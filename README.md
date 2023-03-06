@@ -1,2 +1,3 @@
 # SALMS
-Self Anime List Management System
+
+Simple Anime List Management System
