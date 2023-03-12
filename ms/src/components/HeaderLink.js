@@ -4,10 +4,6 @@ import { useLocation } from "react-router-dom"
 function HeaderLink(props) {
   const { link, title } = props
   const location = useLocation()
-
-  console.log("link :: ", link)
-  console.log("location ::", location)
-
   return (
     <li className="nav-item">
       <a
