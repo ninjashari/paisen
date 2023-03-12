@@ -1,10 +1,8 @@
-import React from 'react';
-import Header from '../../components/Header'
+import React from "react"
+import Header from "../../components/Header"
 
-    function Statistics() {
-        return ( 
-            <Header/>
-         );
-    }
-    
-    export default Statistics;
+function Statistics() {
+  return <Header />
+}
+
+export default Statistics

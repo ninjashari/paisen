@@ -1,10 +1,8 @@
-import React from 'react';
-import Header from '../../components/Header'
+import React from "react"
+import Header from "../../components/Header"
 
-    function Animelist() {
-        return ( 
-            <Header/>
-         );
-    }
-    
-    export default Animelist;
+function Animelist() {
+  return <Header />
+}
+
+export default Animelist
