@@ -1,6 +1,7 @@
 import React from "react"
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom"
 import Animelist from "./pages/Animelist"
+import Authorized from "./pages/Authorized"
 import Home from "./pages/Home"
 import Search from "./pages/Search"
 import Seasons from "./pages/Seasons"
@@ -15,6 +16,7 @@ function App() {
         <Route exact path="/statistics" Component={Statistics} />
         <Route exact path="/search" Component={Search} />
         <Route exact path="/seasons" Component={Seasons} />
+        <Route exact path="/authorized" Component={Authorized} />
       </Routes>
     </Router>
   )

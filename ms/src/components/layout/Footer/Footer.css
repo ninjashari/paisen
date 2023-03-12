@@ -1,0 +1,24 @@
+.footer {
+  color: #fff !important;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.footer a {
+  color: #fff !important;
+}
+
+.footer a:hover {
+  color: #fff !important;
+  text-decoration: underline;
+}
+
+.footer .text-muted {
+  color: #999 !important;
+}
+
+@media (max-width: 767px) {
+  .footer {
+    text-align: center;
+  }
+}

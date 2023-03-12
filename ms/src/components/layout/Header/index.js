@@ -18,9 +18,7 @@ function Header() {
                 <HeaderLink key={index} title={item.title} link={item.link} />
               ))}
             </ul>
-
             <SearchInput />
-
             <div className="text-end">
               <SearchButton />
             </div>
