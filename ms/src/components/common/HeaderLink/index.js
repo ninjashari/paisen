@@ -9,7 +9,7 @@ function HeaderLink(props) {
       <a
         href={link}
         className={`nav-link px-2 ${
-          location.pathname === link ? "text-secondary" : "text-white"
+          location.pathname === link ? "text-secondary" : "text-dark"
         }`}
       >
         {title}

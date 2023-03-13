@@ -1,12 +1,21 @@
 import React, { useState } from "react"
+import generateCodeChallenge from "../../../lib/CodeChallengeGenerator"
 
 function Authorize() {
   const [username, setUsername] = useState("")
+  const [pkceCodeChallenge, setPkceCodeChallenge] = useState("")
 
   const clientId = process.env.REACT_APP_MYANIMELIST_CLIENT_ID
-  console.log(clientId)
 
-  const pkceCodeChallenge = "47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU"
+  generateCodeChallenge(username)
+    .then((codeChallenge) => {
+      setPkceCodeChallenge(codeChallenge)
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+
+  console.log(pkceCodeChallenge)
 
   const handleUsernameChange = (event) => {
     setUsername(event.target.value)
@@ -18,11 +27,13 @@ function Authorize() {
     const url =
       "https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id=" +
       clientId +
+      "&state=" +
+      username +
       "&code_challenge=" +
       pkceCodeChallenge +
       "&code_challenge_method=plain"
 
-    window.open(url)
+    window.location.href = url
   }
 
   return (
@@ -41,11 +52,7 @@ function Authorize() {
                 onChange={handleUsernameChange}
               />
               <label>Username</label>
-              <div
-                id="usernameHelp"
-                className="form-text text-color-white"
-                style={{ color: "white" }}
-              >
+              <div id="usernameHelp" className="form-text">
                 Please enter username, not the email address.
               </div>
             </div>
