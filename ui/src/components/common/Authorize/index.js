@@ -1,39 +1,64 @@
 import React, { useState } from "react"
-import generateCodeChallenge from "../../../lib/CodeChallengeGenerator"
+import { addUser } from "../../../utils/api"
+import {
+  generateCodeChallenge,
+  generateCodeVerifier
+} from "../../../utils/pkceCodeChallenge"
 
 function Authorize() {
   const [username, setUsername] = useState("")
   const [pkceCodeChallenge, setPkceCodeChallenge] = useState("")
+  const [codeChallengeVerifier, setCodeChallengeVerifier] = useState("")
 
   const clientId = process.env.REACT_APP_MYANIMELIST_CLIENT_ID
 
-  generateCodeChallenge(username)
+  // Generation of code verifier and code challenge
+  const codeVerifier = generateCodeVerifier()
+  generateCodeChallenge(codeVerifier)
     .then((codeChallenge) => {
       setPkceCodeChallenge(codeChallenge)
+      setCodeChallengeVerifier(codeVerifier)
     })
     .catch((error) => {
       console.error(error)
     })
 
-  console.log(pkceCodeChallenge)
-
+  // Change username value when typing
   const handleUsernameChange = (event) => {
     setUsername(event.target.value)
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
-    const url =
-      "https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id=" +
-      clientId +
-      "&state=" +
-      username +
-      "&code_challenge=" +
-      pkceCodeChallenge +
-      "&code_challenge_method=plain"
+    if (username !== undefined && username !== "" && username.length > 0) {
+      // Call register API to save username, pkceCodeChallenge and codeVerifier
+      const response = await addUser(
+        username,
+        "",
+        pkceCodeChallenge,
+        codeChallengeVerifier
+      )
 
-    window.location.href = url
+      if (response.username) {
+        console.log("response authorized :: ", response)
+        window.location.href = "http://localhost:3000/animelist"
+      } else {
+        // Set redirect URL
+        const url =
+          "https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id=" +
+          clientId +
+          "&state=" +
+          username +
+          "&code_challenge=" +
+          pkceCodeChallenge +
+          "&code_challenge_method=plain"
+        // Open myanimelist authorize url
+        window.location.href = url
+      }
+    } else {
+      alert("please type username")
+    }
   }
 
   return (
@@ -50,6 +75,7 @@ function Authorize() {
                 aria-describedby="usernameHelp"
                 value={username}
                 onChange={handleUsernameChange}
+                required
               />
               <label>Username</label>
               <div id="usernameHelp" className="form-text">

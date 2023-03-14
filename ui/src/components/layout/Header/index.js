@@ -1,9 +1,9 @@
 import React from "react"
-import pagesList from "../../../utils/constants"
 import BrandIcon from "../../common/BrandIcon"
 import HeaderLink from "../../common/HeaderLink"
 import SearchButton from "../../common/SearchButton"
 import SearchInput from "../../common/SearchInput"
+import { pagesList } from "../../../utils/constants"
 
 function Header() {
   return (

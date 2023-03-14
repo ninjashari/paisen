@@ -1,4 +1,4 @@
-const pagesList = [
+export const pagesList = [
   { title: "Home", link: "/" },
   { title: "Anime List", link: "/animelist" },
   { title: "Statistics", link: "/statistics" },
@@ -6,4 +6,4 @@ const pagesList = [
   { title: "Seasons", link: "/seasons" },
 ]
 
-export default pagesList;
+export const baseUrl = "http://localhost:5000"

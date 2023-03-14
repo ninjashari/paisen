@@ -1,19 +1,13 @@
-import React, { useState } from "react"
 import { useSearchParams } from "react-router-dom"
-import Header from "../../components/layout/Header"
 
 function Authorized() {
-  const [searchParams, setSearchParams] = useSearchParams("")
-  const [code, setCode] = useState()
-  const [username, setUsername] = useState()
+  const [searchParams] = useSearchParams("")
 
-  console.log(searchParams.get("code"))
-  console.log(searchParams.get("state"))
+  console.log("code :: ", searchParams.get("code"))
+  console.log("username :: ", searchParams.get("state"))
 
-  setCode(searchParams.get("code"))
-  setUsername(searchParams.get("state"))
-
-  return <Header />
+  const code = searchParams.get("code")
+  const username = searchParams.get("state")
 }
 
 export default Authorized
