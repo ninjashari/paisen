@@ -1,13 +1,33 @@
 import express from "express"
-// import { ObjectId } from "mongodb"
-import { connectDB, closeClient } from "../config/db.js"
+import { closeClient, connectDB } from "../config/db.js"
 
 const router = express.Router()
 
 router.post("/register", async (req, res) => {
-  await connectDB("users")
-  await closeClient()
-  res.send("done").status(204)
+  try {
+    const collection = await connectDB("users")
+    const user = await collection.findOne({ username: req.body.username })
+
+    if (user) {
+      res.send(user).status(409)
+    } else {
+      let newUser = {
+        username: req.body.username,
+        code: req.body.code,
+        codeChallenge: req.body.codeChallenge,
+        challengeVerifier: req.body.challengeVerifier,
+        dateCreated: new Date(),
+        dateModified: new Date(),
+      }
+      let result = await collection.insertOne(newUser)
+      console.log("result :: ", result)
+      res.send(result).status(204)
+    }
+    closeClient()
+  } catch (err) {
+    console.error(`Error :: ${err.message}`.red.underline.bold)
+    closeClient()
+  }
 })
 
 // // Add a new user to the users collection
