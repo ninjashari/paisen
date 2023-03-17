@@ -44,4 +44,15 @@ router.post("/update/", async (req, res) => {
   res.send(result).status(204)
 })
 
+// Get User details
+router.post("/detail/", async (req, res) => {
+  const collection = await db.collection("users")
+  const filter = { username: req.body.username }
+
+  const user = await collection.findOne({ username: req.body.username })
+
+  console.log("user :: ", user)
+  res.send(user).status(204)
+})
+
 export default router

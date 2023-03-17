@@ -29,3 +29,13 @@ export const updateUser = async (username, code) => {
 
   return response.data
 }
+
+export const userDetail = async (username) => {
+  const response = await axios.post(`${baseUrl}/api/users/detail`, {
+    username: username,
+  })
+
+  console.log("response :: ", response)
+
+  return response.data
+}

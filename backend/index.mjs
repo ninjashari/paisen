@@ -1,8 +1,9 @@
-import express from "express"
 import cors from "cors"
-import "./loadEnvironment.mjs"
+import express from "express"
 import "express-async-errors"
+import "./loadEnvironment.mjs"
 import users from "./routes/users.mjs"
+import mal from "./routes/mal.mjs"
 
 const PORT = process.env.PORT || 5050
 const app = express()
@@ -12,6 +13,7 @@ app.use(express.json())
 
 // Load the /posts routes
 app.use("/api/users", users)
+app.use("/api/mal", mal)
 
 // Global error handling
 app.use((err, _req, res, next) => {
