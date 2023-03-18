@@ -19,32 +19,34 @@ function Homepage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    try {
+      const usernm = username
 
-    const usernm = username
+      if (usernm !== undefined && usernm !== "" && usernm.length > 0) {
+        const pkce = pkceChallenge()
 
-    if (usernm !== undefined && usernm !== "" && usernm.length > 0) {
-      const pkce = pkceChallenge()
+        //MAL client ID from env variables
+        const clientId = process.env.REACT_APP_MYANIMELIST_CLIENT_ID
 
-      //MAL client ID from env variables
-      const clientId = process.env.REACT_APP_MYANIMELIST_CLIENT_ID
+        const data = {
+          username: usernm,
+          code: "",
+          codeChallenge: pkce.code_challenge,
+          challengeVerifier: pkce.code_challenge,
+        }
 
-      const data = {
-        username: usernm,
-        code: "",
-        codeChallenge: pkce.code_challenge,
-        challengeVerifier: pkce.code_verifier,
+        const response = await addUser(data)
+
+        if (response.username) {
+          window.location.href = "http://localhost:3000/animelist"
+        } else {
+          const mal = new Mal(clientId)
+          const url = mal.generateAuthorizeUrl(data.codeChallenge)
+          window.location.href = url
+        }
       }
-
-      const response = await addUser(data)
-
-      if (response.username) {
-        console.log("response authorized :: ", response)
-        window.location.href = "http://localhost:3000/animelist"
-      } else {
-        const mal = new Mal(clientId)
-        const url = mal.generateAuthorizeUrl(data.codeChallenge)
-        window.location.href = url
-      }
+    } catch (err) {
+      console.error(err)
     }
   }
 

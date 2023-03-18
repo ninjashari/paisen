@@ -21,7 +21,6 @@ router.post("/register", async (req, res) => {
         dateModified: new Date(),
       }
       let result = await collection.insertOne(newUser)
-      console.log("result :: ", result)
       res.send(result).status(204)
     }
     closeClient()
@@ -41,12 +40,14 @@ router.post("/update", async (req, res) => {
       $set: {
         code: req.body.code,
         dateModified: new Date(),
+        accessToken: req.body.accessToken,
+        expiryTime: req.body.expiryTime,
+        refreshToken: req.body.refreshToken,
+        tokenType: req.body.tokenType,
       },
     }
 
     const result = await collection.updateOne(filter, updateDoc, options)
-
-    console.log("result :: ", result)
     res.send(result).status(204)
     closeClient()
   } catch (err) {

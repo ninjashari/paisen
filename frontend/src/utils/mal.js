@@ -10,6 +10,7 @@ class Mal {
     this.clientId = clientId
 
     axios.defaults.headers["Content-Type"] = "application/x-www-form-urlencoded"
+    axios.defaults.headers["Host"] = "http://localhost:3000/oauth"
   }
 
   /**
@@ -25,8 +26,8 @@ class Mal {
    * @param  {String} code
    * @param  {String} codeVerifier
    */
-  accessToken(code, codeVerifier) {
-    return new Promise((resolve, reject) => {
+  async generateAccessToken(code, codeVerifier) {
+    try {
       const query = {
         client_id: this.clientId,
         code: code,
@@ -34,15 +35,14 @@ class Mal {
         grant_type: "authorization_code",
       }
 
-      axios
-        .post(this.accessTokenUrl, querystring.stringify(query))
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((err) => {
-          reject(err.response.data)
-        })
-    })
+      const response = await axios.post(
+        this.accessTokenUrl,
+        querystring.stringify(query)
+      )
+      return response.data
+    } catch (err) {
+      console.error(err)
+    }
   }
 }
 
