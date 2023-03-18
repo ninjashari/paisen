@@ -54,7 +54,7 @@ function Authorize() {
           pkceCodeChallenge +
           "&code_challenge_method=plain"
         // Open myanimelist authorize url
-        window.location.href = url
+        console.log(url)
       }
     } else {
       alert("please type username")
