@@ -25,6 +25,7 @@ export const updateUser = async (username, code) => {
 }
 
 export const userDetail = async (username) => {
+  console.log(username)
   const response = await axios.post(`${baseUrl}/api/users/detail`, {
     username: username,
   })
