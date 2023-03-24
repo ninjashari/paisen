@@ -8,7 +8,7 @@ const Logo = () => {
         <img src="/assets/img/logo.png" alt="" />
         <span className="d-none d-lg-block">Paisen</span>
       </Link>
-      <i className="bi bi-list toggle-sidebar-btn" />
+      <i className="bi bi-list toggle-sidebar-btn"></i>
     </div>
   )
 }
