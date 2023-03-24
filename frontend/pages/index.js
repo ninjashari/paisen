@@ -1,5 +1,3 @@
-import Header from "@/components/Header"
-import Sidebar from "@/components/Sidebar"
 import { Inter } from "next/font/google"
 import Head from "next/head"
 
@@ -15,8 +13,7 @@ export default function Home() {
         <link rel="icon" href="/assets/img/favicon.png" />
       </Head>
       <main>
-        <Header />
-        <Sidebar />
+
       </main>
     </>
   )
