@@ -1,3 +1,4 @@
+import Breadcrumb from "@/components/Breadcrumb"
 import Header from "@/components/Header"
 import Sidebar from "@/components/Sidebar"
 import { Inter } from "next/font/google"
@@ -14,9 +15,11 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/assets/img/favicon.png" />
       </Head>
-      <main>
-        <Header />
-        <Sidebar currentPage="home" />
+
+      <Header />
+      <Sidebar currentPage="home" />
+      <main id="main" class="main">
+        <Breadcrumb name="Home"/>
       </main>
     </>
   )
