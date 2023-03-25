@@ -1,4 +1,5 @@
 import React from "react"
+import Table from "./Table"
 
 const Tabs = () => {
   return (
@@ -83,6 +84,7 @@ const Tabs = () => {
             </button>
           </li>
         </ul>
+
         <div className="tab-content pt-2" id="borderedTabJustifiedContent">
           <div
             className="tab-pane fade show active"
@@ -90,8 +92,9 @@ const Tabs = () => {
             role="tabpanel"
             aria-labelledby="current-tab"
           >
-            current-tab
+            <Table />
           </div>
+
           <div
             className="tab-pane fade"
             id="bordered-justified-completed"
@@ -99,6 +102,7 @@ const Tabs = () => {
             aria-labelledby="completed-tab"
           >
             completed-tab
+            <Table />
           </div>
           <div
             className="tab-pane fade"
@@ -107,6 +111,7 @@ const Tabs = () => {
             aria-labelledby="onhold-tab"
           >
             onhold-tab
+            <Table />
           </div>
           <div
             className="tab-pane fade"
@@ -115,6 +120,7 @@ const Tabs = () => {
             aria-labelledby="dropped-tab"
           >
             dropped-tab
+            <Table />
           </div>
           <div
             className="tab-pane fade"
@@ -123,6 +129,7 @@ const Tabs = () => {
             aria-labelledby="plantowatch-tab"
           >
             plantowatch-tab
+            <Table />
           </div>
         </div>
       </div>
