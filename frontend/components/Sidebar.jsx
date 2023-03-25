@@ -41,31 +41,31 @@ const Sidebar = () => {
         <li className="nav-heading">Pages</li>
 
         <li className="nav-item">
-          <a className="nav-link collapsed" href="/register">
+          <Link className="nav-link collapsed" href="/register">
             <i className="bi bi-card-list"></i>
             <span>Register</span>
-          </a>
+          </Link>
         </li>
 
         <li className="nav-item">
-          <a className="nav-link collapsed" href="/login">
+          <Link className="nav-link collapsed" href="/login">
             <i className="bi bi-box-arrow-in-right"></i>
             <span>Login</span>
-          </a>
+          </Link>
         </li>
 
         <li className="nav-item">
-          <a className="nav-link collapsed" href="/jellyfin">
+          <Link className="nav-link collapsed" href="/jellyfin">
             <i className="bi bi-link"></i>
             <span>Jellyfin</span>
-          </a>
+          </Link>
         </li>
 
         <li className="nav-item">
-          <a className="nav-link collapsed" href="/authorise">
+          <Link className="nav-link collapsed" href="/authorise">
             <i className="bi bi-shield-check"></i>
             <span>Authorize</span>
-          </a>
+          </Link>
         </li>
       </ul>
     </aside>
