@@ -8,7 +8,9 @@ Uodate and manage myanimelist.net anime list and update watched/watching series 
 
 2.  Login to your profile and go to [API config page](https://myanimelist.net/apiconfig)
 
-3.  Create a new ID as shown ![mal](./extra/mal.jpg)
+3.  Create a new ID as shown
+
+![mal](./extra/mal.jpg)
 
 4.  Click submit and a new ID will be created. Copy the clentID after creation.
 
@@ -16,14 +18,14 @@ Uodate and manage myanimelist.net anime list and update watched/watching series 
 
 6.  Take a pull of this branch and install node dependencies as
 
-        1. `git clone  https://github.com/ninjashari/paisen.git`
-
-        2. `cd paisen`
-
-        3. `npm i`
-
-        4. Create a .env file here with following text :
-
+        `git clone  https://github.com/ninjashari/paisen.git`
+        
+        `cd paisen`
+        
+        `npm i`
+        
+        Create a .env file here with following text :
+        
                 ```
                     PORT=5000
 
