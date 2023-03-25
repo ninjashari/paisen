@@ -1,7 +1,6 @@
-import React from "react"
 import Logo from "./Logo"
-import Searchbar from "./Searchbar"
 import Profilenav from "./Profilenav"
+import Searchbar from "./Searchbar"
 
 const Header = () => {
   return (
