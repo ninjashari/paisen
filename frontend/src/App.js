@@ -5,6 +5,7 @@ import Header from "./components/layout/Header"
 import Animelist from "./pages/AnimeList"
 import Homepage from "./pages/Homepage"
 import OAuth from "./pages/OAuth"
+import Register from "./pages/Register"
 import Search from "./pages/Search"
 import Seasons from "./pages/Seasons"
 import Statistics from "./pages/Statistics"
@@ -21,6 +22,7 @@ function App() {
           <Route exact path="/search" Component={Search} />
           <Route exact path="/seasons" Component={Seasons} />
           <Route exact path="/oauth" Component={OAuth} />
+          <Route exact path="/register" Component={Register} />
         </Routes>
       </Container>
     </Router>

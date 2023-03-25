@@ -1,12 +1,22 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
+import { getCurrentUser } from "../../services/auth.service"
 import { pagesList } from "../../utils/constants"
 import BrandIcon from "../common/BrandIcon"
 import HeaderLink from "../common/HeaderLink"
 import SearchButton from "../common/SearchButton"
 import SearchInput from "../common/SearchInput"
 
-
 function Header() {
+  const [showUserIcon, setShowUserIcon] = useState(false)
+  const [currentUser, setCurrentUser] = useState("")
+
+  useEffect(() => {
+    setCurrentUser(getCurrentUser())
+    if (currentUser) {
+      setShowUserIcon(true)
+      console.log(currentUser)
+    }
+  }, [currentUser])
 
   return (
     <div>
@@ -34,7 +44,7 @@ function Header() {
             </ul>
             <SearchInput />
             <div className="text-end">
-              <SearchButton />
+              {showUserIcon ? <div>{currentUser}</div> : <SearchButton />}
             </div>
           </div>
         </div>

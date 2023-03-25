@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom"
 import { updateUser, userDetail } from "../utils/api"
 import Mal from "../utils/mal"
 
-function Oauth() {
+const Oauth = () => {
   const [searchParams] = useSearchParams("")
 
   const USERNAME = "USERNAME"
@@ -47,7 +47,7 @@ function Oauth() {
 
           // Save access token data in database
           await updateUser(newData)
-         
+
           // Redirect to animelist page
         }
       }

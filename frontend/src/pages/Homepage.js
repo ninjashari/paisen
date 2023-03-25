@@ -4,6 +4,8 @@ import { addUser } from "../utils/api"
 import Mal from "../utils/mal"
 
 function Homepage() {
+  const [showUserIcon, setShowUserIcon] = useState(false)
+  const [currentUser, setCurrentUser] = useState(undefined)
   const [username, setUsername] = useState("")
 
   // Session Key for username
@@ -69,7 +71,7 @@ function Homepage() {
                 />
                 <label>Username</label>
                 <div id="usernameHelp" className="form-text">
-                  Please enter username, not the email address.
+                  Please enter myanimelist username, not the email address.
                 </div>
               </div>
               <button
