@@ -12,7 +12,7 @@ Uodate and manage myanimelist.net anime list and update watched/watching series 
 
 4.  Click submit and a new ID will be created. Copy the clentID after creation.
 
-5.  Install [Node.js](https://nodejs.org/en)
+5.  Install [Node.js](https://nodejs.org/en) and [mongoDB](https://www.mongodb.com/)
 
 6.  Take a pull of this branch and install node dependencies as
 
