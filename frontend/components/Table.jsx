@@ -7,7 +7,7 @@ const Table = () => {
   return (
     <div className="card">
       <div className="card-body">
-        <table className="table table-hover">
+        <table className="table">
           <thead>
             <tr>
               <th scope="col"></th>
@@ -31,9 +31,9 @@ const Table = () => {
                       <i className="bi bi-dash"></i>
                     </button>
                   </div>
-                  <dic className="col">
+                  <div className="col">
                     <Progressbar fillPercentage="25%" />
-                  </dic>
+                  </div>
                   <div className="col-2">
                     <button type="button" className="btn btn-sm">
                       <i className="bi bi-plus"></i>

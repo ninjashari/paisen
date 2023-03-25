@@ -1,4 +1,5 @@
 import React from "react"
+import BarChart from "./BarChart"
 
 const Stats = () => {
   return (
@@ -30,7 +31,7 @@ const Stats = () => {
                   data-bs-parent="#accordionExample"
                 >
                   <div className="accordion-body">
-                    <table class="table table-borderless">
+                    <table className="table table-borderless">
                       <tbody>
                         <tr>
                           <td>Anime count</td>
@@ -80,7 +81,9 @@ const Stats = () => {
                   aria-labelledby="headingTwo"
                   data-bs-parent="#accordionExample"
                 >
-                  <div className="accordion-body"></div>
+                  <div className="accordion-body">
+                    <BarChart />
+                  </div>
                 </div>
               </div>
               <div className="accordion-item">
@@ -103,7 +106,7 @@ const Stats = () => {
                   data-bs-parent="#accordionExample"
                 >
                   <div className="accordion-body">
-                    <table class="table table-borderless">
+                    <table className="table table-borderless">
                       <tbody>
                         <tr>
                           <td>Anime count</td>

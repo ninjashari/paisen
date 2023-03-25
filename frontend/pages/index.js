@@ -16,7 +16,7 @@ export default function Home() {
       </Head>
       <main>
         <Header />
-        <Sidebar />
+        <Sidebar currentPage="home" />
       </main>
     </>
   )

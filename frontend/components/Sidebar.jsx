@@ -1,72 +1,97 @@
 import Link from "next/link"
-import React from "react"
+import React, { useEffect, useState } from "react"
+import { useRouter } from "next/router"
 
-const Sidebar = () => {
+const Sidebar = (props) => {
+  const sidebarItems = [
+    {
+      id: 0,
+      key: "home",
+      name: "Home",
+      icon: "bi bi-grid",
+      href: "/",
+    },
+    {
+      id: 1,
+      key: "animelist",
+      name: "Anime List",
+      icon: "bi bi-menu-button-wide",
+      href: "/animelist",
+    },
+    {
+      id: 2,
+      key: "statistics",
+      name: "Statistics",
+      icon: "bi bi-bar-chart",
+      href: "/statistics",
+    },
+    {
+      id: 3,
+      key: "search",
+      name: "Search",
+      icon: "bi bi-search",
+      href: "/search",
+    },
+    {
+      id: 4,
+      key: "seasons",
+      name: "Seasons",
+      icon: "bi bi-calendar3",
+      href: "/seasons",
+    },
+    {
+      id: 5,
+      key: "register",
+      name: "Register",
+      icon: "bi bi-card-list",
+      href: "/register",
+    },
+    {
+      id: 6,
+      name: "Login",
+      key: "login",
+      icon: "bi bi-box-arrow-in-right",
+      href: "/login",
+    },
+    {
+      id: 7,
+      key: "jellyfin",
+      name: "Jellyfin",
+      icon: "bi bi-link",
+      href: "/jellyfin",
+    },
+    {
+      id: 8,
+      name: "Authorize",
+      key: "authorise",
+      icon: "bi bi-shield-check",
+      href: "/authorise",
+    },
+  ]
+
+  sidebarItems.forEach((sidebarItem) => {
+    if (
+      props.currentPage !== undefined &&
+      props.currentPage !== "" &&
+      props.currentPage === sidebarItem.key
+    ) {
+      sidebarItem.linkClass = "nav-link"
+    } else {
+      sidebarItem.linkClass = "nav-link collapsed"
+    }
+  })
+
   return (
     <aside id="sidebar" className="sidebar">
       <ul className="sidebar-nav" id="sidebar-nav">
-        <li className="nav-item">
-          <Link className="nav-link" href="/">
-            <i className="bi bi-grid"></i>
-            <span>Home</span>
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link className="nav-link collapsed" href="/animelist">
-            <i className="bi bi-menu-button-wide"></i>
-            <span>Anime List</span>
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link className="nav-link collapsed" href="/statistics">
-            <i className="bi bi-bar-chart"></i>
-            <span>Statistics</span>
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link className="nav-link collapsed" href="/search">
-            <i className="bi bi-search"></i>
-            <span>Search</span>
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link className="nav-link collapsed" href="/seasons">
-            <i className="bi bi-calendar3"></i>
-            <span>Seasons</span>
-          </Link>
-        </li>
-
-        <li className="nav-heading">Pages</li>
-
-        <li className="nav-item">
-          <Link className="nav-link collapsed" href="/register">
-            <i className="bi bi-card-list"></i>
-            <span>Register</span>
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link className="nav-link collapsed" href="/login">
-            <i className="bi bi-box-arrow-in-right"></i>
-            <span>Login</span>
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link className="nav-link collapsed" href="/jellyfin">
-            <i className="bi bi-link"></i>
-            <span>Jellyfin</span>
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link className="nav-link collapsed" href="/authorise">
-            <i className="bi bi-shield-check"></i>
-            <span>Authorize</span>
-          </Link>
-        </li>
+        {sidebarItems.map((sidebarItem) => (
+          <li className="nav-item" key={sidebarItem.key}>
+            <Link className={sidebarItem.linkClass} href={sidebarItem.href}>
+              <i className={sidebarItem.icon}></i>
+              <span>{sidebarItem.name}</span>
+            </Link>
+          </li>
+        ))}
       </ul>
     </aside>
   )

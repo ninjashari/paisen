@@ -6,7 +6,7 @@ function Statistics() {
   return (
     <>
       <Header />
-      <Sidebar />
+      <Sidebar currentPage="statistics"/>
       <main id="main" className="main">
         <section className="section">
           <Stats />

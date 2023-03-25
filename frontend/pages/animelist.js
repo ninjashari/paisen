@@ -6,7 +6,7 @@ export default function Animelist() {
   return (
     <>
       <Header />
-      <Sidebar />
+      <Sidebar currentPage="animelist" />
       <main id="main" className="main">
         <section className="section">
           <div className="row">
