@@ -1,4 +1,3 @@
-import React from "react"
 import ProfileIcon from "./ProfileIcon"
 import SignoutDropdown from "./SignoutDropdown"
 

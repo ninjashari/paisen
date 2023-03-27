@@ -1,4 +1,3 @@
-import React from "react"
 import Progressbar from "./Progressbar"
 import ScoreSelect from "./ScoreSelect"
 import SquareIcon from "./SquareIcon"

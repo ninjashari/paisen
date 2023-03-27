@@ -1,8 +1,55 @@
+import { addUser } from "@/utils/UserService"
+import sha256 from "crypto-js/sha256"
 import Link from "next/link"
-import React from "react"
+import { useState } from "react"
 import FormLogo from "./FormLogo"
 
 const RegisterForm = () => {
+  const [name, setName] = useState("")
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [successful, setSuccessful] = useState(false)
+
+  const onChangeName = (event) => {
+    const name = event.target.value
+    setName(name)
+  }
+
+  const onChangeUsername = (event) => {
+    const username = event.target.value
+    setUsername(username)
+  }
+
+  const onChangePassword = (event) => {
+    const password = event.target.value
+    setPassword(password)
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+
+    const encryptPassword = sha256(password).toString()
+
+    const data = {
+      name: name,
+      username: username,
+      password: encryptPassword,
+    }
+    const response = await addUser(data)
+
+    console.log(response)
+
+    if (
+      response &&
+      response.acknowledged != undefined &&
+      response.acknowledged &&
+      response.insertedId != undefined
+    ) {
+      // create a session
+      // redirect to logged in home page
+    }
+  }
+
   return (
     <main>
       <div className="container">
@@ -23,9 +70,13 @@ const RegisterForm = () => {
                       </p>
                     </div>
 
-                    <form className="row g-3 needs-validation" novalidate>
+                    <form
+                      className="row g-3 needs-validation"
+                      noValidate
+                      onSubmit={handleSubmit}
+                    >
                       <div className="col-12">
-                        <label for="yourName" className="form-label">
+                        <label htmlFor="yourName" className="form-label">
                           Your Name
                         </label>
                         <input
@@ -33,15 +84,24 @@ const RegisterForm = () => {
                           name="name"
                           className="form-control"
                           id="yourName"
+                          value={name}
+                          onChange={onChangeName}
                           required
+                          pattern="^[A-Za-z][A-Za-z ]{1,48}[A-Za-z]$"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          title="Please enter your name"
                         />
                         <div className="invalid-feedback">
-                          Please, enter your name!
+                          <ul>
+                            <li>May contain upto 50 characters</li>
+                            <li>Only alphabets and space allowed</li>
+                          </ul>
                         </div>
                       </div>
 
                       <div className="col-12">
-                        <label for="yourUsername" className="form-label">
+                        <label htmlFor="yourUsername" className="form-label">
                           Username
                         </label>
                         <div className="input-group has-validation">
@@ -56,16 +116,26 @@ const RegisterForm = () => {
                             name="username"
                             className="form-control"
                             id="yourUsername"
+                            value={username}
+                            onChange={onChangeUsername}
                             required
+                            pattern="^[A-Za-z][A-Za-z0-9_]{7,31}$"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            title="Please enter username"
                           />
                           <div className="invalid-feedback">
-                            Please choose a username.
+                            <ul>
+                              <li>Contain 8 to 32 characters</li>
+                              <li>Starts with an alphabet</li>
+                              <li>Username should be Alphanumeric</li>
+                            </ul>
                           </div>
                         </div>
                       </div>
 
                       <div className="col-12">
-                        <label for="yourPassword" className="form-label">
+                        <label htmlFor="yourPassword" className="form-label">
                           Password
                         </label>
                         <input
@@ -73,10 +143,18 @@ const RegisterForm = () => {
                           name="password"
                           className="form-control"
                           id="yourPassword"
+                          value={password}
+                          onChange={onChangePassword}
                           required
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          title="Please enter password"
+                          pattern="^[A-Za-z0-9!@#$%^&*_=+-]{8,}$"
                         />
                         <div className="invalid-feedback">
-                          Please enter your password!
+                          <ul>
+                            <li>Minimum 8 characters required</li>
+                          </ul>
                         </div>
                       </div>
 

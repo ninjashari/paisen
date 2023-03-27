@@ -1,4 +1,3 @@
-import React from 'react';
 import Logo from "./Logo"
 import Profilenav from "./Profilenav"
 import Searchbar from "./Searchbar"

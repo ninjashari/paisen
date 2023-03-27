@@ -1,5 +1,4 @@
-import Link from "next/link"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import NavLoginButton from "./NavLoginButton"
 import NavSearchIcon from "./NavSearchIcon"
 import NavUserProfile from "./NavUserProfile"

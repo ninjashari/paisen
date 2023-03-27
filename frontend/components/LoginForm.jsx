@@ -1,5 +1,4 @@
 import Link from "next/link"
-import React from "react"
 import FormLogo from "./FormLogo"
 
 const LoginForm = () => {
@@ -23,9 +22,9 @@ const LoginForm = () => {
                       </p>
                     </div>
 
-                    <form className="row g-3 needs-validation" novalidate>
+                    <form className="row g-3 needs-validation" noValidate>
                       <div className="col-12">
-                        <label for="yourUsername" className="form-label">
+                        <label htmlFor="yourUsername" className="form-label">
                           Username
                         </label>
                         <div className="input-group has-validation">
@@ -49,7 +48,7 @@ const LoginForm = () => {
                       </div>
 
                       <div className="col-12">
-                        <label for="yourPassword" className="form-label">
+                        <label htmlFor="yourPassword" className="form-label">
                           Password
                         </label>
                         <input
@@ -73,7 +72,7 @@ const LoginForm = () => {
                             value="true"
                             id="rememberMe"
                           />
-                          <label className="form-check-label" for="rememberMe">
+                          <label className="form-check-label" htmlFor="rememberMe">
                             Remember me
                           </label>
                         </div>
