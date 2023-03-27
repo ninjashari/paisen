@@ -1,4 +1,3 @@
-
 const NavSearchIcon = () => {
   return (
     <li className="nav-item d-block d-lg-none">

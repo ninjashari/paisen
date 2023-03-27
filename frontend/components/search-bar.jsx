@@ -1,4 +1,3 @@
-
 const Searchbar = () => {
   return (
     <div className="search-bar">

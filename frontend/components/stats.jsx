@@ -1,4 +1,4 @@
-import BarChart from "./BarChart"
+import BarChart from "./bar-chart"
 
 const Stats = () => {
   return (

@@ -1,5 +1,5 @@
-import ProfileIcon from "./ProfileIcon"
-import SignoutDropdown from "./SignoutDropdown"
+import ProfileIcon from "./profile-icon"
+import SignoutDropdown from "./signout-dropdown"
 
 const NavUserProfile = () => {
   return (

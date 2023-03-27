@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import NavLoginButton from "./NavLoginButton"
-import NavSearchIcon from "./NavSearchIcon"
-import NavUserProfile from "./NavUserProfile"
+import NavLoginButton from "./nav-login-button"
+import NavSearchIcon from "./nav-search-button"
+import NavUserProfile from "./nav-user-profile"
 
 const Profilenav = () => {
   const [currentUser, setCurrentUser] = useState(undefined)

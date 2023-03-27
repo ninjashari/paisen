@@ -1,7 +1,7 @@
-import Breadcrumb from "@/components/Breadcrumb"
-import Header from "@/components/Header"
-import Sidebar from "@/components/Sidebar"
-import Stats from "@/components/Stats"
+import Breadcrumb from "@/components/breadcrumb"
+import Header from "@/components/header"
+import Sidebar from "@/components/sidebar"
+import Stats from "@/components/stats"
 
 function Statistics() {
   return (

@@ -1,7 +1,7 @@
-import Breadcrumb from "@/components/Breadcrumb"
-import Header from "@/components/Header"
-import Sidebar from "@/components/Sidebar"
-import Tabs from "@/components/Tabs"
+import Tabs from "@/components/animelist-tabs"
+import Breadcrumb from "@/components/breadcrumb"
+import Header from "@/components/header"
+import Sidebar from "@/components/sidebar"
 
 export default function Animelist() {
   return (

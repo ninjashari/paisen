@@ -1,8 +1,8 @@
-import { addUser } from "@/utils/UserService"
+import { addUser } from "@/utils/user-service"
 import sha256 from "crypto-js/sha256"
 import Link from "next/link"
 import { useState } from "react"
-import FormLogo from "./FormLogo"
+import FormLogo from "./form-logo"
 
 const RegisterForm = () => {
   const [name, setName] = useState("")

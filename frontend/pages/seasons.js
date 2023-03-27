@@ -2,16 +2,16 @@ import Breadcrumb from "@/components/breadcrumb"
 import Header from "@/components/header"
 import Sidebar from "@/components/sidebar"
 
-function Search() {
+function Statistics() {
   return (
     <>
       <Header />
-      <Sidebar currentPage="search" />
+      <Sidebar currentPage="seasons" />
       <main id="main" className="main">
-        <Breadcrumb name="Search" />
+        <Breadcrumb name="Seasons" />
       </main>
     </>
   )
 }
 
-export default Search
+export default Statistics

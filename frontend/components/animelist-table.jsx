@@ -1,6 +1,6 @@
-import Progressbar from "./Progressbar"
-import ScoreSelect from "./ScoreSelect"
-import SquareIcon from "./SquareIcon"
+import Progressbar from "./progress-bar"
+import ScoreSelect from "./score-select"
+import SquareIcon from "./square-icon"
 
 const Table = () => {
   return (

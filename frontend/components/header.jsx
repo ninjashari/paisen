@@ -1,6 +1,6 @@
-import Logo from "./Logo"
-import Profilenav from "./Profilenav"
-import Searchbar from "./Searchbar"
+import Logo from "./logo"
+import Profilenav from "./profile-nav"
+import Searchbar from "./search-bar"
 
 const Header = () => {
   return (
