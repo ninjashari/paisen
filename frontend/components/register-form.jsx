@@ -1,14 +1,19 @@
-import { addUser } from "@/utils/user-service"
-import sha256 from "crypto-js/sha256"
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import FormLogo from "./form-logo"
 
 const RegisterForm = () => {
   const [name, setName] = useState("")
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-  const [successful, setSuccessful] = useState(false)
+  // const [confirmPassword, setConfirmPassword] = useState("")
+  const [nameToolTip, setNameToolTip] = useState("")
+  const [usernameToolTip, setUsernameToolTip] = useState("")
+  const [passwordToolTip, setPasswordToolTip] = useState("")
+  // const [confirmPasswordToolTip, setConfirmPasswordToolTip] = useState("")
+  // const [confirmPasswordErrorMsg, setConfirmPasswordErrorMsg] = useState("")
+  const [successful, isSuccessful] = useState(false)
+  const [loading, isLoading] = useState(false)
 
   const onChangeName = (event) => {
     const name = event.target.value
@@ -25,30 +30,60 @@ const RegisterForm = () => {
     setPassword(password)
   }
 
+  // const onChangeConfirmPassword = (event) => {
+  //   const confirmPassword = event.target.value
+  //   setConfirmPassword(confirmPassword)
+  //   if (
+  //     password !== undefined &&
+  //     password !== "" &&
+  //     password !== confirmPassword
+  //   ) {
+  //     setConfirmPasswordErrorMsg("Passwords do not match")
+  //   } else {
+  //     setConfirmPasswordErrorMsg(
+  //       "Please enter confirm password same as password"
+  //     )
+  //   }
+  // }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-    const encryptPassword = sha256(password).toString()
-
-    const data = {
-      name: name,
-      username: username,
-      password: encryptPassword,
-    }
-    const response = await addUser(data)
-
-    console.log(response)
-
     if (
-      response &&
-      response.acknowledged != undefined &&
-      response.acknowledged &&
-      response.insertedId != undefined
+      name !== undefined &&
+      username !== undefined &&
+      password != undefined &&
+      name !== "" &&
+      username !== "" &&
+      password != ""
     ) {
-      // create a session
-      // redirect to logged in home page
+      isLoading(true)
+      // const encryptPassword = sha256(password).toString()
+
+      const data = {
+        name: name,
+        username: username,
+        password: password,
+      }
+
+      console.log(data)
+
+      const res = await fetch("/api/user/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+
+      console.log(res)
     }
   }
+
+  useEffect(() => {
+    setNameToolTip("Please enter your name")
+    setUsernameToolTip("Please enter a valid username")
+    setPasswordToolTip("Please enter a valid password")
+    // setConfirmPasswordToolTip("Please enter same password as above")
+  }, [])
 
   return (
     <main>
@@ -90,7 +125,7 @@ const RegisterForm = () => {
                           pattern="^[A-Za-z][A-Za-z ]{1,48}[A-Za-z]$"
                           data-bs-toggle="tooltip"
                           data-bs-placement="top"
-                          title="Please enter your name"
+                          title={nameToolTip}
                         />
                         <div className="invalid-feedback">
                           <ul>
@@ -122,7 +157,7 @@ const RegisterForm = () => {
                             pattern="^[A-Za-z][A-Za-z0-9_]{7,31}$"
                             data-bs-toggle="tooltip"
                             data-bs-placement="top"
-                            title="Please enter username"
+                            title={usernameToolTip}
                           />
                           <div className="invalid-feedback">
                             <ul>
@@ -148,7 +183,7 @@ const RegisterForm = () => {
                           required
                           data-bs-toggle="tooltip"
                           data-bs-placement="top"
-                          title="Please enter password"
+                          title={passwordToolTip}
                           pattern="^[A-Za-z0-9!@#$%^&*_=+-]{8,}$"
                         />
                         <div className="invalid-feedback">
@@ -157,6 +192,29 @@ const RegisterForm = () => {
                           </ul>
                         </div>
                       </div>
+
+                      {/* <div className="col-12">
+                        <label htmlFor="confirmPassword" className="form-label">
+                          Confirm Password
+                        </label>
+                        <input
+                          type="password"
+                          name="confirmPassword"
+                          className="form-control"
+                          id="confirmPassword"
+                          value={confirmPassword}
+                          onChange={onChangeConfirmPassword}
+                          required
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          title={confirmPasswordToolTip}
+                        />
+                        <div className="invalid-feedback">
+                          <ul>
+                            <li>{confirmPasswordErrorMsg}</li>
+                          </ul>
+                        </div>
+                      </div> */}
 
                       <div className="col-12">
                         <button className="btn btn-primary w-100" type="submit">
