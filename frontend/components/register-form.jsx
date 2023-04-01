@@ -1,89 +1,125 @@
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useRouter } from "next/router"
+import { useState } from "react"
 import FormLogo from "./form-logo"
+import { hashPassword } from "@/utils/hash"
 
-const RegisterForm = () => {
-  const [name, setName] = useState("")
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  // const [confirmPassword, setConfirmPassword] = useState("")
-  const [nameToolTip, setNameToolTip] = useState("")
-  const [usernameToolTip, setUsernameToolTip] = useState("")
-  const [passwordToolTip, setPasswordToolTip] = useState("")
-  // const [confirmPasswordToolTip, setConfirmPasswordToolTip] = useState("")
-  // const [confirmPasswordErrorMsg, setConfirmPasswordErrorMsg] = useState("")
-  const [successful, isSuccessful] = useState(false)
-  const [loading, isLoading] = useState(false)
+const RegisterForm = ({ formId, userForm }) => {
+  const router = useRouter()
+  const contentType = "application/json"
+  // User data form
+  const [form, setForm] = useState({
+    name: userForm.name,
+    username: userForm.username,
+    password: userForm.password,
+  })
 
-  const onChangeName = (event) => {
-    const name = event.target.value
-    setName(name)
+  const [confirmPassword, setConfirmPassword] = useState("")
+
+  const [formClass, setFormClass] = useState("row g-3 needs-validation")
+
+  const [confirmPasswordErrorMsg, setConfirmPasswordErrorMsg] = useState(
+    "Please enter confirm password"
+  )
+
+  const [showAlert, setShowAlert] = useState(false)
+  const [alertMessage, setAlertMessage] = useState("")
+
+  // When confirm password value is changed
+  const handleConfirmPasswordChange = (e) => {
+    const target = e.target
+    const value = target.value
+
+    if (value && value === form.password) {
+      target.setCustomValidity("")
+    } else if (value && value !== form.password) {
+      target.setCustomValidity("Invalid confirm password")
+      setConfirmPasswordErrorMsg("Confirm password should match password")
+    } else {
+      target.setCustomValidity("Invalid confirm password")
+      setConfirmPasswordErrorMsg("Please enter confirm password")
+    }
+
+    setConfirmPassword(value)
   }
 
-  const onChangeUsername = (event) => {
-    const username = event.target.value
-    setUsername(username)
+  // Handle form value changed
+  const handleChange = (e) => {
+    const target = e.target
+    const value = target.value
+    const name = target.name
+
+    setForm({
+      ...form,
+      [name]: value,
+    })
+
+    setShowAlert(false)
   }
 
-  const onChangePassword = (event) => {
-    const password = event.target.value
-    setPassword(password)
-  }
-
-  // const onChangeConfirmPassword = (event) => {
-  //   const confirmPassword = event.target.value
-  //   setConfirmPassword(confirmPassword)
-  //   if (
-  //     password !== undefined &&
-  //     password !== "" &&
-  //     password !== confirmPassword
-  //   ) {
-  //     setConfirmPasswordErrorMsg("Passwords do not match")
-  //   } else {
-  //     setConfirmPasswordErrorMsg(
-  //       "Please enter confirm password same as password"
-  //     )
-  //   }
-  // }
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-
+  // Handle form submit
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setFormClass("row g-3 was-validated")
+    // setShowAlert(true)
     if (
-      name !== undefined &&
-      username !== undefined &&
-      password != undefined &&
-      name !== "" &&
-      username !== "" &&
-      password != ""
+      e.target.name.validity.valid &&
+      e.target.username.validity.valid &&
+      e.target.password.validity.valid &&
+      e.target.confirmPassword.validity.valid
     ) {
-      isLoading(true)
-      // const encryptPassword = sha256(password).toString()
-
-      const data = {
-        name: name,
-        username: username,
-        password: password,
-      }
-
-      console.log(data)
-
-      const res = await fetch("/api/user/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      })
-
-      console.log(res)
+      postData(form)
     }
   }
 
-  useEffect(() => {
-    setNameToolTip("Please enter your name")
-    setUsernameToolTip("Please enter a valid username")
-    setPasswordToolTip("Please enter a valid password")
-    // setConfirmPasswordToolTip("Please enter same password as above")
-  }, [])
+  const closeAlert = () => {
+    setShowAlert(false)
+  }
+
+  // Call register API to save user data
+  const postData = async (form) => {
+    try {
+      const hashPass = await hashPassword(form.password)
+
+      console.log(hashPass)
+
+      const addUser = {
+        name: form.name,
+        username: form.username,
+        password: hashPass,
+      }
+
+      // setConfirmPassword(form.password)
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          Accept: contentType,
+          "Content-Type": contentType,
+        },
+        body: JSON.stringify(addUser),
+      })
+
+      if (res.ok) {
+        router.push("/")
+      } else {
+        const response = await res.json()
+        if (response.userExists) {
+          setAlertMessage(response.message)
+        } else {
+          if (response.message) {
+            setAlertMessage(response.message)
+          } else {
+            setAlertMessage("Failed to add user")
+          }
+        }
+        setShowAlert(true)
+      }
+    } catch (error) {
+      console.error(error)
+      setAlertMessage("Failed to add user")
+      setShowAlert(true)
+    }
+  }
 
   return (
     <main>
@@ -93,6 +129,25 @@ const RegisterForm = () => {
             <div className="row justify-content-center">
               <div className="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
                 <FormLogo />
+
+                {showAlert ? (
+                  <div
+                    className="alert alert-warning alert-dismissible fade show"
+                    role="alert"
+                  >
+                    <i className="bi bi-exclamation-triangle me-1"></i>
+                    {alertMessage}
+                    <button
+                      type="button"
+                      className="btn-close"
+                      data-bs-dismiss="alert"
+                      aria-label="Close"
+                      onClick={closeAlert}
+                    ></button>
+                  </div>
+                ) : (
+                  ""
+                )}
 
                 <div className="card mb-3">
                   <div className="card-body">
@@ -104,41 +159,29 @@ const RegisterForm = () => {
                         Enter your personal details to create account
                       </p>
                     </div>
-
+                    {/* needs-validation */}
+                    {/* was-validated */}
                     <form
-                      className="row g-3 needs-validation"
+                      className={formClass}
                       noValidate
                       onSubmit={handleSubmit}
                     >
                       <div className="col-12">
-                        <label htmlFor="yourName" className="form-label">
-                          Your Name
-                        </label>
+                        <label className="form-label">Your Name</label>
                         <input
                           type="text"
                           name="name"
                           className="form-control"
-                          id="yourName"
-                          value={name}
-                          onChange={onChangeName}
+                          value={form.name}
+                          onChange={handleChange}
+                          pattern="^[A-Za-z][A-Za-z ]{0,48}[A-Za-z]$"
                           required
-                          pattern="^[A-Za-z][A-Za-z ]{1,48}[A-Za-z]$"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="top"
-                          title={nameToolTip}
                         />
-                        <div className="invalid-feedback">
-                          <ul>
-                            <li>May contain upto 50 characters</li>
-                            <li>Only alphabets and space allowed</li>
-                          </ul>
-                        </div>
+                        <div className="invalid-feedback">Enter name</div>
                       </div>
 
                       <div className="col-12">
-                        <label htmlFor="yourUsername" className="form-label">
-                          Username
-                        </label>
+                        <label className="form-label">Username</label>
                         <div className="input-group has-validation">
                           <span
                             className="input-group-text"
@@ -150,14 +193,10 @@ const RegisterForm = () => {
                             type="text"
                             name="username"
                             className="form-control"
-                            id="yourUsername"
-                            value={username}
-                            onChange={onChangeUsername}
+                            value={form.username}
+                            onChange={handleChange}
                             required
                             pattern="^[A-Za-z][A-Za-z0-9_]{7,31}$"
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="top"
-                            title={usernameToolTip}
                           />
                           <div className="invalid-feedback">
                             <ul>
@@ -170,51 +209,38 @@ const RegisterForm = () => {
                       </div>
 
                       <div className="col-12">
-                        <label htmlFor="yourPassword" className="form-label">
-                          Password
-                        </label>
+                        <label className="form-label">Password</label>
                         <input
                           type="password"
                           name="password"
                           className="form-control"
-                          id="yourPassword"
-                          value={password}
-                          onChange={onChangePassword}
+                          value={form.password}
+                          onChange={handleChange}
                           required
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="top"
-                          title={passwordToolTip}
-                          pattern="^[A-Za-z0-9!@#$%^&*_=+-]{8,}$"
+                          pattern="^[A-Za-z0-9!@#$%^&*_=+-]{8,32}$"
                         />
                         <div className="invalid-feedback">
                           <ul>
                             <li>Minimum 8 characters required</li>
+                            <li>Maximum 32 characters required</li>
                           </ul>
                         </div>
                       </div>
 
-                      {/* <div className="col-12">
-                        <label htmlFor="confirmPassword" className="form-label">
-                          Confirm Password
-                        </label>
+                      <div className="col-12">
+                        <label className="form-label">Confirm Password</label>
                         <input
                           type="password"
                           name="confirmPassword"
                           className="form-control"
-                          id="confirmPassword"
                           value={confirmPassword}
-                          onChange={onChangeConfirmPassword}
+                          onChange={handleConfirmPasswordChange}
                           required
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="top"
-                          title={confirmPasswordToolTip}
                         />
                         <div className="invalid-feedback">
-                          <ul>
-                            <li>{confirmPasswordErrorMsg}</li>
-                          </ul>
+                          {confirmPasswordErrorMsg}
                         </div>
-                      </div> */}
+                      </div>
 
                       <div className="col-12">
                         <button className="btn btn-primary w-100" type="submit">

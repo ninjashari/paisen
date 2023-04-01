@@ -1,7 +1,39 @@
 import Link from "next/link"
+import { useRouter } from "next/router"
+import { useState } from "react"
 import FormLogo from "./form-logo"
+import { signIn } from "next-auth/react"
 
 const LoginForm = () => {
+  const router = useRouter()
+
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+
+  const [formClass, setFormClass] = useState("row g-3 needs-validation")
+
+  const [showAlert, setShowAlert] = useState(false)
+  const [alertMessage, setAlertMessage] = useState("")
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    await signIn("credentials", {
+      redirect: false,
+      username,
+      password,
+    })
+      .then((res) => {
+        console.log(res)
+        router.replace("/animelist")
+      })
+      .catch((err) => {
+        console.error(err)
+        setAlertMessage("Username/Password invalid. Please try again")
+        setShowAlert(true)
+      })
+  }
+
   return (
     <main>
       <div className="container">
@@ -10,6 +42,25 @@ const LoginForm = () => {
             <div className="row justify-content-center">
               <div className="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
                 <FormLogo />
+
+                {showAlert ? (
+                  <div
+                    className="alert alert-warning alert-dismissible fade show"
+                    role="alert"
+                  >
+                    <i className="bi bi-exclamation-triangle me-1"></i>
+                    {alertMessage}
+                    <button
+                      type="button"
+                      className="btn-close"
+                      data-bs-dismiss="alert"
+                      aria-label="Close"
+                      onClick={closeAlert}
+                    ></button>
+                  </div>
+                ) : (
+                  ""
+                )}
 
                 <div className="card mb-3">
                   <div className="card-body">
@@ -22,11 +73,13 @@ const LoginForm = () => {
                       </p>
                     </div>
 
-                    <form className="row g-3 needs-validation" noValidate>
+                    <form
+                      className={formClass}
+                      noValidate
+                      onSubmit={handleSubmit}
+                    >
                       <div className="col-12">
-                        <label htmlFor="yourUsername" className="form-label">
-                          Username
-                        </label>
+                        <label className="form-label">Username</label>
                         <div className="input-group has-validation">
                           <span
                             className="input-group-text"
@@ -38,7 +91,8 @@ const LoginForm = () => {
                             type="text"
                             name="username"
                             className="form-control"
-                            id="yourUsername"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                             required
                           />
                           <div className="invalid-feedback">
@@ -48,14 +102,13 @@ const LoginForm = () => {
                       </div>
 
                       <div className="col-12">
-                        <label htmlFor="yourPassword" className="form-label">
-                          Password
-                        </label>
+                        <label className="form-label">Password</label>
                         <input
                           type="password"
                           name="password"
                           className="form-control"
-                          id="yourPassword"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
                           required
                         />
                         <div className="invalid-feedback">
@@ -63,20 +116,6 @@ const LoginForm = () => {
                         </div>
                       </div>
 
-                      <div className="col-12">
-                        <div className="form-check">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            name="remember"
-                            value="true"
-                            id="rememberMe"
-                          />
-                          <label className="form-check-label" htmlFor="rememberMe">
-                            Remember me
-                          </label>
-                        </div>
-                      </div>
                       <div className="col-12">
                         <button className="btn btn-primary w-100" type="submit">
                           Login
