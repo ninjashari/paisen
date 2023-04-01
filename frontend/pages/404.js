@@ -10,7 +10,7 @@ export default function ErrorPage() {
           Back to home
         </Link>
         <img
-          src="/assets/img/not-found.svg"
+          src="/img/not-found.svg"
           className="img-fluid"
           alt="Page Not Found"
         />
