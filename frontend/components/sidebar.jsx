@@ -11,6 +11,7 @@ const Sidebar = () => {
     console.log(animeListClass)
     console.log(animeListLinkClass)
     if ("nav-content" === animeListClass && "nav-link" === animeListLinkClass) {
+      setAnimeListClass("nav-content collapsing")
       setAnimeListClass("nav-content collapse")
       setAnimeListLinkClass("nav-link collapsed")
     } else if (
@@ -77,8 +78,36 @@ const Sidebar = () => {
 
         <li className="nav-item">
           <Link className="nav-link collapsed" href="/statistics">
-            <i className="bi bi-grid"></i>
+            <i className="bi bi-bar-chart"></i>
             <span>Statictics</span>
+          </Link>
+        </li>
+
+        <li className="nav-item">
+          <Link className="nav-link collapsed" href="/search">
+            <i className="bi bi-search"></i>
+            <span>Search</span>
+          </Link>
+        </li>
+
+        <li className="nav-item">
+          <Link className="nav-link collapsed" href="/seasons">
+            <i className="bi bi-calendar3"></i>
+            <span>Seasons</span>
+          </Link>
+        </li>
+
+        <li className="nav-item">
+          <Link className="nav-link collapsed" href="/jellyfin">
+            <i className="bi bi-link"></i>
+            <span>Jellyfin</span>
+          </Link>
+        </li>
+
+        <li className="nav-item">
+          <Link className="nav-link collapsed" href="/authorise">
+            <i className="bi bi-shield-check"></i>
+            <span>Authorize</span>
           </Link>
         </li>
       </ul>
