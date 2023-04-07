@@ -1,4 +1,4 @@
-import { ApexCharts } from "@/public/apexcharts/apexcharts.amd"
+// import { ApexCharts } from "@/public/apexcharts/apexcharts.amd"
 import { useEffect } from "react"
 
 const BarChart = () => {
