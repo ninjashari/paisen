@@ -63,3 +63,36 @@ export const sidebarItems = [
     href: "/authorise",
   },
 ]
+
+export const animeTabs = [
+  {
+    key: "current",
+    name: "current",
+    value: "Current",
+    className: "nav-link w-100 active",
+  },
+  {
+    key: "completed",
+    name: "completed",
+    value: "Completed",
+    className: "nav-link w-100",
+  },
+  {
+    key: "onhold",
+    name: "onhold",
+    value: "On Hold",
+    className: "nav-link w-100",
+  },
+  {
+    key: "dropped",
+    name: "dropped",
+    value: "Dropped",
+    className: "nav-link w-100",
+  },
+  {
+    key: "plantowatch",
+    name: "plantowatch",
+    value: "Plan to Watch",
+    className: "nav-link w-100",
+  },
+]

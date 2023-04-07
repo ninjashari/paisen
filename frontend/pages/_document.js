@@ -23,19 +23,6 @@ export default function Document() {
       <body>
         <Main />
         <NextScript />
-
-        {/* Vendor JS Files */}
-        {/* <Script src="/apexcharts/apexcharts.min.js"></Script>
-        <Script src="/bootstrap/js/bootstrap.bundle.min.js"></Script>
-        <Script src="/chart.js/chart.umd.js"></Script>
-        <Script src="/echarts/echarts.min.js"></Script>
-        <Script src="/quill/quill.min.js"></Script>
-        <Script src="/simple-datatables/simple-datatables.js"></Script>
-        <Script src="/tinymce/tinymce.min.js"></Script>
-        <Script src="/php-email-form/validate.js"></Script>
-
-        {/* Template Main JS File 
-        <Script src="/js/main.js"></Script> */}
       </body>
     </Html>
   )

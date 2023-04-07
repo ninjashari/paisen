@@ -25,13 +25,22 @@ const LoginForm = () => {
     })
       .then((res) => {
         console.log(res)
-        router.replace("/animelist")
+        if (!res.ok) {
+          setAlertMessage("Username/Password invalid. Please try again")
+          setShowAlert(true)
+        } else {
+          router.replace("/")
+        }
       })
       .catch((err) => {
         console.error(err)
         setAlertMessage("Username/Password invalid. Please try again")
         setShowAlert(true)
       })
+  }
+
+  const closeAlert = () => {
+    setShowAlert(false)
   }
 
   return (

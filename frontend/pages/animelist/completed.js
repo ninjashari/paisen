@@ -1,5 +1,4 @@
-import Tabs from "@/components/animelist-tabs"
-import Breadcrumb from "@/components/breadcrumb"
+import Table from "@/components/animelist-table"
 import Header from "@/components/header"
 import Layout from "@/components/layout"
 import Sidebar from "@/components/sidebar"
@@ -11,10 +10,9 @@ export default function Animelist() {
       <Header />
       <Sidebar currentPage="animelist" />
       <main id="main" className="main">
-        <Breadcrumb name="Anime List" />
         <section className="section">
           <div className="row">
-            <Tabs />
+            <Table />
           </div>
         </section>
       </main>

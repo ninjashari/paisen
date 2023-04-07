@@ -1,30 +1,86 @@
-import { sidebarItems } from "@/utils/constants"
 import Link from "next/link"
+import { useState } from "react"
 
-const Sidebar = (props) => {
-  sidebarItems.forEach((sidebarItem) => {
-    if (
-      props.currentPage !== undefined &&
-      props.currentPage !== "" &&
-      props.currentPage === sidebarItem.key
+const Sidebar = () => {
+  const [animeListClass, setAnimeListClass] = useState("nav-content collapse")
+  const [animeListLinkClass, setAnimeListLinkClass] =
+    useState("nav-link collapsed")
+
+  const handleShowAnimeList = (e) => {
+    e.preventDefault()
+    console.log(animeListClass)
+    console.log(animeListLinkClass)
+    if ("nav-content" === animeListClass && "nav-link" === animeListLinkClass) {
+      setAnimeListClass("nav-content collapse")
+      setAnimeListLinkClass("nav-link collapsed")
+    } else if (
+      "nav-content collapse" === animeListClass &&
+      "nav-link collapsed" === animeListLinkClass
     ) {
-      sidebarItem.linkClass = "nav-link"
-    } else {
-      sidebarItem.linkClass = "nav-link collapsed"
+      setAnimeListClass("nav-content")
+      setAnimeListLinkClass("nav-link")
     }
-  })
-
+  }
   return (
     <aside id="sidebar" className="sidebar">
       <ul className="sidebar-nav" id="sidebar-nav">
-        {sidebarItems.map((sidebarItem) => (
-          <li className="nav-item" key={sidebarItem.key}>
-            <Link className={sidebarItem.linkClass} href={sidebarItem.href}>
-              <i className={sidebarItem.icon}></i>
-              <span>{sidebarItem.name}</span>
-            </Link>
-          </li>
-        ))}
+        <li className="nav-item">
+          <Link className="nav-link collapsed" href="/">
+            <i className="bi bi-grid"></i>
+            <span>Home</span>
+          </Link>
+        </li>
+        <li className="nav-item">
+          <a
+            className={animeListLinkClass}
+            onClick={handleShowAnimeList}
+            style={{ cursor: "pointer" }}
+          >
+            <i className="bi bi-menu-button-wide"></i>
+            <span>Anime List</span>
+            <i className="bi bi-chevron-down ms-auto"></i>
+          </a>
+
+          <ul id="components-nav" className={animeListClass}>
+            <li>
+              <Link href="/animelist/current" className="active">
+                <i className="bi bi-circle"></i>
+                <span>Currently Watching</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/animelist/completed">
+                <i className="bi bi-circle"></i>
+                <span>Completed</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/animelist/onhold">
+                <i className="bi bi-circle"></i>
+                <span>On Hold</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/animelist/dropped">
+                <i className="bi bi-circle"></i>
+                <span>Dropped</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/animelist/plantowatch">
+                <i className="bi bi-circle"></i>
+                <span>Plan To Watch</span>
+              </Link>
+            </li>
+          </ul>
+        </li>
+
+        <li className="nav-item">
+          <Link className="nav-link collapsed" href="/statistics">
+            <i className="bi bi-grid"></i>
+            <span>Statictics</span>
+          </Link>
+        </li>
       </ul>
     </aside>
   )
