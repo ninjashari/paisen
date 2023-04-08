@@ -29,6 +29,17 @@ class MalApi {
     })
     return res
   }
+
+  async getFullAnimeList(fields) {
+    const res = await this.http.get(`/users/@me/animelist`, {
+      params: {
+        fields: fields.animeList.toString(),
+        limit: 1000,
+        nsfw: 1,
+      },
+    })
+    return res
+  }
 }
 
 export default MalApi

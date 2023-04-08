@@ -24,6 +24,7 @@ const Stats = () => {
   )
 
   const [malUserData, setMalUserData] = useState()
+  const [loading, setLoading] = useState(true)
 
   // MAL API Variables
   const fields = {
@@ -48,6 +49,7 @@ const Stats = () => {
           if (200 === resp.status) {
             const malData = resp.data
             setMalUserData(malData)
+            setLoading(false)
           } else {
             alert("Couldn't get user MAL data")
           }
@@ -131,109 +133,125 @@ const Stats = () => {
   // End Accordion Functions
   return (
     <div className="row">
-      <div className="col-10">
-        <div className="card">
-          <div className="card-body">
-            <h5 className="card-title">Watchlist Statistics</h5>
-
-            {/* Default Accordion */}
-            <div className="accordion">
-              <div className="accordion-item">
-                <h2 className="accordion-header">
-                  <button
-                    className={animeListHeaderClass}
-                    type="button"
-                    onClick={handleAnimeListClick}
-                  >
-                    Anime List
-                  </button>
-                </h2>
-                <div className={animeListContentClass}>
-                  <div className="accordion-body">
-                    <table className="table table-borderless">
-                      <tbody>
-                        <tr>
-                          <td>Anime count</td>
-                          <td>{malUserData?.anime_statistics?.num_items}</td>
-                        </tr>
-                        <tr>
-                          <td>Episode count</td>
-                          <td>{malUserData?.anime_statistics?.num_episodes}</td>
-                        </tr>
-
-                        <tr>
-                          <td>Time spent watching</td>
-                          <td>
-                            {convertToDaysHrsMins(
-                              malUserData?.anime_statistics?.num_days_completed
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Time to complete</td>
-                          <td>
-                            {" "}
-                            {convertToDaysHrsMins(
-                              malUserData?.anime_statistics?.num_days_watching
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Mean score</td>
-                          <td> {malUserData?.anime_statistics?.mean_score}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
+      {loading ? (
+        <div className="container">
+          <section className="section register d-flex flex-column align-items-center justify-content-center mt-10r">
+            <div className="container">
+              <div className="row justify-content-center">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
                 </div>
               </div>
-              <div className="accordion-item">
-                <h2 className="accordion-header">
-                  <button
-                    className={scoreDistributionHeaderClass}
-                    type="button"
-                    onClick={handleScoreDistributionClick}
-                  >
-                    Score Distribution
-                  </button>
-                </h2>
-                <div className={scoreDistributionContentClass}>
-                  <div className="accordion-body">
-                    <BarChart />
+            </div>
+          </section>
+        </div>
+      ) : (
+        <div className="col-10">
+          <div className="card">
+            <div className="card-body">
+              <h5 className="card-title">Watchlist Statistics</h5>
+
+              {/* Default Accordion */}
+              <div className="accordion">
+                <div className="accordion-item">
+                  <h2 className="accordion-header">
+                    <button
+                      className={animeListHeaderClass}
+                      type="button"
+                      onClick={handleAnimeListClick}
+                    >
+                      Anime List
+                    </button>
+                  </h2>
+                  <div className={animeListContentClass}>
+                    <div className="accordion-body">
+                      <table className="table table-borderless">
+                        <tbody>
+                          <tr>
+                            <td>Anime count</td>
+                            <td>{malUserData?.anime_statistics?.num_items}</td>
+                          </tr>
+                          <tr>
+                            <td>Episode count</td>
+                            <td>
+                              {malUserData?.anime_statistics?.num_episodes}
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td>Time spent watching</td>
+                            <td>
+                              {convertToDaysHrsMins(
+                                malUserData?.anime_statistics
+                                  ?.num_days_completed
+                              )}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Time to complete</td>
+                            <td>
+                              {convertToDaysHrsMins(
+                                malUserData?.anime_statistics?.num_days_watching
+                              )}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Mean score</td>
+                            <td>{malUserData?.anime_statistics?.mean_score}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="accordion-item">
-                <h2 className="accordion-header">
-                  <button
-                    className={localDatabaseHeaderClass}
-                    type="button"
-                    onClick={handleLocalDatabaseClick}
-                  >
-                    Local Database
-                  </button>
-                </h2>
-                <div id="collapseThree" className={localDatabaseContentClass}>
-                  <div className="accordion-body">
-                    <table className="table table-borderless">
-                      <tbody>
-                        <tr>
-                          <td>Anime count</td>
-                          <td>12831</td>
-                        </tr>
-                        <tr>
-                          <td>Image files</td>
-                          <td>10534 (279.6 MiB)</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                <div className="accordion-item">
+                  <h2 className="accordion-header">
+                    <button
+                      className={scoreDistributionHeaderClass}
+                      type="button"
+                      onClick={handleScoreDistributionClick}
+                    >
+                      Score Distribution
+                    </button>
+                  </h2>
+                  <div className={scoreDistributionContentClass}>
+                    <div className="accordion-body">
+                      <BarChart />
+                    </div>
+                  </div>
+                </div>
+                <div className="accordion-item">
+                  <h2 className="accordion-header">
+                    <button
+                      className={localDatabaseHeaderClass}
+                      type="button"
+                      onClick={handleLocalDatabaseClick}
+                    >
+                      Local Database
+                    </button>
+                  </h2>
+                  <div id="collapseThree" className={localDatabaseContentClass}>
+                    <div className="accordion-body">
+                      <table className="table table-borderless">
+                        <tbody>
+                          <tr>
+                            <td>Anime count</td>
+                            <td>Dummy Text</td>
+                          </tr>
+                          <tr>
+                            <td>Image files</td>
+                            <td>Dummy Text</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
