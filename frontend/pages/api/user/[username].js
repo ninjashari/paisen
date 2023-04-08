@@ -1,4 +1,4 @@
-import { findUser, updateUser } from "@/lib/dbUtil"
+import { findUser } from "@/lib/dbUtil"
 
 export default async function handler(req, res) {
   switch (req.method) {

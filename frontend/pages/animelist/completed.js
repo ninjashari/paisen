@@ -3,62 +3,19 @@ import Header from "@/components/header"
 import Layout from "@/components/layout"
 import Sidebar from "@/components/sidebar"
 import MalApi from "@/lib/malApi"
-import { getSession, useSession } from "next-auth/react"
+import { fields } from "@/utils/constants"
+import { getSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 
 export default function Animelist() {
-  const { data: session } = useSession()
-
   const [animeListData, setAnimeListData] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const fields = {
-    animeList: [
-      "id",
-      "title",
-      "main_picture",
-      "alternative_titles",
-      "start_date",
-      "end_date",
-      "synopsis",
-      "mean",
-      "rank",
-      "popularity",
-      "num_list_users",
-      "num_scoring_users",
-      "nsfw",
-      "genres",
-      "created_at",
-      "updated_at",
-      "media_type",
-      "status",
-      "my_list_status",
-      "num_episodes",
-      "start_season",
-      "broadcast",
-      "source",
-      "average_episode_duration",
-      "rating",
-      "studios",
-      "status",
-      "score",
-      "num_watched_episodes",
-      "is_rewatching",
-      "start_date",
-      "finish_date",
-      "priority",
-      "num_times_rewatched",
-      "rewatch_value",
-      "tags",
-      "updated_at",
-    ],
-  }
-
   useEffect(() => {
-    getCurrentAnimeList()
+    getAnimeList()
   }, [])
 
-  const getCurrentAnimeList = async () => {
+  const getAnimeList = async () => {
     // Get user data
     const sessionA = await getSession()
 
@@ -86,7 +43,26 @@ export default function Animelist() {
       <main id="main" className="main">
         <section className="section">
           <div className="row">
-            {loading ? "" : <Table animeList={animeListData} />}
+            {loading ? (
+              <div className="container">
+                <section className="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+                  <div className="container">
+                    <div className="row justify-content-center">
+                      <div className="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
+                        <div
+                          className="spinner-border text-primary"
+                          role="status"
+                        >
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            ) : (
+              <Table animeList={animeListData} />
+            )}
           </div>
         </section>
       </main>

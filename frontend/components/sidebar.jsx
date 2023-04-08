@@ -8,8 +8,7 @@ const Sidebar = () => {
 
   const handleShowAnimeList = (e) => {
     e.preventDefault()
-    console.log(animeListClass)
-    console.log(animeListLinkClass)
+
     if ("nav-content" === animeListClass && "nav-link" === animeListLinkClass) {
       setAnimeListClass("nav-content collapsing")
       setAnimeListClass("nav-content collapse")

@@ -24,22 +24,18 @@ const ScoreSelect = ({ selectedVal }) => {
   }
 
   return (
-    <form>
-      <div className="col-8">
-        <select
-          className="form-select"
-          aria-label="Default select example"
-          value={selectedVal}
-          onChange={handleSelectedChange}
-        >
-          {scoreList.map((score, index) => (
-            <option key={index} value={score.value}>
-              {score.value}
-            </option>
-          ))}
-        </select>
-      </div>
-    </form>
+    <select
+      className="form-select"
+      aria-label="Default select example"
+      value={selectedVal}
+      onChange={handleSelectedChange}
+    >
+      {scoreList.map((score, index) => (
+        <option key={index} value={score.value}>
+          {score.value}
+        </option>
+      ))}
+    </select>
   )
 }
 

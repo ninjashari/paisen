@@ -1,3 +1,4 @@
+import { camelize } from "@/utils/helper"
 import Progressbar from "./progress-bar"
 import ScoreSelect from "./score-select"
 import SquareIcon from "./square-icon"
@@ -7,7 +8,7 @@ const Table = ({ animeList }) => {
     <div className="card">
       <div className="card-body">
         <table className="table">
-          <thead>
+          <thead style={{ textAlign: "center" }}>
             <tr>
               <th scope="col"></th>
               <th scope="col">Anime Title</th>
@@ -21,7 +22,15 @@ const Table = ({ animeList }) => {
             {animeList?.map((anime) => (
               <tr key={anime.node.id}>
                 <th scope="row">
-                  <SquareIcon squareColor="blue" />
+                  {/* <SquareIcon squareColor="blue" /> */}
+
+                  {anime?.node?.status === "finished_airing" ? (
+                    <SquareIcon squareColor="blue" />
+                  ) : anime?.node?.status === "not_yet_aired" ? (
+                    <SquareIcon squareColor="red" />
+                  ) : (
+                    <SquareIcon squareColor="green" />
+                  )}
                 </th>
                 <td style={{ maxWidth: "2rem" }}>{anime.node.title}</td>
                 <td>
@@ -49,13 +58,21 @@ const Table = ({ animeList }) => {
                     </div>
                   </div>
                 </td>
-                <td>
+                <td className="col-1">
                   <ScoreSelect selectedVal={anime.node.my_list_status.score} />
                 </td>
-                <td>{anime.node.media_type}</td>
-                <td>
-                  {anime.node.start_season.season +
-                    anime.node.start_season.year}
+                <td style={{ textAlign: "center" }}>
+                  {anime?.node?.media_type.length < 4
+                    ? anime?.node?.media_type.toUpperCase()
+                    : camelize(anime?.node?.media_type)}
+                </td>
+                <td style={{ textAlign: "center" }}>
+                  {anime?.node?.start_season?.season +
+                  anime?.node?.start_season?.year
+                    ? camelize(anime?.node?.start_season?.season) +
+                      " " +
+                      anime?.node?.start_season?.year
+                    : ""}
                 </td>
               </tr>
             ))}

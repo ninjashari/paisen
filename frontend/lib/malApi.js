@@ -39,6 +39,7 @@ class MalApi {
         fields: fieldsA.animeList.toString(),
         status: "watching",
         limit: 1000,
+        nsfw: 1,
       },
     })
     return res
@@ -50,6 +51,7 @@ class MalApi {
         fields: fieldsA.animeList.toString(),
         status: "completed",
         limit: 1000,
+        nsfw: 1,
       },
     })
     return res
@@ -61,6 +63,7 @@ class MalApi {
         fields: fieldsA.animeList.toString(),
         status: "on_hold",
         limit: 1000,
+        nsfw: 1,
       },
     })
     return res
@@ -72,6 +75,7 @@ class MalApi {
         fields: fieldsA.animeList.toString(),
         status: "dropped",
         limit: 1000,
+        nsfw: 1,
       },
     })
     return res
@@ -83,6 +87,7 @@ class MalApi {
         fields: fieldsA.animeList.toString(),
         status: "plan_to_watch",
         limit: 1000,
+        nsfw: 1,
       },
     })
     return res

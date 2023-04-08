@@ -39,37 +39,39 @@ export default function Home() {
 
         // Create MAL service object
         const mal = new Mal(clientID)
-        const response = await mal.generateAccessToken(
-          queryCode,
-          currentUserData.codeChallenge
-        )
+        if (queryCode && currentUserData) {
+          const response = await mal.generateAccessToken(
+            queryCode,
+            currentUserData.codeChallenge
+          )
 
-        console.log(response)
+          console.log(response)
 
-        if (response) {
-          // Create user data to be updated
-          const updateUserData = {
-            username: session.user.username,
-            code: queryCode,
-            tokenType: response.token_type,
-            refreshToken: response.refresh_token,
-            expiryTime: response.expires_in,
-            accessToken: response.access_token,
-          }
+          if (response) {
+            // Create user data to be updated
+            const updateUserData = {
+              username: session.user.username,
+              code: queryCode,
+              tokenType: response.token_type,
+              refreshToken: response.refresh_token,
+              expiryTime: response.expires_in,
+              accessToken: response.access_token,
+            }
 
-          // Update user data
-          const updateResponse = await fetch("/api/user/update", {
-            method: "PUT",
-            headers: {
-              Accept: contentType,
-              "Content-Type": contentType,
-            },
-            body: JSON.stringify(updateUserData),
-          })
+            // Update user data
+            const updateResponse = await fetch("/api/user/update", {
+              method: "PUT",
+              headers: {
+                Accept: contentType,
+                "Content-Type": contentType,
+              },
+              body: JSON.stringify(updateUserData),
+            })
 
-          if (updateResponse.ok) {
-            //     console.log(await updateResponse.json().body)
-            router.replace("/")
+            if (updateResponse.ok) {
+              //     console.log(await updateResponse.json().body)
+              router.replace("/")
+            }
           }
         }
       }
