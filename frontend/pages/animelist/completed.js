@@ -27,7 +27,7 @@ export default function Animelist() {
       if (currentUserData && currentUserData.accessToken) {
         const malApi = new MalApi(currentUserData.accessToken)
 
-        const resp = await malApi.getCompletedList(fields)
+        const resp = await malApi.getAnimeList(fields, "completed")
         if (200 === resp.status) {
           const malData = resp.data
           setAnimeListData(malData.data)

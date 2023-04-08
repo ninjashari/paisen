@@ -9,13 +9,27 @@ import { useEffect } from "react"
 export default function Home() {
   const { data: session } = useSession()
 
+  const fields = {
+    user: [
+      "id",
+      "name",
+      "picture",
+      "gender",
+      "birthday",
+      "location",
+      "joined_at",
+      "anime_statistics",
+      "time_zone",
+      "is_supporter",
+    ],
+  }
+
   useEffect(() => {
     getMalUserData()
   }, [])
 
   const getMalUserData = async () => {
     // Get user data
-
     const sessionA = await getSession()
 
     if (sessionA && sessionA.user) {
@@ -25,7 +39,7 @@ export default function Home() {
       if (currentUserData && currentUserData.accessToken) {
         const malApi = new MalApi(currentUserData.accessToken)
 
-        const resp = await malApi.getUserData()
+        const resp = await malApi.getUserData(fields)
         if (200 === resp.status) {
           const malData = resp.data
           console.log(malData)

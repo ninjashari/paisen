@@ -6,7 +6,6 @@ import { useEffect } from "react"
 
 export default function Home() {
   const router = useRouter()
-
   const contentType = "application/json"
 
   useEffect(() => {

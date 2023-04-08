@@ -13,3 +13,12 @@ export const getQueryParams = (url) => {
   })
   return params
 }
+
+export const convertToDaysHrsMins = (days) => {
+  const daysFinal = Math.floor(days)
+  const remDays = days - daysFinal
+  const hrs = Math.floor(remDays * 24)
+  const remHrs = remDays * 24 - hrs
+  const mins = Math.ceil(remHrs * 60)
+  return daysFinal + " days " + hrs + " hours " + mins + " minutes"
+}
