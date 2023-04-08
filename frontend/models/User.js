@@ -22,6 +22,27 @@ const UserSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
   },
+  code: {
+    type: String,
+  },
+  malUsername: {
+    type: String,
+  },
+  codeChallenge: {
+    type: String,
+  },
+  accessToken: {
+    type: String,
+  },
+  expiryTime: {
+    type: Number,
+  },
+  refreshToken: {
+    type: String,
+  },
+  tokenType: {
+    type: String,
+  },
 })
 
 export default mongoose.models.User || mongoose.model("User", UserSchema)

@@ -6,9 +6,6 @@ import NavUserProfile from "./nav-user-profile"
 
 const Profilenav = () => {
   const { data: session } = useSession()
-  useEffect(() => {
-    console.log(session)
-  }, [])
 
   return (
     <nav className="header-nav ms-auto">

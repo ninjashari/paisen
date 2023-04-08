@@ -31,16 +31,12 @@ const Sidebar = () => {
             <span>Home</span>
           </Link>
         </li>
-        <li className="nav-item">
-          <a
-            className={animeListLinkClass}
-            onClick={handleShowAnimeList}
-            style={{ cursor: "pointer" }}
-          >
+        <li className="nav-item hand-on-hover">
+          <div className={animeListLinkClass} onClick={handleShowAnimeList}>
             <i className="bi bi-menu-button-wide"></i>
             <span>Anime List</span>
             <i className="bi bi-chevron-down ms-auto"></i>
-          </a>
+          </div>
 
           <ul id="components-nav" className={animeListClass}>
             <li>

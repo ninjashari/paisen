@@ -1,41 +1,58 @@
-import Link from "next/link"
+import Mal from "@/lib/mal"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/router"
+import pkceChallenge from "pkce-challenge"
 import { useState } from "react"
 import FormLogo from "./form-logo"
-import { signIn } from "next-auth/react"
+import Link from "next/link"
 
-const LoginForm = () => {
+const AuthoriseForm = () => {
   const router = useRouter()
+  const contentType = "application/json"
+
+  const { data: session } = useSession()
 
   const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-
   const [formClass, setFormClass] = useState("row g-3 needs-validation")
-
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState("")
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setFormClass("row g-3 was-validated")
+    if (e.target.username.validity.valid) {
+      const pkce = pkceChallenge()
+      const updateUserData = {
+        username: session.user.username,
+        malUsername: username,
+        codeChallenge: pkce.code_challenge,
+      }
 
-    await signIn("credentials", {
-      redirect: false,
-      username,
-      password,
-    })
-      .then((res) => {
-        if (!res.ok) {
-          setAlertMessage("Username/Password invalid. Please try again")
-          setShowAlert(true)
-        } else {
-          router.replace("/")
+      const response = await fetch("/api/user/update", {
+        method: "PUT",
+        headers: {
+          Accept: contentType,
+          "Content-Type": contentType,
+        },
+        body: JSON.stringify(updateUserData),
+      })
+
+      if (response.ok) {
+        const res = await fetch("/api/mal/clientid")
+
+        if (res.ok) {
+          const resp = await res.json()
+          if (resp && resp.data && resp.data.clientId) {
+            const clientID = resp.data.clientId
+            const mal = new Mal(clientID)
+
+            const url = mal.generateAuthorizeUrl(updateUserData.codeChallenge)
+
+            window.location.href = url
+          }
         }
-      })
-      .catch((err) => {
-        console.error(err)
-        setAlertMessage("Username/Password invalid. Please try again")
-        setShowAlert(true)
-      })
+      }
+    }
   }
 
   const closeAlert = () => {
@@ -74,10 +91,10 @@ const LoginForm = () => {
                   <div className="card-body">
                     <div className="pt-4 pb-2">
                       <h5 className="card-title text-center pb-0 fs-4">
-                        Login to Your Account
+                        Authorize myanimelist
                       </h5>
                       <p className="text-center small">
-                        Enter your username & password to login
+                        Enter your myanimelist username to authorize
                       </p>
                     </div>
 
@@ -101,38 +118,27 @@ const LoginForm = () => {
                             className="form-control"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
+                            pattern="^[A-Za-z][A-Za-z0-9_-]{1,15}$"
                             required
                           />
                           <div className="invalid-feedback">
-                            Please enter your username.
+                            Please enter your myanimelist username (not the
+                            email id).
                           </div>
                         </div>
                       </div>
 
                       <div className="col-12">
-                        <label className="form-label">Password</label>
-                        <input
-                          type="password"
-                          name="password"
-                          className="form-control"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                        />
-                        <div className="invalid-feedback">
-                          Please enter your password!
-                        </div>
-                      </div>
-
-                      <div className="col-12">
                         <button className="btn btn-primary w-100" type="submit">
-                          Login
+                          Authorize
                         </button>
                       </div>
                       <div className="col-12">
                         <p className="small mb-0">
-                          Don't have account?{" "}
-                          <Link href="/register">Create an account</Link>
+                          Don't have MAL account?{" "}
+                          <Link href="https://myanimelist.net/register.php">
+                            Create MAL account
+                          </Link>
                         </p>
                       </div>
                     </form>
@@ -147,4 +153,4 @@ const LoginForm = () => {
   )
 }
 
-export default LoginForm
+export default AuthoriseForm

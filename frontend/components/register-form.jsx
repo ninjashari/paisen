@@ -196,7 +196,7 @@ const RegisterForm = ({ formId, userForm }) => {
                             value={form.username}
                             onChange={handleChange}
                             required
-                            pattern="^[A-Za-z][A-Za-z0-9_]{7,31}$"
+                            pattern="^[A-Za-z][A-Za-z0-9_-]{7,31}$"
                           />
                           <div className="invalid-feedback">
                             <ul>
