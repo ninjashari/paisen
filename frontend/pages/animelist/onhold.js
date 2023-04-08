@@ -18,16 +18,16 @@ export default function Animelist() {
 
   const getAnimeList = async () => {
     // Get user data
-    const sessionA = await getSession()
+    const session = await getSession()
 
-    if (sessionA && sessionA.user) {
-      const userResponse = await fetch("/api/user/" + sessionA.user.username)
+    if (session && session.user) {
+      const userResponse = await fetch("/api/user/" + session.user.username)
       const userRes = await userResponse.json()
       const currentUserData = userRes.userData
       if (currentUserData && currentUserData.accessToken) {
         const malApi = new MalApi(currentUserData.accessToken)
 
-        const resp = await malApi.getOnHoldList(fields)
+        const resp = await malApi.getAnimeList(fields, "on_hold")
         if (200 === resp.status) {
           const malData = resp.data
           setAnimeListData(malData.data)
@@ -51,7 +51,7 @@ export default function Animelist() {
           <div className="row">
             {loading ? (
               <div className="container">
-                <section className="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+                <section className="section register d-flex flex-column align-items-center justify-content-center mt-10r">
                   <div className="container">
                     <div className="row justify-content-center">
                       <div className="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">

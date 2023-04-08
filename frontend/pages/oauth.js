@@ -1,17 +1,11 @@
-import Header from "@/components/header"
-import Layout from "@/components/layout"
-import Sidebar from "@/components/sidebar"
 import Mal from "@/lib/mal"
+import { getQueryParams } from "@/utils/helper"
 import { getSession } from "next-auth/react"
 import { useRouter } from "next/router"
 import { useEffect } from "react"
-import { useSearchParams } from "next/navigation"
 
 export default function Home() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const queryCode = searchParams.get("code")
-  console.log(queryCode)
   const contentType = "application/json"
 
   useEffect(() => {
@@ -20,67 +14,77 @@ export default function Home() {
   }, [])
 
   const updateUserCodeAndToken = async () => {
-    // Get MAL client ID
-    const res = await fetch("/api/mal/clientid")
-    if (res.ok) {
-      const resp = await res.json()
-      if (resp && resp.data && resp.data.clientId) {
-        const clientID = resp.data.clientId
+    try {
+      // Get MAL client ID
+      const res = await fetch("/api/mal/clientid")
+      if (res.ok) {
+        const resp = await res.json()
+        if (resp && resp.data && resp.data.clientId) {
+          const clientID = resp.data.clientId
 
-        // Fetch user data
-        const session = await getSession()
+          // Fetch user data
+          const session = await getSession()
 
-        const userResponse = await fetch("/api/user/" + session.user.username)
+          const userResponse = await fetch("/api/user/" + session.user.username)
 
-        const userRes = await userResponse.json()
-        const currentUserData = userRes.userData
+          const userRes = await userResponse.json()
+          const currentUserData = userRes.userData
+          const queryParams = getQueryParams(router.asPath.toString())
+          const queryCode = queryParams.code
 
-        console.log(currentUserData)
+          // Create MAL service object
+          const mal = new Mal(clientID)
+          if (queryCode && currentUserData) {
+            const response = await mal.generateAccessToken(
+              queryCode,
+              currentUserData.codeChallenge
+            )
 
-        // Create MAL service object
-        const mal = new Mal(clientID)
-        if (queryCode && currentUserData) {
-          const response = await mal.generateAccessToken(
-            queryCode,
-            currentUserData.codeChallenge
-          )
+            console.log(response)
 
-          console.log(response)
+            if (response) {
+              // Create user data to be updated
+              const updateUserData = {
+                username: session.user.username,
+                code: queryCode,
+                tokenType: response.token_type,
+                refreshToken: response.refresh_token,
+                expiryTime: response.expires_in,
+                accessToken: response.access_token,
+              }
 
-          if (response) {
-            // Create user data to be updated
-            const updateUserData = {
-              username: session.user.username,
-              code: queryCode,
-              tokenType: response.token_type,
-              refreshToken: response.refresh_token,
-              expiryTime: response.expires_in,
-              accessToken: response.access_token,
+              // Update user data
+              const updateResponse = await fetch("/api/user/update", {
+                method: "PUT",
+                headers: {
+                  Accept: contentType,
+                  "Content-Type": contentType,
+                },
+                body: JSON.stringify(updateUserData),
+              })
+
+              if (updateResponse.ok) {
+                //     console.log(await updateResponse.json().body)
+                router.replace("/")
+              } else {
+                alert("Couldn't update user data with token info")
+              }
+            } else {
+              alert("Couldn't generate access token")
             }
-
-            // Update user data
-            const updateResponse = await fetch("/api/user/update", {
-              method: "PUT",
-              headers: {
-                Accept: contentType,
-                "Content-Type": contentType,
-              },
-              body: JSON.stringify(updateUserData),
-            })
-
-            if (updateResponse.ok) {
-              //     console.log(await updateResponse.json().body)
-              router.replace("/")
-            }
+          } else {
+            alert("Couldn't get queryCode")
           }
         }
       }
+    } catch (err) {
+      alert(err)
     }
   }
 
   return (
     <>
-      <main id="main" className="main">
+      <main>
         <div className="container">
           <section className="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
             <div className="container">

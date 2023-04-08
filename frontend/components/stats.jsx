@@ -1,129 +1,257 @@
+import { useEffect, useState } from "react"
 import BarChart from "./bar-chart"
+import { getSession } from "next-auth/react"
+import MalApi from "@/lib/malApi"
+import { convertToDaysHrsMins } from "@/utils/helper"
 
 const Stats = () => {
+  const [animeListHeaderClass, setAnimeListHeaderClass] =
+    useState("accordion-button")
+  const [animeListContentClass, setAnimeListContentClass] = useState(
+    "accordion-collapse collapse show"
+  )
+
+  const [scoreDistributionHeaderClass, setScoreDistributionHeaderClass] =
+    useState("accordion-button collapsed")
+  const [scoreDistributionContentClass, setScoreDistributionContentClass] =
+    useState("accordion-collapse collapse")
+
+  const [localDatabaseHeaderClass, setLocalDatabaseHeaderClass] = useState(
+    "accordion-button collapsed"
+  )
+  const [localDatabaseContentClass, setLocalDatabaseContentClass] = useState(
+    "accordion-collapse collapse"
+  )
+
+  const [malUserData, setMalUserData] = useState()
+  const [loading, setLoading] = useState(true)
+
+  // MAL API Variables
+  const fields = {
+    user: ["anime_statistics"],
+  }
+
+  useEffect(() => {
+    getMalUserData()
+  }, [])
+
+  const getMalUserData = async () => {
+    try {
+      const session = await getSession()
+      if (session && session.user) {
+        const userResponse = await fetch("/api/user/" + session.user.username)
+        const userRes = await userResponse.json()
+        const currentUserData = userRes.userData
+        if (currentUserData && currentUserData.accessToken) {
+          const malApi = new MalApi(currentUserData.accessToken)
+
+          const resp = await malApi.getUserData(fields)
+          if (200 === resp.status) {
+            const malData = resp.data
+            setMalUserData(malData)
+            setLoading(false)
+          } else {
+            alert("Couldn't get user MAL data")
+          }
+        } else {
+          alert("Couldn't get local user data")
+        }
+      } else {
+        alert("Couldn't get session")
+      }
+    } catch (err) {
+      alert(err)
+    }
+  }
+
+  // Accordion Functions
+  const handleAnimeListClick = (e) => {
+    e.preventDefault()
+
+    if (
+      "accordion-button" === animeListHeaderClass &&
+      "accordion-collapse collapse show" === animeListContentClass
+    ) {
+      setAnimeListHeaderClass("accordion-button collapsed")
+      setAnimeListContentClass("accordion-collapse collapse")
+    } else if (
+      "accordion-button collapsed" === animeListHeaderClass &&
+      "accordion-collapse collapse" === animeListContentClass
+    ) {
+      setAnimeListHeaderClass("accordion-button")
+      setAnimeListContentClass("accordion-collapse collapse show")
+      setScoreDistributionHeaderClass("accordion-button collapsed")
+      setScoreDistributionContentClass("accordion-collapse collapse")
+      setLocalDatabaseHeaderClass("accordion-button collapsed")
+      setLocalDatabaseContentClass("accordion-collapse collapse")
+    }
+  }
+
+  const handleScoreDistributionClick = (e) => {
+    e.preventDefault()
+
+    if (
+      "accordion-button" === scoreDistributionHeaderClass &&
+      "accordion-collapse collapse show" === scoreDistributionContentClass
+    ) {
+      setScoreDistributionHeaderClass("accordion-button collapsed")
+      setScoreDistributionContentClass("accordion-collapse collapse")
+    } else if (
+      "accordion-button collapsed" === scoreDistributionHeaderClass &&
+      "accordion-collapse collapse" === scoreDistributionContentClass
+    ) {
+      setScoreDistributionHeaderClass("accordion-button")
+      setScoreDistributionContentClass("accordion-collapse collapse show")
+      setLocalDatabaseHeaderClass("accordion-button collapsed")
+      setLocalDatabaseContentClass("accordion-collapse collapse")
+      setAnimeListHeaderClass("accordion-button collapsed")
+      setAnimeListContentClass("accordion-collapse collapse")
+    }
+  }
+
+  const handleLocalDatabaseClick = (e) => {
+    e.preventDefault()
+
+    if (
+      "accordion-button" === localDatabaseHeaderClass &&
+      "accordion-collapse collapse show" === localDatabaseContentClass
+    ) {
+      setLocalDatabaseHeaderClass("accordion-button collapsed")
+      setLocalDatabaseContentClass("accordion-collapse collapse")
+    } else if (
+      "accordion-button collapsed" === localDatabaseHeaderClass &&
+      "accordion-collapse collapse" === localDatabaseContentClass
+    ) {
+      setLocalDatabaseHeaderClass("accordion-button")
+      setLocalDatabaseContentClass("accordion-collapse collapse show")
+      setScoreDistributionHeaderClass("accordion-button collapsed")
+      setScoreDistributionContentClass("accordion-collapse collapse")
+      setAnimeListHeaderClass("accordion-button collapsed")
+      setAnimeListContentClass("accordion-collapse collapse")
+    }
+  }
+  // End Accordion Functions
   return (
     <div className="row">
-      <div className="col-10">
-        <div className="card">
-          <div className="card-body">
-            <h5 className="card-title">Watchlist Statistics</h5>
+      {loading ? (
+        <div className="container">
+          <section className="section register d-flex flex-column align-items-center justify-content-center mt-10r">
+            <div className="container">
+              <div className="row justify-content-center">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      ) : (
+        <div className="col-10">
+          <div className="card">
+            <div className="card-body">
+              <h5 className="card-title">Watchlist Statistics</h5>
 
-            {/* Default Accordion */}
-            <div className="accordion" id="accordionExample">
-              <div className="accordion-item">
-                <h2 className="accordion-header" id="headingOne">
-                  <button
-                    className="accordion-button"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseOne"
-                    aria-expanded="true"
-                    aria-controls="collapseOne"
-                  >
-                    Anime List
-                  </button>
-                </h2>
-                <div
-                  id="collapseOne"
-                  className="accordion-collapse collapse show"
-                  aria-labelledby="headingOne"
-                  data-bs-parent="#accordionExample"
-                >
-                  <div className="accordion-body">
-                    <table className="table table-borderless">
-                      <tbody>
-                        <tr>
-                          <td>Anime count</td>
-                          <td>632</td>
-                        </tr>
-                        <tr>
-                          <td>Episode count</td>
-                          <td>9254</td>
-                        </tr>
-                        <tr>
-                          <td>Time spent watching</td>
-                          <td>148 days 11 hours 38 minutes</td>
-                        </tr>
-                        <tr>
-                          <td>Time to complete</td>
-                          <td>21 days 17 hours 18 minutes</td>
-                        </tr>
-                        <tr>
-                          <td>Mean score</td>
-                          <td>632</td>
-                        </tr>
-                        <tr>
-                          <td>Score deviation</td>
-                          <td>1.07</td>
-                        </tr>
-                      </tbody>
-                    </table>
+              {/* Default Accordion */}
+              <div className="accordion">
+                <div className="accordion-item">
+                  <h2 className="accordion-header">
+                    <button
+                      className={animeListHeaderClass}
+                      type="button"
+                      onClick={handleAnimeListClick}
+                    >
+                      Anime List
+                    </button>
+                  </h2>
+                  <div className={animeListContentClass}>
+                    <div className="accordion-body">
+                      <table className="table table-borderless">
+                        <tbody>
+                          <tr>
+                            <td>Anime count</td>
+                            <td>{malUserData?.anime_statistics?.num_items}</td>
+                          </tr>
+                          <tr>
+                            <td>Episode count</td>
+                            <td>
+                              {malUserData?.anime_statistics?.num_episodes}
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td>Time spent watching</td>
+                            <td>
+                              {convertToDaysHrsMins(
+                                malUserData?.anime_statistics
+                                  ?.num_days_completed
+                              )}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Time to complete</td>
+                            <td>
+                              {convertToDaysHrsMins(
+                                malUserData?.anime_statistics?.num_days_watching
+                              )}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Mean score</td>
+                            <td>{malUserData?.anime_statistics?.mean_score}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="accordion-item">
-                <h2 className="accordion-header" id="headingTwo">
-                  <button
-                    className="accordion-button collapsed"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseTwo"
-                    aria-expanded="false"
-                    aria-controls="collapseTwo"
-                  >
-                    Score Distribution
-                  </button>
-                </h2>
-                <div
-                  id="collapseTwo"
-                  className="accordion-collapse collapse"
-                  aria-labelledby="headingTwo"
-                  data-bs-parent="#accordionExample"
-                >
-                  <div className="accordion-body">
-                    <BarChart />
+                <div className="accordion-item">
+                  <h2 className="accordion-header">
+                    <button
+                      className={scoreDistributionHeaderClass}
+                      type="button"
+                      onClick={handleScoreDistributionClick}
+                    >
+                      Score Distribution
+                    </button>
+                  </h2>
+                  <div className={scoreDistributionContentClass}>
+                    <div className="accordion-body">
+                      <BarChart />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="accordion-item">
-                <h2 className="accordion-header" id="headingThree">
-                  <button
-                    className="accordion-button collapsed"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseThree"
-                    aria-expanded="false"
-                    aria-controls="collapseThree"
-                  >
-                    Local Database
-                  </button>
-                </h2>
-                <div
-                  id="collapseThree"
-                  className="accordion-collapse collapse"
-                  aria-labelledby="headingThree"
-                  data-bs-parent="#accordionExample"
-                >
-                  <div className="accordion-body">
-                    <table className="table table-borderless">
-                      <tbody>
-                        <tr>
-                          <td>Anime count</td>
-                          <td>12831</td>
-                        </tr>
-                        <tr>
-                          <td>Image files</td>
-                          <td>10534 (279.6 MiB)</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                <div className="accordion-item">
+                  <h2 className="accordion-header">
+                    <button
+                      className={localDatabaseHeaderClass}
+                      type="button"
+                      onClick={handleLocalDatabaseClick}
+                    >
+                      Local Database
+                    </button>
+                  </h2>
+                  <div id="collapseThree" className={localDatabaseContentClass}>
+                    <div className="accordion-body">
+                      <table className="table table-borderless">
+                        <tbody>
+                          <tr>
+                            <td>Anime count</td>
+                            <td>Dummy Text</td>
+                          </tr>
+                          <tr>
+                            <td>Image files</td>
+                            <td>Dummy Text</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

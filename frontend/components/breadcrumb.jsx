@@ -5,20 +5,20 @@ const Breadcrumb = ({ firstPage, secondPage, title }) => {
     <div className="pagetitle">
       <h1>{title}</h1>
       <nav>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item">
+        <ol className="breadcrumb">
+          <li className="breadcrumb-item">
             <Link href="/">
-              <i class="bi bi-house-door"></i>
+              <i className="bi bi-house-door"></i>
             </Link>
           </li>
 
           {firstPage && secondPage ? (
             <>
-              <li class="breadcrumb-item">{firstPage}</li>
-              <li class="breadcrumb-item active">{secondPage}</li>
+              <li className="breadcrumb-item">{firstPage}</li>
+              <li className="breadcrumb-item active">{secondPage}</li>
             </>
           ) : firstPage ? (
-            <li class="breadcrumb-item active">{firstPage}</li>
+            <li className="breadcrumb-item active">{firstPage}</li>
           ) : (
             ""
           )}
