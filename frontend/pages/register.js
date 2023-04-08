@@ -1,7 +1,18 @@
-import RegisterForm from "@/components/RegisterForm"
+import Layout from "@/components/layout"
+import RegisterForm from "@/components/register-form"
 
 function Register() {
-  return <RegisterForm />
+  const userForm = {
+    name: "",
+    username: "",
+    password: "",
+  }
+  return (
+    <>
+      <Layout titleName="Register" />
+      <RegisterForm userForm={userForm} />
+    </>
+  )
 }
 
 export default Register

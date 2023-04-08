@@ -2,19 +2,15 @@ import Breadcrumb from "@/components/breadcrumb"
 import Header from "@/components/header"
 import Layout from "@/components/layout"
 import Sidebar from "@/components/sidebar"
-import Stats from "@/components/stats"
 
 function Statistics() {
   return (
     <>
-      <Layout titleName="Statistics" />
+      <Layout titleName="Seasons" />
       <Header />
-      <Sidebar currentPage="statistics" />
+      <Sidebar currentPage="seasons" />
       <main id="main" className="main">
-        <Breadcrumb firstPage="Statistics" title="Statistics" />
-        <section className="section">
-          <Stats />
-        </section>
+        <Breadcrumb firstPage="Seasons" title="Seasons" />
       </main>
     </>
   )
