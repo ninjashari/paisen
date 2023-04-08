@@ -1,4 +1,3 @@
-
 const Progressbar = (props) => {
   return (
     <div className="progress" style={{ marginTop: "0.4rem" }}>
@@ -6,7 +5,6 @@ const Progressbar = (props) => {
         className="progress-bar"
         role="progressbar"
         style={{ width: props.fillPercentage }}
-        aria-valuenow="25"
         aria-valuemin="0"
         aria-valuemax="100"
       ></div>

@@ -2,7 +2,7 @@ import Progressbar from "./progress-bar"
 import ScoreSelect from "./score-select"
 import SquareIcon from "./square-icon"
 
-const Table = () => {
+const Table = ({ animeList }) => {
   return (
     <div className="card">
       <div className="card-body">
@@ -18,34 +18,47 @@ const Table = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <th scope="row">
-                <SquareIcon squareColor="blue" />
-              </th>
-              <td>Blue Lock</td>
-              <td>
-                <div className="row">
-                  <div className="col-2">
-                    <button type="button" className="btn btn-sm">
-                      <i className="bi bi-dash"></i>
-                    </button>
+            {animeList?.map((anime) => (
+              <tr key={anime.node.id}>
+                <th scope="row">
+                  <SquareIcon squareColor="blue" />
+                </th>
+                <td style={{ maxWidth: "2rem" }}>{anime.node.title}</td>
+                <td>
+                  <div className="row">
+                    <div className="col-2">
+                      <button type="button" className="btn btn-sm">
+                        <i className="bi bi-dash"></i>
+                      </button>
+                    </div>
+                    <div className="col">
+                      <Progressbar
+                        fillPercentage={
+                          Math.ceil(
+                            (anime.node.my_list_status.num_episodes_watched /
+                              anime.node.num_episodes) *
+                              100
+                          ).toString() + "%"
+                        }
+                      />
+                    </div>
+                    <div className="col-2">
+                      <button type="button" className="btn btn-sm">
+                        <i className="bi bi-plus"></i>
+                      </button>
+                    </div>
                   </div>
-                  <div className="col">
-                    <Progressbar fillPercentage="25%" />
-                  </div>
-                  <div className="col-2">
-                    <button type="button" className="btn btn-sm">
-                      <i className="bi bi-plus"></i>
-                    </button>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <ScoreSelect />
-              </td>
-              <td>TV</td>
-              <td>Winter 2023</td>
-            </tr>
+                </td>
+                <td>
+                  <ScoreSelect selectedVal={anime.node.my_list_status.score} />
+                </td>
+                <td>{anime.node.media_type}</td>
+                <td>
+                  {anime.node.start_season.season +
+                    anime.node.start_season.year}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

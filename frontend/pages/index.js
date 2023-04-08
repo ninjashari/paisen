@@ -2,9 +2,9 @@ import Breadcrumb from "@/components/breadcrumb"
 import Header from "@/components/header"
 import Layout from "@/components/layout"
 import Sidebar from "@/components/sidebar"
+import MalApi from "@/lib/malApi"
 import { getSession, useSession } from "next-auth/react"
 import { useEffect } from "react"
-import axios from "axios"
 
 export default function Home() {
   const { data: session } = useSession()
@@ -18,29 +18,20 @@ export default function Home() {
 
     const sessionA = await getSession()
 
-    const userResponse = await fetch("/api/user/" + sessionA.user.username)
+    if (sessionA && sessionA.user) {
+      const userResponse = await fetch("/api/user/" + sessionA.user.username)
+      const userRes = await userResponse.json()
+      const currentUserData = userRes.userData
+      if (currentUserData && currentUserData.accessToken) {
+        const malApi = new MalApi(currentUserData.accessToken)
 
-    const userRes = await userResponse.json()
-    const currentUserData = userRes.userData
-
-    const url =
-      "https://api.myanimelist.net/v2/users/" +
-      currentUserData.malUsername +
-      "?fields=anime_statistics"
-
-    // const res = await fetch(
-    //   "https://api.myanimelist.net/v2/users/" +
-    //     currentUserData.malUsername +
-    //     "?fields=anime_statistics",
-    //   {
-    //     headers: {
-    //       Authorization:
-    //         currentUserData.tokenType + " " + currentUserData.accessToken,
-    //     },
-    //   }
-    // )
-
-    console.log(res)
+        const resp = await malApi.getUserData()
+        if (200 === resp.status) {
+          const malData = resp.data
+          console.log(malData)
+        }
+      }
+    }
   }
   return (
     <>
