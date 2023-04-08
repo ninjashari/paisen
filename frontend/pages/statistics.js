@@ -11,7 +11,7 @@ function Statistics() {
       <Header />
       <Sidebar currentPage="statistics" />
       <main id="main" className="main">
-        <Breadcrumb name="Statistics" />
+        <Breadcrumb firstPage="Statistics" title="Statistics" />
         <section className="section">
           <Stats />
         </section>

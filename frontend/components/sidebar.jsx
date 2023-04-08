@@ -131,7 +131,7 @@ const Sidebar = () => {
         <li className="nav-item">
           <Link className={statisticsClass} href="/statistics">
             <i className="bi bi-bar-chart"></i>
-            <span>Statictics</span>
+            <span>Statistics</span>
           </Link>
         </li>
 

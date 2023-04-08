@@ -20,22 +20,22 @@ const Table = ({ animeList }) => {
           </thead>
           <tbody>
             {animeList?.map((anime) => (
-              <tr key={anime.node.id}>
+              <tr key={anime?.node?.id}>
                 <th scope="row">
                   {/* <SquareIcon squareColor="blue" /> */}
 
                   {anime?.node?.status === "finished_airing" ? (
-                    <SquareIcon squareColor="blue" />
+                    <SquareIcon squareColor="blue" title="Finished Airing" />
                   ) : anime?.node?.status === "not_yet_aired" ? (
-                    <SquareIcon squareColor="red" />
+                    <SquareIcon squareColor="red" title="To be Aired" />
                   ) : (
-                    <SquareIcon squareColor="green" />
+                    <SquareIcon squareColor="green" title="Currently Airing" />
                   )}
                 </th>
-                <td style={{ maxWidth: "2rem" }}>{anime.node.title}</td>
+                <td style={{ maxWidth: "2rem" }}>{anime?.node?.title}</td>
                 <td>
                   <div className="row">
-                    <div className="col-2">
+                    <div className="col-1">
                       <button type="button" className="btn btn-sm">
                         <i className="bi bi-dash"></i>
                       </button>
@@ -44,22 +44,29 @@ const Table = ({ animeList }) => {
                       <Progressbar
                         fillPercentage={
                           Math.ceil(
-                            (anime.node.my_list_status.num_episodes_watched /
-                              anime.node.num_episodes) *
+                            (anime?.node?.my_list_status?.num_episodes_watched /
+                              anime?.node?.num_episodes) *
                               100
                           ).toString() + "%"
                         }
                       />
                     </div>
-                    <div className="col-2">
+                    <div className="col-1">
                       <button type="button" className="btn btn-sm">
                         <i className="bi bi-plus"></i>
                       </button>
                     </div>
+                    <div className="col-3">
+                      {anime?.node?.my_list_status?.num_episodes_watched +
+                        "/" +
+                        anime?.node?.num_episodes}
+                    </div>
                   </div>
                 </td>
                 <td className="col-1">
-                  <ScoreSelect selectedVal={anime.node.my_list_status.score} />
+                  <ScoreSelect
+                    selectedVal={anime?.node?.my_list_status.score}
+                  />
                 </td>
                 <td style={{ textAlign: "center" }}>
                   {anime?.node?.media_type.length < 4

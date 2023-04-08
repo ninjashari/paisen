@@ -10,7 +10,7 @@ function Search() {
       <Header />
       <Sidebar currentPage="search" />
       <main id="main" className="main">
-        <Breadcrumb name="Search" />
+        <Breadcrumb firstPage="Search" title="Search" />
       </main>
     </>
   )

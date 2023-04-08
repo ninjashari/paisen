@@ -3,17 +3,17 @@ import Header from "@/components/header"
 import Layout from "@/components/layout"
 import Sidebar from "@/components/sidebar"
 
-function Statistics() {
+function Jellyfin() {
   return (
     <>
-      <Layout titleName="Seasons" />
+      <Layout titleName="Jellyfin" />
       <Header />
-      <Sidebar currentPage="seasons" />
+      <Sidebar currentPage="jellyfin" />
       <main id="main" className="main">
-        <Breadcrumb firstPage="Seasons" title="Seasons" />
+        <Breadcrumb firstPage="Jellyfin" title="Jellyfin" />
       </main>
     </>
   )
 }
 
-export default Statistics
+export default Jellyfin

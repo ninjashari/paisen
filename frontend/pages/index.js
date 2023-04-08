@@ -39,7 +39,7 @@ export default function Home() {
       <Header />
       <Sidebar currentPage="home" />
       <main id="main" className="main">
-        <Breadcrumb name="Home" />
+        <Breadcrumb title="Home" />
         {session ? (
           <h1>
             Signed in as {session?.user?.name} <br />
