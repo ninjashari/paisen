@@ -47,14 +47,10 @@ export const createDataArray = (scoreArray) => {
     scoreMap[element] += 1
   })
 
-  console.log(scoreMap)
-
   let scoreData = []
   for (var i = 10; i > 0; i--) {
-    console.log(scoreMap[i])
     scoreData.push(scoreMap[i])
   }
-  console.log(scoreData)
 
   return scoreData
 }
