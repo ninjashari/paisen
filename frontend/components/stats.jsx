@@ -3,6 +3,7 @@ import BarChart from "./bar-chart"
 import { getSession } from "next-auth/react"
 import MalApi from "@/lib/malApi"
 import { convertToDaysHrsMins } from "@/utils/helper"
+import Loader from "./loader"
 
 const Stats = () => {
   const [animeListHeaderClass, setAnimeListHeaderClass] =
@@ -134,17 +135,7 @@ const Stats = () => {
   return (
     <div className="row">
       {loading ? (
-        <div className="container">
-          <section className="section register d-flex flex-column align-items-center justify-content-center mt-10r">
-            <div className="container">
-              <div className="row justify-content-center">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
+        <Loader />
       ) : (
         <div className="col-10">
           <div className="card">

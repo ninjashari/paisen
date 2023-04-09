@@ -1,92 +1,200 @@
-import { camelize } from "@/utils/helper"
+import MalApi from "@/lib/malApi"
+import { getAnimeObj, getWachedPercentage } from "@/utils/helper"
+import { useEffect, useState } from "react"
+import Loader from "./loader"
 import Progressbar from "./progress-bar"
 import ScoreSelect from "./score-select"
 import SquareIcon from "./square-icon"
 
-const Table = ({ animeList }) => {
-  return (
-    <div className="card">
-      <div className="card-body">
-        <table className="table">
-          <thead style={{ textAlign: "center" }}>
-            <tr>
-              <th scope="col"></th>
-              <th scope="col">Anime Title</th>
-              <th scope="col">Progress</th>
-              <th scope="col">Score</th>
-              <th scope="col">Type</th>
-              <th scope="col">Season</th>
-            </tr>
-          </thead>
-          <tbody>
-            {animeList?.map((anime) => (
-              <tr key={anime?.node?.id}>
-                <th scope="row">
-                  {/* <SquareIcon squareColor="blue" /> */}
+const Table = ({ animeList, malAccessToken }) => {
+  const [animeDataList, setAnimeDataList] = useState([])
+  const [loading, setLoading] = useState(true)
 
-                  {anime?.node?.status === "finished_airing" ? (
-                    <SquareIcon squareColor="blue" title="Finished Airing" />
-                  ) : anime?.node?.status === "not_yet_aired" ? (
-                    <SquareIcon squareColor="red" title="To be Aired" />
-                  ) : (
-                    <SquareIcon squareColor="green" title="Currently Airing" />
-                  )}
-                </th>
-                <td style={{ maxWidth: "2rem" }}>{anime?.node?.title}</td>
-                <td>
-                  <div className="row">
-                    <div className="col-1">
-                      <button type="button" className="btn btn-sm">
-                        <i className="bi bi-dash"></i>
-                      </button>
-                    </div>
-                    <div className="col">
-                      <Progressbar
-                        fillPercentage={
-                          Math.ceil(
-                            (anime?.node?.my_list_status?.num_episodes_watched /
-                              anime?.node?.num_episodes) *
-                              100
-                          ).toString() + "%"
-                        }
+  useEffect(() => {
+    let dataList = getAnimeObj(animeList)
+
+    setAnimeDataList(dataList)
+    setLoading(false)
+  }, [])
+
+  const handleWatchIncrement = async (e) => {
+    e.preventDefault()
+
+    setLoading(true)
+
+    const animeId = e.target.id
+
+    let newList = []
+    let watchedEpisodes = 0
+    animeDataList.forEach((dataObj) => {
+      if (parseInt(dataObj.id) === parseInt(animeId)) {
+        dataObj.incrementWatchedEpisodes()
+        watchedEpisodes = dataObj.episodesWatched
+      }
+      newList.push(dataObj)
+    })
+
+    setAnimeDataList(newList)
+
+    // call MAL api to update
+    const fieldsToUpdate = {
+      num_watched_episodes: watchedEpisodes,
+    }
+    if (malAccessToken) {
+      const malApi = new MalApi(malAccessToken)
+      const res = await malApi.updateList(animeId, fieldsToUpdate)
+
+      if (200 === res.status) {
+        setLoading(false)
+      } else {
+        alert("Couldn't update animelist")
+      }
+    } else {
+      alert("Couldn't fetch local user data")
+    }
+  }
+
+  const handleWatchDecrement = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+
+    const animeId = e.target.id
+
+    let newList = []
+    let watchedEpisodes = 0
+    animeDataList.forEach((dataObj) => {
+      if (parseInt(dataObj.id) === parseInt(animeId)) {
+        dataObj.decrementWatchedEpisodes()
+        watchedEpisodes = dataObj.episodesWatched
+      }
+      newList.push(dataObj)
+    })
+
+    setAnimeDataList(newList)
+
+    // call MAL api to update
+    const fieldsToUpdate = {
+      num_watched_episodes: watchedEpisodes,
+    }
+    if (malAccessToken) {
+      const malApi = new MalApi(malAccessToken)
+      const res = await malApi.updateList(animeId, fieldsToUpdate)
+
+      if (200 === res.status) {
+        setLoading(false)
+      } else {
+        alert("Couldn't update animelist")
+      }
+    } else {
+      alert("Couldn't fetch access token from parent")
+    }
+  }
+  return (
+    <>
+      {loading ? (
+        <Loader />
+      ) : (
+        <div className="card">
+          <div className="card-body">
+            <table className="table">
+              <thead style={{ textAlign: "center" }}>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">Anime Title</th>
+                  <th scope="col">Progress</th>
+                  <th scope="col">Score</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Season</th>
+                </tr>
+              </thead>
+              <tbody>
+                {animeDataList?.map((anime) => (
+                  <tr key={anime.id}>
+                    <th scope="row">
+                      <SquareIcon
+                        squareColor={anime.status.color}
+                        title={anime.status.value}
                       />
-                    </div>
-                    <div className="col-1">
-                      <button type="button" className="btn btn-sm">
-                        <i className="bi bi-plus"></i>
-                      </button>
-                    </div>
-                    <div className="col-3">
-                      {anime?.node?.my_list_status?.num_episodes_watched +
-                        "/" +
-                        anime?.node?.num_episodes}
-                    </div>
-                  </div>
-                </td>
-                <td className="col-1">
-                  <ScoreSelect
-                    selectedVal={anime?.node?.my_list_status.score}
-                  />
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  {anime?.node?.media_type.length < 4
-                    ? anime?.node?.media_type.toUpperCase()
-                    : camelize(anime?.node?.media_type)}
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  {anime?.node?.start_season?.season +
-                  anime?.node?.start_season?.year
-                    ? camelize(anime?.node?.start_season?.season) +
-                      " " +
-                      anime?.node?.start_season?.year
-                    : ""}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+                    </th>
+                    <td className="col-3">{anime.title}</td>
+                    <td>
+                      <div className="row">
+                        {/* Decrement watched episodes */}
+                        <div className="col-1">
+                          {anime.episodesWatched > 0 &&
+                          anime.episodesWatched <= anime.totalEpisodes &&
+                          (anime.userStatus === "watching" ||
+                            anime.userStatus === "on_hold" ||
+                            anime.userStatus === "plan_to_watch") ? (
+                            <button
+                              type="button"
+                              className="btn btn-sm"
+                              onClick={handleWatchDecrement}
+                            >
+                              <i className="bi bi-dash" id={anime.id}></i>
+                            </button>
+                          ) : (
+                            ""
+                          )}
+                        </div>
+                        {/* End Decrement watched episodes */}
+
+                        {/* Progress Bar */}
+                        <div className="col">
+                          <Progressbar
+                            fillPercentage={getWachedPercentage(
+                              anime.episodesWatched,
+                              anime.totalEpisodes
+                            )}
+                          />
+                        </div>
+                        {/* End Progress Bar */}
+
+                        {/* Increment watched episodes */}
+                        <div className="col-1">
+                          {anime.userStatus === "watching" ||
+                          anime.userStatus === "on_hold" ||
+                          anime.userStatus === "plan_to_watch" ? (
+                            <button
+                              type="button"
+                              className="btn btn-sm"
+                              onClick={handleWatchIncrement}
+                            >
+                              <i className="bi bi-plus" id={anime.id}></i>
+                            </button>
+                          ) : (
+                            ""
+                          )}
+                        </div>
+                        {/* End Increment watched episodes */}
+
+                        {/* Value of watched/total episodes */}
+                        <div className="col-3">
+                          {anime.episodesWatched + "/" + anime.totalEpisodes}
+                        </div>
+                        {/* End Value of watched/total episodes */}
+                      </div>
+                    </td>
+                    <td className="col-2">
+                      <ScoreSelect
+                        selectedVal={anime.userScore}
+                        animeID={anime.id}
+                      />
+                    </td>
+                    <td className="col-2" style={{ textAlign: "center" }}>
+                      {anime.mediaType}
+                    </td>
+                    <td className="col-1" style={{ textAlign: "center" }}>
+                      {anime.startSeason + " " + anime.startSeasonYear}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

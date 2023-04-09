@@ -2,6 +2,7 @@ import Table from "@/components/animelist-table"
 import Breadcrumb from "@/components/breadcrumb"
 import Header from "@/components/header"
 import Layout from "@/components/layout"
+import Loader from "@/components/loader"
 import Sidebar from "@/components/sidebar"
 import MalApi from "@/lib/malApi"
 import { fields } from "@/utils/constants"
@@ -11,6 +12,7 @@ import { useEffect, useState } from "react"
 export default function Animelist() {
   const [animeListData, setAnimeListData] = useState([])
   const [loading, setLoading] = useState(true)
+  const [malAccessToken, setMalAccessToken] = useState()
 
   useEffect(() => {
     getAnimeList()
@@ -25,6 +27,7 @@ export default function Animelist() {
       const userRes = await userResponse.json()
       const currentUserData = userRes.userData
       if (currentUserData && currentUserData.accessToken) {
+        setMalAccessToken(currentUserData.accessToken)
         const malApi = new MalApi(currentUserData.accessToken)
 
         const resp = await malApi.getAnimeList(fields, "on_hold")
@@ -32,7 +35,11 @@ export default function Animelist() {
           const malData = resp.data
           setAnimeListData(malData.data)
           setLoading(false)
+        } else {
+          alert("Couldn't fetch anime list data from MAL")
         }
+      } else {
+        alert("Couldn't fetch local user data")
       }
     }
   }
@@ -50,24 +57,12 @@ export default function Animelist() {
         <section className="section">
           <div className="row">
             {loading ? (
-              <div className="container">
-                <section className="section register d-flex flex-column align-items-center justify-content-center mt-10r">
-                  <div className="container">
-                    <div className="row justify-content-center">
-                      <div className="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-                        <div
-                          className="spinner-border text-primary"
-                          role="status"
-                        >
-                          <span className="visually-hidden">Loading...</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              </div>
+              <Loader />
             ) : (
-              <Table animeList={animeListData} />
+              <Table
+                animeList={animeListData}
+                malAccessToken={malAccessToken}
+              />
             )}
           </div>
         </section>

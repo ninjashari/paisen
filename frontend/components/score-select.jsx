@@ -1,37 +1,30 @@
+import { scoreList } from "@/utils/constants"
 import { useEffect, useState } from "react"
 
 const ScoreSelect = ({ selectedVal }) => {
-  const [scoreList, setScoreList] = useState([])
   const [selectedScore, setSelectedScore] = useState()
 
   useEffect(() => {
-    const tempList = []
-    for (var i = 0; i <= 10; i++) {
-      const tempVar = {
-        id: i,
-        value: i,
-      }
-      tempList.push(tempVar)
-    }
-    setScoreList(tempList)
+    setSelectedScore(selectedVal)
   }, [])
 
   const handleSelectedChange = (e) => {
     e.preventDefault()
 
     setSelectedScore(e.target.value)
-    console.log(selectedScore)
+
+    // Call MAL api to update
   }
 
   return (
     <select
       className="form-select"
       aria-label="Default select example"
-      value={selectedVal}
+      value={selectedScore}
       onChange={handleSelectedChange}
     >
-      {scoreList.map((score, index) => (
-        <option key={index} value={score.value}>
+      {scoreList.map((score) => (
+        <option key={score.score} value={score.score}>
           {score.value}
         </option>
       ))}

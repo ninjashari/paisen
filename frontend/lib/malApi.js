@@ -1,4 +1,5 @@
 import axios from "axios"
+const querystring = require("querystring")
 
 class MalApi {
   http = axios.default.create()
@@ -38,6 +39,16 @@ class MalApi {
         nsfw: 1,
       },
     })
+    return res
+  }
+
+  async updateList(animeID, fieldsToUpdate) {
+    this.http.defaults.headers["Content-Type"] =
+      "application/x-www-form-urlencoded"
+    const res = await this.http.put(
+      `/anime/${animeID}/my_list_status`,
+      querystring.stringify(fieldsToUpdate)
+    )
     return res
   }
 }
