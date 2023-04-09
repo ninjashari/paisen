@@ -42,7 +42,6 @@ export default function Home() {
         const resp = await malApi.getUserData(fields)
         if (200 === resp.status) {
           const malData = resp.data
-          console.log(malData)
         }
       }
     }

@@ -4,8 +4,10 @@ import { getSession } from "next-auth/react"
 import MalApi from "@/lib/malApi"
 import { convertToDaysHrsMins } from "@/utils/helper"
 import Loader from "./loader"
+import { useRouter } from "next/router"
 
 const Stats = () => {
+  const router = useRouter()
   const [animeListHeaderClass, setAnimeListHeaderClass] =
     useState("accordion-button")
   const [animeListContentClass, setAnimeListContentClass] = useState(
@@ -59,6 +61,7 @@ const Stats = () => {
         }
       } else {
         alert("Couldn't get session")
+        router.replace("/")
       }
     } catch (err) {
       alert(err)

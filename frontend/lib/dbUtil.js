@@ -34,7 +34,6 @@ export async function findUser(username) {
  */
 export async function updateUser(username, userData) {
   await dbConnect()
-  console.log(userData)
   const res = await User.updateOne({ username: username }, userData)
   return res
 }

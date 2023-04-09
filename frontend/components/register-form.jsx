@@ -81,8 +81,6 @@ const RegisterForm = ({ formId, userForm }) => {
     try {
       const hashPass = await hashPassword(form.password)
 
-      console.log(hashPass)
-
       const addUser = {
         name: form.name,
         username: form.username,

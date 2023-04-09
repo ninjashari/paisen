@@ -40,8 +40,6 @@ export default function Home() {
               currentUserData.codeChallenge
             )
 
-            console.log(response)
-
             if (response) {
               // Create user data to be updated
               const updateUserData = {
@@ -64,7 +62,6 @@ export default function Home() {
               })
 
               if (updateResponse.ok) {
-                //     console.log(await updateResponse.json().body)
                 router.replace("/")
               } else {
                 alert("Couldn't update user data with token info")
