@@ -1,9 +1,9 @@
-const SquareIcon = (props) => {
+const SquareIcon = ({ squareColor, title }) => {
   return (
     <i
       className="bi bi-square-fill"
-      style={{ color: props.squareColor }}
-      title={props.title}
+      style={{ color: squareColor }}
+      title={title}
     ></i>
   )
 }

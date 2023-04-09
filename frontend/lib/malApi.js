@@ -11,12 +11,17 @@ class MalApi {
   }
 
   async getUserData(fields) {
-    const res = await this.http.get(`/users/@me`, {
-      params: {
-        fields: fields.user.toString(),
-      },
-    })
-    return res
+    try {
+      const res = await this.http.get(`/users/@me`, {
+        params: {
+          fields: fields.user.toString(),
+        },
+      })
+      return res
+    } catch (err) {
+      console.error(err)
+      return undefined
+    }
   }
 
   async getAnimeList(fields, status) {
@@ -24,17 +29,6 @@ class MalApi {
       params: {
         fields: fields.animeList.toString(),
         status: status,
-        limit: 1000,
-        nsfw: 1,
-      },
-    })
-    return res
-  }
-
-  async getFullAnimeList(fields) {
-    const res = await this.http.get(`/users/@me/animelist`, {
-      params: {
-        fields: fields.animeList.toString(),
         limit: 1000,
         nsfw: 1,
       },

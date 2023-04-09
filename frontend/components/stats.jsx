@@ -5,9 +5,13 @@ import MalApi from "@/lib/malApi"
 import { convertToDaysHrsMins } from "@/utils/malService"
 import Loader from "./loader"
 import { useRouter } from "next/router"
+import { getUserAccessToken } from "@/utils/userService"
 
 const Stats = () => {
   const router = useRouter()
+
+  const [malAccessToken, setMalAccessToken] = useState()
+
   const [animeListHeaderClass, setAnimeListHeaderClass] =
     useState("accordion-button")
   const [animeListContentClass, setAnimeListContentClass] = useState(
@@ -41,12 +45,12 @@ const Stats = () => {
   const getMalUserData = async () => {
     try {
       const session = await getSession()
-      if (session && session.user) {
-        const userResponse = await fetch("/api/user/" + session.user.username)
-        const userRes = await userResponse.json()
-        const currentUserData = userRes.userData
-        if (currentUserData && currentUserData.accessToken) {
-          const malApi = new MalApi(currentUserData.accessToken)
+      if (session) {
+        const accessToken = await getUserAccessToken(session)
+        if (accessToken) {
+          setMalAccessToken(accessToken)
+
+          const malApi = new MalApi(accessToken)
 
           const resp = await malApi.getUserData(fields)
           if (200 === resp.status) {
@@ -60,8 +64,8 @@ const Stats = () => {
           alert("Couldn't get local user data")
         }
       } else {
-        alert("Couldn't get session")
-        router.replace("/")
+        alert("Couldn't fetch current session, Redirecting to login page!!")
+        router.replace("/login")
       }
     } catch (err) {
       alert(err)
@@ -210,7 +214,7 @@ const Stats = () => {
                   </h2>
                   <div className={scoreDistributionContentClass}>
                     <div className="accordion-body">
-                      <BarChart />
+                      <BarChart malAccessToken={malAccessToken} />
                     </div>
                   </div>
                 </div>
