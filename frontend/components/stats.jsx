@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import BarChart from "./bar-chart"
 import { getSession } from "next-auth/react"
 import MalApi from "@/lib/malApi"
-import { convertToDaysHrsMins } from "@/utils/helper"
+import { convertToDaysHrsMins } from "@/utils/malService"
 import Loader from "./loader"
 import { useRouter } from "next/router"
 

@@ -1,5 +1,5 @@
 import { ratingUtil, seriesStatus, seriesType } from "@/utils/constants"
-import { camelize } from "@/utils/helper"
+import { camelize } from "@/utils/malService"
 
 class Anime {
   constructor(

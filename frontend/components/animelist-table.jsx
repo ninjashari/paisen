@@ -1,5 +1,5 @@
 import MalApi from "@/lib/malApi"
-import { getAnimeObj, getWachedPercentage } from "@/utils/helper"
+import { getAnimeObj, getWatchedPercentage } from "@/utils/malService"
 import { useEffect, useState } from "react"
 import Loader from "./loader"
 import Progressbar from "./progress-bar"
@@ -142,7 +142,7 @@ const Table = ({ animeList, malAccessToken }) => {
                         {/* Progress Bar */}
                         <div className="col">
                           <Progressbar
-                            fillPercentage={getWachedPercentage(
+                            fillPercentage={getWatchedPercentage(
                               anime.episodesWatched,
                               anime.totalEpisodes
                             )}

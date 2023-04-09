@@ -1,5 +1,5 @@
 import Mal from "@/lib/mal"
-import { getQueryParams } from "@/utils/helper"
+import { getQueryParams } from "@/utils/malService"
 import { getSession } from "next-auth/react"
 import { useRouter } from "next/router"
 import { useEffect } from "react"

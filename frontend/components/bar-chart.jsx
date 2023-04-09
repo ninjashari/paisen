@@ -1,5 +1,5 @@
 import MalApi from "@/lib/malApi"
-import { createDataArray } from "@/utils/helper"
+import { createDataArray } from "@/utils/malService"
 import { getSession } from "next-auth/react"
 import dynamic from "next/dynamic"
 import { useEffect, useState } from "react"

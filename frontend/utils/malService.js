@@ -55,7 +55,7 @@ export const createDataArray = (scoreArray) => {
   return scoreData
 }
 
-export const getWachedPercentage = (watched, total) => {
+export const getWatchedPercentage = (watched, total) => {
   if (watched && total) {
     return (
       Math.ceil((parseInt(watched) / parseInt(total)) * 100).toString() + "%"

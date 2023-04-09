@@ -77,9 +77,9 @@ export const ratingUtil = {
 }
 
 export const userListStatus = {
-  current: { apiValue: "watching" },
-  completed: { apiValue: "completed" },
-  dropped: { apiValue: "dropped" },
-  onhold: { apiValue: "on_hold" },
-  plantowatch: { apiValue: "plan_to_watch" },
+  current: { apiValue: "watching", pageTitle: "Currently Watching" },
+  completed: { apiValue: "completed", pageTitle: "Completed" },
+  dropped: { apiValue: "dropped", pageTitle: "Dropped" },
+  onhold: { apiValue: "on_hold", pageTitle: "On Hold" },
+  plantowatch: { apiValue: "plan_to_watch", pageTitle: "Plan To Watch" },
 }
