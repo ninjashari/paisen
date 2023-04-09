@@ -179,6 +179,8 @@ const Table = ({ animeList, malAccessToken }) => {
                       <ScoreSelect
                         selectedVal={anime.userScore}
                         animeID={anime.id}
+                        malAccessToken={malAccessToken}
+                        loading={loading}
                       />
                     </td>
                     <td className="col-2" style={{ textAlign: "center" }}>

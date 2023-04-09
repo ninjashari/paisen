@@ -1,19 +1,36 @@
+import MalApi from "@/lib/malApi"
 import { scoreList } from "@/utils/constants"
 import { useEffect, useState } from "react"
 
-const ScoreSelect = ({ selectedVal }) => {
+const ScoreSelect = ({ selectedVal, animeID, malAccessToken, loading }) => {
   const [selectedScore, setSelectedScore] = useState()
 
   useEffect(() => {
     setSelectedScore(selectedVal)
   }, [])
 
-  const handleSelectedChange = (e) => {
+  const handleSelectedChange = async (e) => {
     e.preventDefault()
+    loading = true
 
-    setSelectedScore(e.target.value)
+    const scoreVal = e.target.value
+
+    setSelectedScore(scoreVal)
 
     // Call MAL api to update
+    const fieldsToUpdate = {
+      score: scoreVal,
+    }
+    if (malAccessToken) {
+      const malApi = new MalApi(malAccessToken)
+      const res = await malApi.updateList(animeID, fieldsToUpdate)
+
+      if (200 !== res.status) {
+        alert("Couldn't update animelist with score")
+      }
+    } else {
+      alert("Couldn't fetch access token from parent")
+    }
   }
 
   return (
