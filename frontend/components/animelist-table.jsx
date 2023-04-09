@@ -1,9 +1,54 @@
-import { camelize } from "@/utils/helper"
+import Anime from "@/lib/anime"
+import { getAnimeObj, getWachedPercentage } from "@/utils/helper"
+import { useEffect, useState } from "react"
 import Progressbar from "./progress-bar"
 import ScoreSelect from "./score-select"
 import SquareIcon from "./square-icon"
 
 const Table = ({ animeList }) => {
+  const [animeDataList, setAnimeDataList] = useState([])
+
+  useEffect(() => {
+    let dataList = getAnimeObj(animeList)
+
+    setAnimeDataList(dataList)
+  }, [])
+
+  const handleWatchIncrement = (e) => {
+    e.preventDefault()
+
+    const animeId = e.target.id
+
+    let newList = []
+    animeDataList.forEach((dataObj) => {
+      if (parseInt(dataObj.id) === parseInt(animeId)) {
+        dataObj.incrementWatchedEpisodes()
+      }
+      newList.push(dataObj)
+    })
+
+    setAnimeDataList(newList)
+
+    // call MAL api to update
+  }
+
+  const handleWatchDecrement = (e) => {
+    e.preventDefault()
+
+    const animeId = e.target.id
+
+    let newList = []
+    animeDataList.forEach((dataObj) => {
+      if (parseInt(dataObj.id) === parseInt(animeId)) {
+        dataObj.decrementWatchedEpisodes()
+      }
+      newList.push(dataObj)
+    })
+
+    setAnimeDataList(newList)
+
+    // call MAL api to update
+  }
   return (
     <div className="card">
       <div className="card-body">
@@ -19,67 +64,84 @@ const Table = ({ animeList }) => {
             </tr>
           </thead>
           <tbody>
-            {animeList?.map((anime) => (
-              <tr key={anime?.node?.id}>
+            {animeDataList?.map((anime) => (
+              <tr key={anime.id}>
                 <th scope="row">
-                  {/* <SquareIcon squareColor="blue" /> */}
-
-                  {anime?.node?.status === "finished_airing" ? (
-                    <SquareIcon squareColor="blue" title="Finished Airing" />
-                  ) : anime?.node?.status === "not_yet_aired" ? (
-                    <SquareIcon squareColor="red" title="To be Aired" />
-                  ) : (
-                    <SquareIcon squareColor="green" title="Currently Airing" />
-                  )}
+                  <SquareIcon
+                    squareColor={anime.status.color}
+                    title={anime.status.value}
+                  />
                 </th>
-                <td style={{ maxWidth: "2rem" }}>{anime?.node?.title}</td>
+                <td className="col-3">{anime.title}</td>
                 <td>
                   <div className="row">
+                    {/* Decrement watched episodes */}
                     <div className="col-1">
-                      <button type="button" className="btn btn-sm">
-                        <i className="bi bi-dash"></i>
-                      </button>
+                      {anime.episodesWatched > 0 &&
+                      anime.episodesWatched < anime.totalEpisodes &&
+                      (anime.userStatus === "watching" ||
+                        anime.userStatus === "on_hold" ||
+                        anime.userStatus === "plan_to_watch") ? (
+                        <button
+                          type="button"
+                          className="btn btn-sm"
+                          onClick={handleWatchDecrement}
+                        >
+                          <i className="bi bi-dash" id={anime.id}></i>
+                        </button>
+                      ) : (
+                        ""
+                      )}
                     </div>
+                    {/* End Decrement watched episodes */}
+
+                    {/* Progress Bar */}
                     <div className="col">
                       <Progressbar
-                        fillPercentage={
-                          Math.ceil(
-                            (anime?.node?.my_list_status?.num_episodes_watched /
-                              anime?.node?.num_episodes) *
-                              100
-                          ).toString() + "%"
-                        }
+                        fillPercentage={getWachedPercentage(
+                          anime.episodesWatched,
+                          anime.totalEpisodes
+                        )}
                       />
                     </div>
+                    {/* End Progress Bar */}
+
+                    {/* Increment watched episodes */}
                     <div className="col-1">
-                      <button type="button" className="btn btn-sm">
-                        <i className="bi bi-plus"></i>
-                      </button>
+                      {anime.userStatus === "watching" ||
+                      anime.userStatus === "on_hold" ||
+                      anime.userStatus === "plan_to_watch" ? (
+                        <button
+                          type="button"
+                          className="btn btn-sm"
+                          onClick={handleWatchIncrement}
+                        >
+                          <i className="bi bi-plus" id={anime.id}></i>
+                        </button>
+                      ) : (
+                        ""
+                      )}
                     </div>
+                    {/* End Increment watched episodes */}
+
+                    {/* Value of watched/total episodes */}
                     <div className="col-3">
-                      {anime?.node?.my_list_status?.num_episodes_watched +
-                        "/" +
-                        anime?.node?.num_episodes}
+                      {anime.episodesWatched + "/" + anime.totalEpisodes}
                     </div>
+                    {/* End Value of watched/total episodes */}
                   </div>
                 </td>
-                <td className="col-1">
+                <td className="col-2">
                   <ScoreSelect
-                    selectedVal={anime?.node?.my_list_status.score}
+                    selectedVal={anime.userScore}
+                    animeID={anime.id}
                   />
                 </td>
-                <td style={{ textAlign: "center" }}>
-                  {anime?.node?.media_type.length < 4
-                    ? anime?.node?.media_type.toUpperCase()
-                    : camelize(anime?.node?.media_type)}
+                <td className="col-2" style={{ textAlign: "center" }}>
+                  {anime.mediaType}
                 </td>
-                <td style={{ textAlign: "center" }}>
-                  {anime?.node?.start_season?.season +
-                  anime?.node?.start_season?.year
-                    ? camelize(anime?.node?.start_season?.season) +
-                      " " +
-                      anime?.node?.start_season?.year
-                    : ""}
+                <td className="col-1" style={{ textAlign: "center" }}>
+                  {anime.startSeason + " " + anime.startSeasonYear}
                 </td>
               </tr>
             ))}

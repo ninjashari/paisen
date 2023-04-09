@@ -1,7 +1,13 @@
+import Anime from "@/lib/anime"
+
 export const camelize = (str) => {
-  return str.replace(/([A-Z])/g, " $1").replace(/^./, function (str) {
-    return str.toUpperCase()
-  })
+  if (str) {
+    return str.replace(/([A-Z])/g, " $1").replace(/^./, function (str) {
+      return str.toUpperCase()
+    })
+  } else {
+    return ""
+  }
 }
 
 export const getQueryParams = (url) => {
@@ -51,4 +57,43 @@ export const createDataArray = (scoreArray) => {
   console.log(scoreData)
 
   return scoreData
+}
+
+export const getWachedPercentage = (watched, total) => {
+  if (watched && total) {
+    return (
+      Math.ceil((parseInt(watched) / parseInt(total)) * 100).toString() + "%"
+    )
+  } else {
+    return "0%"
+  }
+}
+
+export const getAnimeObj = (animeList) => {
+  let dataList = []
+  animeList.forEach((anime) => {
+    const node = anime.node
+    let animeObj = new Anime(
+      node.alternative_titles,
+      node.average_episode_duration,
+      node.end_date,
+      node.genres,
+      node.id,
+      node.main_picture,
+      node.mean,
+      node.media_type,
+      node.my_list_status,
+      node.num_episodes,
+      node.rating,
+      node.source,
+      node.start_date,
+      node.start_season,
+      node.status,
+      node.synopsis,
+      node.title
+    )
+    dataList.push(animeObj)
+  })
+
+  return dataList
 }
