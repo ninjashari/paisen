@@ -180,7 +180,7 @@ const Table = ({ animeList, malAccessToken }) => {
                         selectedVal={anime.userScore}
                         animeID={anime.id}
                         malAccessToken={malAccessToken}
-                        loading={loading}
+                        setLoading={setLoading}
                       />
                     </td>
                     <td className="col-2" style={{ textAlign: "center" }}>

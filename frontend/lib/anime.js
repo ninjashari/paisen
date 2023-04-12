@@ -21,8 +21,8 @@ class Anime {
     synopsis,
     title
   ) {
-    this.alternativeTitlesEn = alternativeTitles.en ? alternativeTitles.en : ""
-    this.alternativeTitlesJa = alternativeTitles.ja ? alternativeTitles.ja : ""
+    this.alternativeTitlesEn = alternativeTitles.en
+    this.alternativeTitlesJa = alternativeTitles.ja
     this.alternativeTitlesSynonyms = alternativeTitles.synonyms
     this.averageEpisodeDuration = averageEpisodeDuration
     this.endDate = endDate
@@ -42,7 +42,7 @@ class Anime {
     this.startDate = startDate
     this.status = seriesStatus[status]
     if (!startSeason) {
-      this.startSeason = ""
+      this.startSeason = "Unknown"
       this.startSeasonYear = ""
     } else {
       this.startSeason = camelize(startSeason.season)

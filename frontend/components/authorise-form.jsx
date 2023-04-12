@@ -1,5 +1,5 @@
 import Mal from "@/lib/mal"
-import { updateUserData } from "@/utils/userService"
+import { getClientId, updateUserData } from "@/utils/userService"
 import { getSession } from "next-auth/react"
 import Link from "next/link"
 import pkceChallenge from "pkce-challenge"
@@ -30,22 +30,25 @@ const AuthoriseForm = () => {
         }
 
         const response = await updateUserData(userUpdateData)
-
-        if (response.ok) {
+        console.log(response)
+        if (response) {
           const clientID = await getClientId()
           if (clientID) {
             const mal = new Mal(clientID)
 
             const url = mal.generateAuthorizeUrl(userUpdateData.codeChallenge)
+            console.log(url)
 
             window.location.href = url
           } else {
-            showAlert(true)
+            setShowAlert(true)
             setAlertMessage("Couldn't fetch MAL client ID")
           }
+        } else {
+          alert("Couldn't update user data")
         }
       } else {
-        showAlert(true)
+        setShowAlert(true)
         setAlertMessage("Invalid username entered!!")
       }
     } else {

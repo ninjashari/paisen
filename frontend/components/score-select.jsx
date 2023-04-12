@@ -2,7 +2,7 @@ import MalApi from "@/lib/malApi"
 import { scoreList } from "@/utils/constants"
 import { useEffect, useState } from "react"
 
-const ScoreSelect = ({ selectedVal, animeID, malAccessToken, loading }) => {
+const ScoreSelect = ({ selectedVal, animeID, malAccessToken }) => {
   const [selectedScore, setSelectedScore] = useState()
 
   useEffect(() => {
@@ -11,7 +11,6 @@ const ScoreSelect = ({ selectedVal, animeID, malAccessToken, loading }) => {
 
   const handleSelectedChange = async (e) => {
     e.preventDefault()
-    loading = true
 
     const scoreVal = e.target.value
 
@@ -23,6 +22,7 @@ const ScoreSelect = ({ selectedVal, animeID, malAccessToken, loading }) => {
     }
     if (malAccessToken) {
       const malApi = new MalApi(malAccessToken)
+
       const res = await malApi.updateList(animeID, fieldsToUpdate)
 
       if (200 !== res.status) {

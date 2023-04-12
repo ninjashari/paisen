@@ -20,13 +20,11 @@ export const getQueryParams = (url) => {
   return params
 }
 
-export const convertToDaysHrsMins = (days) => {
-  const daysFinal = Math.floor(days)
-  const remDays = days - daysFinal
-  const hrs = Math.floor(remDays * 24)
-  const remHrs = remDays * 24 - hrs
-  const mins = Math.ceil(remHrs * 60)
-  return daysFinal + " days " + hrs + " hours " + mins + " minutes"
+export const convertToDaysHrsMins = (seconds) => {
+  const days = Math.floor(seconds / 86400)
+  const hrs = Math.floor(seconds / 3600) - days * 24
+  const mins = Math.floor(seconds / 60) - days * 24 * 60 - hrs * 60
+  return days + " days " + hrs + " hours " + mins + " minutes"
 }
 
 export const createDataArray = (scoreArray) => {
@@ -92,4 +90,47 @@ export const getAnimeObj = (animeList) => {
   })
 
   return dataList
+}
+
+export const getTotalDuration = (animeList) => {
+  if (animeList) {
+    let totalDuration = 0
+    animeList.forEach((anime) => {
+      totalDuration += anime.averageEpisodeDuration * anime.episodesWatched
+    })
+    return totalDuration
+  }
+  return 0
+}
+
+export const getRemainingDuration = (animeList) => {
+  if (animeList) {
+    let remDuration = 0
+    animeList.forEach((anime) => {
+      if (anime.userStatus === "watching") {
+        if (anime.totalEpisodes > anime.episodesWatched) {
+          remDuration +=
+            anime.averageEpisodeDuration *
+            (anime.totalEpisodes - anime.episodesWatched)
+        }
+      }
+    })
+    return remDuration
+  }
+  return 0
+}
+
+export const calculateMeanScore = (animeList) => {
+  if (animeList) {
+    let totalScore = 0
+    let totalAnime = 0
+    animeList.forEach((anime) => {
+      if (anime.userScore > 0 && anime.userScore <= 10) {
+        totalScore += anime.userScore
+        totalAnime += 1
+      }
+    })
+    return Number(totalScore / totalAnime).toFixed(2)
+  }
+  return 0
 }

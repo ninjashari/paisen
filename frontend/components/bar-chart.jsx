@@ -1,15 +1,15 @@
 import MalApi from "@/lib/malApi"
+import { fields } from "@/utils/constants"
 import { createDataArray } from "@/utils/malService"
-import { getSession } from "next-auth/react"
 import dynamic from "next/dynamic"
 import { useEffect, useState } from "react"
-import Loader from "./loader"
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false })
 
-const BarChart = ({ malAccessToken }) => {
-  const [loading, setLoading] = useState(true)
+const BarChart = ({ animeList, setLoading, malAccessToken }) => {
   const [series, setSeries] = useState([])
+  const [scoreData, setScoreData] = useState([])
+
   const data = {
     chart: {
       type: "bar",
@@ -29,63 +29,44 @@ const BarChart = ({ malAccessToken }) => {
     },
   }
 
-  const field = {
-    animeList: ["my_list_status"],
-  }
-
   useEffect(() => {
-    getAnimeList()
+    setLoading(true)
+
+    let tempArr = []
+    animeList.forEach((anime) => {
+      if (anime.userScore > 0 && anime.userScore <= 10) {
+        tempArr.push(anime.userScore)
+      }
+    })
+    console.log(tempArr)
+    setScoreData(createDataArray(tempArr))
+    console.log(scoreData)
+    setSeries([
+      {
+        name: "number",
+        data: scoreData,
+      },
+    ])
+
+    getUserData()
+
+    setLoading(false)
   }, [])
 
-  const getAnimeList = async () => {
-    try {
-      if (malAccessToken) {
-        const malApi = new MalApi(malAccessToken)
-
-        const resp = await malApi.getAnimeList(field, undefined)
-        if (200 === resp.status) {
-          const malData = resp.data
-          const animeData = malData.data
-          const scoreArray = []
-          animeData.forEach((element) => {
-            if (
-              element?.node?.my_list_status?.score &&
-              element?.node?.my_list_status?.score > 0
-            ) {
-              scoreArray.push(element?.node?.my_list_status?.score)
-            }
-          })
-          const scoreData = createDataArray(scoreArray)
-          setSeries([
-            {
-              name: "number",
-              data: scoreData,
-            },
-          ])
-          setLoading(false)
-        } else {
-          alert("Couldn't fetch graph data")
-        }
-      } else {
-        alert("Couldn't fetch MAL access token")
-      }
-    } catch (error) {
-      alert(error)
-    }
+  const getUserData = async () => {
+    const malApi = new MalApi(malAccessToken)
+    const resp = await malApi.getAnimeList(fields)
+    return resp
   }
 
   return (
     <>
-      {loading ? (
-        <Loader />
-      ) : (
-        <div className="card-body">
-          <h5 className="card-title">Score</h5>
-          <div className="row">
-            <Chart options={data} series={series} type="bar" width="800" />
-          </div>
+      <div className="card-body">
+        <h5 className="card-title">Score</h5>
+        <div className="row">
+          <Chart options={data} series={series} type="bar" width="800" />
         </div>
-      )}
+      </div>
     </>
   )
 }

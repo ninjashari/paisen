@@ -83,9 +83,9 @@ export default function Home() {
               <h1>
                 Welcome, {session?.user?.name}!<br />
               </h1>
-              {isRefreshTokenValid ? (
+              {refreshTokenValid ? (
                 <>
-                  {isAccessTokenValid ? (
+                  {accessTokenValid ? (
                     <h3>Access Token is Valid!</h3>
                   ) : (
                     <>
