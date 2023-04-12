@@ -45,6 +45,18 @@ class MalApi {
     )
     return res
   }
+
+  async getSearchAnimeList(searchString) {
+    const res = await this.http.get(`/anime`, {
+      params: {
+        q: searchString,
+        limit: 100,
+        nsfw: 1,
+        offset: 0,
+      },
+    })
+    return res
+  }
 }
 
 export default MalApi
