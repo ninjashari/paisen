@@ -1,3 +1,4 @@
+import Loader from "@/components/loader"
 import Mal from "@/lib/mal"
 import { getQueryParams } from "@/utils/malService"
 import { getSession } from "next-auth/react"
@@ -80,22 +81,8 @@ export default function Home() {
   }
 
   return (
-    <>
-      <main>
-        <div className="container">
-          <section className="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-            <div className="container">
-              <div className="row justify-content-center">
-                <div className="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </main>
-    </>
+    <main>
+      <Loader />
+    </main>
   )
 }

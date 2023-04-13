@@ -1,9 +1,9 @@
 import MalApi from "@/lib/malApi"
-import { getUserAccessToken } from "@/utils/userService"
-import { getSession } from "next-auth/react"
+import { useRouter } from "next/router"
 import { useState } from "react"
 
-const Searchbar = ({ isLoading }) => {
+const Searchbar = ({ isLoading, malAccessToken, setSearchData }) => {
+  const router = useRouter()
   const [inputSearchString, setInputSearchString] = useState("")
 
   const handleSubmit = async (e) => {
@@ -12,28 +12,28 @@ const Searchbar = ({ isLoading }) => {
     setInputSearchString(e.target.query.value)
     console.log(inputSearchString)
     if (inputSearchString) {
-      const session = await getSession()
-      if (session) {
-        const accessToken = await getUserAccessToken(session)
-        if (accessToken) {
-          const malApi = new MalApi(accessToken)
+      if (malAccessToken) {
+        const malApi = new MalApi(malAccessToken)
 
-          const resp = await malApi.getSearchAnimeList(inputSearchString)
-          if (200 === resp.status) {
-            isLoading(false)
-            console.log(resp)
-          } else {
-            alert("Couldn't fetch user anime list")
-          }
+        const resp = await malApi.getSearchAnimeList(inputSearchString)
+        if (200 === resp.status) {
+          let dataList = resp.data.data
+          let nameList = []
+          console.log(dataList)
+          dataList.forEach((dataItem) => {
+            nameList.push(dataItem.node)
+          })
+          setSearchData(nameList)
+          isLoading(false)
         } else {
-          alert("Couldn't get acces token. Please authorise!!")
-          router.replace("/authorise")
+          alert("Couldn't fetch user anime list")
         }
       } else {
+        alert("Couldn't get acces token. Please authorise!!")
         router.replace("/")
       }
     } else {
-      alert("Search string is inappropriate!!")
+      router.replace("/")
     }
   }
 

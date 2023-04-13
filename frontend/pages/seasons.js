@@ -1,17 +1,25 @@
 import Breadcrumb from "@/components/breadcrumb"
 import Header from "@/components/header"
 import Layout from "@/components/layout"
+import Loader from "@/components/loader"
 import Sidebar from "@/components/sidebar"
+import { useState } from "react"
 
 function Statistics() {
+  const [loading, isLoading] = useState(false)
   return (
     <>
       <Layout titleName="Seasons" />
-      <Header />
+      <Header isLoading={isLoading} />
       <Sidebar currentPage="seasons" />
-      <main id="main" className="main">
-        <Breadcrumb firstPage="Seasons" title="Seasons" />
-      </main>
+
+      {loading ? (
+        <Loader />
+      ) : (
+        <main id="main" className="main">
+          <Breadcrumb firstPage="Seasons" title="Seasons" />
+        </main>
+      )}
     </>
   )
 }
