@@ -14,10 +14,10 @@ import { useEffect, useState } from "react"
 function Statistics() {
   const router = useRouter()
   const [animeListData, setAnimeListData] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, isLoading] = useState(true)
 
   useEffect(() => {
-    setLoading(true)
+    isLoading(true)
     getAnimeList()
   }, [])
 
@@ -32,7 +32,7 @@ function Statistics() {
         if (200 === resp.status) {
           const malData = resp.data
           setAnimeListData(malData.data)
-          setLoading(false)
+          isLoading(false)
         } else {
           alert("Couldn't fetch user anime list")
         }
@@ -55,7 +55,7 @@ function Statistics() {
           {loading ? (
             <Loader />
           ) : (
-            <Stats animeList={animeListData} setLoading={setLoading} />
+            <Stats animeList={animeListData} isLoading={isLoading} />
           )}
         </section>
       </main>

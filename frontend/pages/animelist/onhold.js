@@ -16,13 +16,13 @@ export default function Animelist() {
   const router = useRouter()
 
   const [animeListData, setAnimeListData] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, isLoading] = useState(true)
   const [malAccessToken, setMalAccessToken] = useState()
   const [pageTitle, setPageTitle] = useState()
   const [currentPageValue, setCurrentPageValue] = useState()
 
   useEffect(() => {
-    setLoading(true)
+    isLoading(true)
     const pageValue = getURILastValue(router.asPath)
     if (pageValue) {
       const pageTitleValue = userListStatus[pageValue].pageTitle
@@ -49,7 +49,7 @@ export default function Animelist() {
           if (200 === resp.status) {
             const malData = resp.data
             setAnimeListData(malData.data)
-            setLoading(false)
+            isLoading(false)
           }
         }
       } else {

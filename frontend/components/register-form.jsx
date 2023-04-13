@@ -4,7 +4,7 @@ import { useState } from "react"
 import FormLogo from "./form-logo"
 import { hashPassword } from "@/utils/hash"
 
-const RegisterForm = ({ formId, userForm }) => {
+const RegisterForm = ({ userForm }) => {
   const router = useRouter()
   const contentType = "application/json"
   // User data form

@@ -8,19 +8,19 @@ import SquareIcon from "./square-icon"
 
 const Table = ({ animeList, malAccessToken }) => {
   const [animeDataList, setAnimeDataList] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, isLoading] = useState(true)
 
   useEffect(() => {
     let dataList = getAnimeObj(animeList)
 
     setAnimeDataList(dataList)
-    setLoading(false)
+    isLoading(false)
   }, [])
 
   const handleWatchIncrement = async (e) => {
     e.preventDefault()
 
-    setLoading(true)
+    isLoading(true)
 
     const animeId = e.target.id
 
@@ -45,7 +45,7 @@ const Table = ({ animeList, malAccessToken }) => {
       const res = await malApi.updateList(animeId, fieldsToUpdate)
 
       if (200 === res.status) {
-        setLoading(false)
+        isLoading(false)
       } else {
         alert("Couldn't update animelist")
       }
@@ -56,7 +56,7 @@ const Table = ({ animeList, malAccessToken }) => {
 
   const handleWatchDecrement = async (e) => {
     e.preventDefault()
-    setLoading(true)
+    isLoading(true)
 
     const animeId = e.target.id
 
@@ -81,7 +81,7 @@ const Table = ({ animeList, malAccessToken }) => {
       const res = await malApi.updateList(animeId, fieldsToUpdate)
 
       if (200 === res.status) {
-        setLoading(false)
+        isLoading(false)
       } else {
         alert("Couldn't update animelist")
       }
@@ -180,7 +180,7 @@ const Table = ({ animeList, malAccessToken }) => {
                         selectedVal={anime.userScore}
                         animeID={anime.id}
                         malAccessToken={malAccessToken}
-                        setLoading={setLoading}
+                        isLoading={isLoading}
                       />
                     </td>
                     <td className="col-2" style={{ textAlign: "center" }}>

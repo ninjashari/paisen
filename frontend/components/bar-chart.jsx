@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false })
 
-const BarChart = ({ animeList, setLoading, malAccessToken }) => {
+const BarChart = ({ animeList, isLoading, malAccessToken }) => {
   const [series, setSeries] = useState([])
   const [scoreData, setScoreData] = useState([])
 
@@ -30,7 +30,7 @@ const BarChart = ({ animeList, setLoading, malAccessToken }) => {
   }
 
   useEffect(() => {
-    setLoading(true)
+    isLoading(true)
 
     let tempArr = []
     animeList.forEach((anime) => {
@@ -50,7 +50,7 @@ const BarChart = ({ animeList, setLoading, malAccessToken }) => {
 
     getUserData()
 
-    setLoading(false)
+    isLoading(false)
   }, [])
 
   const getUserData = async () => {

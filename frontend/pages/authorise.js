@@ -7,17 +7,17 @@ import { useEffect, useState } from "react"
 
 function Statistics() {
   const router = useRouter()
-  const [loading, setLoading] = useState(true)
+  const [loading, isLoading] = useState(true)
 
   useEffect(() => {
-    setLoading(true)
+    isLoading(true)
     checkCurrentSession()
   }, [])
 
   const checkCurrentSession = async () => {
     const session = await getSession()
     if (session) {
-      setLoading(false)
+      isLoading(false)
     } else {
       router.replace("/")
     }

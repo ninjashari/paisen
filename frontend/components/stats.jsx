@@ -11,7 +11,7 @@ import { useEffect, useState } from "react"
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false })
 
-const Stats = ({ animeList, setLoading }) => {
+const Stats = ({ animeList, isLoading }) => {
   // Bar Chart Variables
   const [series, setSeries] = useState([])
   // Bar chart
@@ -62,7 +62,7 @@ const Stats = ({ animeList, setLoading }) => {
   const [userMeanScore, setUserMeanScore] = useState()
   // End Anime List Data Variables
   useEffect(() => {
-    setLoading(true)
+    isLoading(true)
 
     // Convert animeList to node list
     let dataList = getAnimeObj(animeList)
@@ -107,7 +107,7 @@ const Stats = ({ animeList, setLoading }) => {
     // Set Mean Score
     setUserMeanScore(calculateMeanScore(dataList))
 
-    setLoading(false)
+    isLoading(false)
   }, [])
 
   // Accordion Functions
