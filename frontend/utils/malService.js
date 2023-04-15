@@ -67,25 +67,7 @@ export const getAnimeObj = (animeList) => {
   let dataList = []
   animeList.forEach((anime) => {
     const node = anime.node
-    let animeObj = new Anime(
-      node.alternative_titles,
-      node.average_episode_duration,
-      node.end_date,
-      node.genres,
-      node.id,
-      node.main_picture,
-      node.mean,
-      node.media_type,
-      node.my_list_status,
-      node.num_episodes,
-      node.rating,
-      node.source,
-      node.start_date,
-      node.start_season,
-      node.status,
-      node.synopsis,
-      node.title
-    )
+    let animeObj = new Anime(node)
     dataList.push(animeObj)
   })
 

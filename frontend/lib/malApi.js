@@ -46,10 +46,11 @@ class MalApi {
     return res
   }
 
-  async getSearchAnimeList(searchString) {
+  async getSearchAnimeList(searchString, fields) {
     const res = await this.http.get(`/anime`, {
       params: {
         q: searchString,
+        fields: fields.animeList.toString(),
         limit: 100,
         nsfw: 1,
         offset: 0,

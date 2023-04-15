@@ -1,4 +1,5 @@
 import MalApi from "@/lib/malApi"
+import { fields } from "@/utils/constants"
 import { useRouter } from "next/router"
 import { useState } from "react"
 
@@ -15,7 +16,7 @@ const Searchbar = ({ isLoading, malAccessToken, setSearchData }) => {
       if (malAccessToken) {
         const malApi = new MalApi(malAccessToken)
 
-        const resp = await malApi.getSearchAnimeList(inputSearchString)
+        const resp = await malApi.getSearchAnimeList(inputSearchString, fields)
         if (200 === resp.status) {
           let dataList = resp.data.data
           let nameList = []

@@ -71,7 +71,7 @@ export default function Home() {
   return (
     <>
       <Layout titleName="Paisen" />
-      <Header isLoading={isLoading} />
+      <Header />
       <Sidebar currentPage="home" />
       {loading ? (
         <Loader />

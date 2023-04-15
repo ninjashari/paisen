@@ -5,23 +5,17 @@ import Loader from "@/components/loader"
 import Sidebar from "@/components/sidebar"
 import { useState } from "react"
 
-function Statistics() {
-  const [loading, isLoading] = useState(false)
+function Seasons() {
   return (
     <>
       <Layout titleName="Seasons" />
-      <Header isLoading={isLoading} />
+      <Header />
       <Sidebar currentPage="seasons" />
-
-      {loading ? (
-        <Loader />
-      ) : (
-        <main id="main" className="main">
-          <Breadcrumb firstPage="Seasons" title="Seasons" />
-        </main>
-      )}
+      <main id="main" className="main">
+        <Breadcrumb firstPage="Seasons" title="Seasons" />
+      </main>
     </>
   )
 }
 
-export default Statistics
+export default Seasons

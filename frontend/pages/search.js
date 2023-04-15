@@ -25,6 +25,7 @@ function Search() {
       const accessToken = await getUserAccessToken(session)
       if (accessToken) {
         setMalAccessToken(accessToken)
+        isLoading(false)
       } else {
         alert("Couldn't retrieve access token from user. Authorise MAL user")
       }
