@@ -1,5 +1,6 @@
+import Loader from "@/components/loader"
 import Mal from "@/lib/mal"
-import { getQueryParams } from "@/utils/helper"
+import { getQueryParams } from "@/utils/malService"
 import { getSession } from "next-auth/react"
 import { useRouter } from "next/router"
 import { useEffect } from "react"
@@ -40,8 +41,6 @@ export default function Home() {
               currentUserData.codeChallenge
             )
 
-            console.log(response)
-
             if (response) {
               // Create user data to be updated
               const updateUserData = {
@@ -64,7 +63,6 @@ export default function Home() {
               })
 
               if (updateResponse.ok) {
-                //     console.log(await updateResponse.json().body)
                 router.replace("/")
               } else {
                 alert("Couldn't update user data with token info")
@@ -83,22 +81,8 @@ export default function Home() {
   }
 
   return (
-    <>
-      <main>
-        <div className="container">
-          <section className="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-            <div className="container">
-              <div className="row justify-content-center">
-                <div className="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </main>
-    </>
+    <main>
+      <Loader />
+    </main>
   )
 }

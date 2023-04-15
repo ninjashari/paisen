@@ -44,6 +44,28 @@ class Mal {
       console.error(err)
     }
   }
+
+  /**
+   *
+   * @param {String} refreshToken
+   */
+  async refreshAccessToken(refreshToken) {
+    try {
+      const query = {
+        client_id: this.clientId,
+        refresh_token: refreshToken,
+        grant_type: "refresh_token",
+      }
+
+      const response = await axios.post(
+        this.accessTokenUrl,
+        querystring.stringify(query)
+      )
+      return response.data
+    } catch (err) {
+      console.error(err)
+    }
+  }
 }
 
 export default Mal

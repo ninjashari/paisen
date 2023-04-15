@@ -1,16 +1,14 @@
 import Mal from "@/lib/mal"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/router"
+import { getClientId, updateUserData } from "@/utils/userService"
+import { getSession } from "next-auth/react"
+import Link from "next/link"
 import pkceChallenge from "pkce-challenge"
 import { useState } from "react"
 import FormLogo from "./form-logo"
-import Link from "next/link"
+import { useRouter } from "next/router"
 
 const AuthoriseForm = () => {
   const router = useRouter()
-  const contentType = "application/json"
-
-  const { data: session } = useSession()
 
   const [username, setUsername] = useState("")
   const [formClass, setFormClass] = useState("row g-3 needs-validation")
@@ -20,38 +18,42 @@ const AuthoriseForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setFormClass("row g-3 was-validated")
-    if (e.target.username.validity.valid) {
-      const pkce = pkceChallenge()
-      const updateUserData = {
-        username: session.user.username,
-        malUsername: username,
-        codeChallenge: pkce.code_challenge,
-      }
 
-      const response = await fetch("/api/user/update", {
-        method: "PUT",
-        headers: {
-          Accept: contentType,
-          "Content-Type": contentType,
-        },
-        body: JSON.stringify(updateUserData),
-      })
+    const session = await getSession()
+    if (session) {
+      if (e.target.username.validity.valid) {
+        const pkce = pkceChallenge()
+        const userUpdateData = {
+          username: session.user.username,
+          malUsername: username,
+          codeChallenge: pkce.code_challenge,
+        }
 
-      if (response.ok) {
-        const res = await fetch("/api/mal/clientid")
-
-        if (res.ok) {
-          const resp = await res.json()
-          if (resp && resp.data && resp.data.clientId) {
-            const clientID = resp.data.clientId
+        const response = await updateUserData(userUpdateData)
+        console.log(response)
+        if (response) {
+          const clientID = await getClientId()
+          if (clientID) {
             const mal = new Mal(clientID)
 
-            const url = mal.generateAuthorizeUrl(updateUserData.codeChallenge)
+            const url = mal.generateAuthorizeUrl(userUpdateData.codeChallenge)
+            console.log(url)
 
             window.location.href = url
+          } else {
+            setShowAlert(true)
+            setAlertMessage("Couldn't fetch MAL client ID")
           }
+        } else {
+          alert("Couldn't update user data")
         }
+      } else {
+        setShowAlert(true)
+        setAlertMessage("Invalid username entered!!")
       }
+    } else {
+      alert("Couldn't fetch current session, Redirecting to login page!!")
+      router.replace("/login")
     }
   }
 

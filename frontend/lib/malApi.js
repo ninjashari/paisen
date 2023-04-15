@@ -11,12 +11,17 @@ class MalApi {
   }
 
   async getUserData(fields) {
-    const res = await this.http.get(`/users/@me`, {
-      params: {
-        fields: fields.user.toString(),
-      },
-    })
-    return res
+    try {
+      const res = await this.http.get(`/users/@me`, {
+        params: {
+          fields: fields.user.toString(),
+        },
+      })
+      return res
+    } catch (err) {
+      console.error(err)
+      return undefined
+    }
   }
 
   async getAnimeList(fields, status) {
@@ -31,17 +36,6 @@ class MalApi {
     return res
   }
 
-  async getFullAnimeList(fields) {
-    const res = await this.http.get(`/users/@me/animelist`, {
-      params: {
-        fields: fields.animeList.toString(),
-        limit: 1000,
-        nsfw: 1,
-      },
-    })
-    return res
-  }
-
   async updateList(animeID, fieldsToUpdate) {
     this.http.defaults.headers["Content-Type"] =
       "application/x-www-form-urlencoded"
@@ -49,6 +43,19 @@ class MalApi {
       `/anime/${animeID}/my_list_status`,
       querystring.stringify(fieldsToUpdate)
     )
+    return res
+  }
+
+  async getSearchAnimeList(searchString, fields) {
+    const res = await this.http.get(`/anime`, {
+      params: {
+        q: searchString,
+        fields: fields.animeList.toString(),
+        limit: 100,
+        nsfw: 1,
+        offset: 0,
+      },
+    })
     return res
   }
 }
