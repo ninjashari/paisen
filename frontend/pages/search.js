@@ -1,3 +1,4 @@
+import SearchTable from "@/components/animelist-search-table"
 import Breadcrumb from "@/components/breadcrumb"
 import Header from "@/components/header"
 import Layout from "@/components/layout"
@@ -43,32 +44,7 @@ function Search() {
       <Sidebar currentPage="search" />
       <main id="main" className="main">
         <Breadcrumb firstPage="Search" title="Search" />
-        {loading ? (
-          <Loader />
-        ) : (
-          <>
-            <h3>Searched Data Table</h3>{" "}
-            <table className="table">
-              <thead style={{ textAlign: "center" }}>
-                <tr>
-                  {/* <th scope="col"></th> */}
-                  <th scope="col">Anime Title</th>
-                  {/* <th scope="col">Progress</th>
-                  <th scope="col">Score</th>
-                  <th scope="col">Type</th>
-                  <th scope="col">Season</th> */}
-                </tr>
-              </thead>
-              <tbody>
-                {searchData?.map((searchItem) => (
-                  <tr key={searchItem?.id}>
-                    <td className="col-3">{searchItem.title}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </>
-        )}
+        {loading ? <Loader /> : <SearchTable searchData={searchData} />}
       </main>
     </>
   )
