@@ -45,7 +45,14 @@ function Search() {
       <Sidebar currentPage="search" />
       <main id="main" className="main">
         <Breadcrumb firstPage="Search" title="Search" />
-        {loading ? <Loader /> : <SearchTable searchData={searchData} />}
+        {loading ? (
+          <Loader />
+        ) : (
+          <SearchTable
+            searchData={searchData}
+            malAccessToken={malAccessToken}
+          />
+        )}
       </main>
     </>
   )

@@ -56,6 +56,12 @@ class Anime {
   decrementWatchedEpisodes() {
     this.episodesWatched -= 1
   }
+
+  setUserStatus(userStatus) {
+    if (userStatus) {
+      this.userStatus = userStatusMap[userStatus]
+    }
+  }
 }
 
 export default Anime

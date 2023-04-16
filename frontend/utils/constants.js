@@ -84,10 +84,26 @@ export const userListStatus = {
   plantowatch: { apiValue: "plan_to_watch", pageTitle: "Plan To Watch" },
 }
 
+export const userStatusList = [
+  { apiValue: "watching", pageTitle: "Currently Watching" },
+  { apiValue: "completed", pageTitle: "Completed" },
+  { apiValue: "dropped", pageTitle: "Dropped" },
+  { apiValue: "on_hold", pageTitle: "On Hold" },
+  { apiValue: "plan_to_watch", pageTitle: "Plan To Watch" },
+]
+
 export const userStatusMap = {
   watching: "Currently Watching",
   completed: "Completed",
   dropped: "Dropped",
   on_hold: "On Hold",
   plan_to_watch: "Plan To Watch",
+}
+
+export const userStatusReverseMap = {
+  "Currently Watching": "watching",
+  Completed: "completed",
+  Dropped: "dropped",
+  "On Hold": "on_hold",
+  "Plan To Watch": "plan_to_watch",
 }
