@@ -83,3 +83,11 @@ export const userListStatus = {
   onhold: { apiValue: "on_hold", pageTitle: "On Hold" },
   plantowatch: { apiValue: "plan_to_watch", pageTitle: "Plan To Watch" },
 }
+
+export const userStatusMap = {
+  watching: "Currently Watching",
+  completed: "Completed",
+  dropped: "Dropped",
+  on_hold: "On Hold",
+  plan_to_watch: "Plan To Watch",
+}

@@ -1,4 +1,9 @@
-import { ratingUtil, seriesStatus, seriesType } from "@/utils/constants"
+import {
+  ratingUtil,
+  seriesStatus,
+  seriesType,
+  userStatusMap,
+} from "@/utils/constants"
 import { camelize } from "@/utils/malService"
 
 class Anime {
@@ -18,7 +23,7 @@ class Anime {
       this.isRewatching = animeDTO.my_list_status.is_rewatching
       this.userScore = animeDTO.my_list_status.score
       this.watchStartDate = animeDTO.my_list_status.start_date
-      this.userStatus = animeDTO.my_list_status.status
+      this.userStatus = userStatusMap[animeDTO.my_list_status.status]
     } else {
       this.episodesWatched = undefined
       this.isRewatching = undefined
