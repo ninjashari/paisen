@@ -11,7 +11,7 @@ const Searchbar = ({ isLoading, malAccessToken, setSearchData }) => {
     e.preventDefault()
     isLoading(true)
     setInputSearchString(e.target.query.value)
-    console.log(inputSearchString)
+
     if (inputSearchString) {
       if (malAccessToken) {
         const malApi = new MalApi(malAccessToken)
@@ -20,7 +20,7 @@ const Searchbar = ({ isLoading, malAccessToken, setSearchData }) => {
         if (200 === resp.status) {
           let dataList = resp.data.data
           let nameList = []
-          console.log(dataList)
+
           dataList.forEach((dataItem) => {
             nameList.push(dataItem.node)
           })

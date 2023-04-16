@@ -45,16 +45,9 @@ const Stats = ({ animeList, isLoading }) => {
     useState("accordion-button collapsed")
   const [scoreDistributionContentClass, setScoreDistributionContentClass] =
     useState("accordion-collapse collapse")
-  // const [localDatabaseHeaderClass, setLocalDatabaseHeaderClass] = useState(
-  //   "accordion-button collapsed"
-  // )
-  // const [localDatabaseContentClass, setLocalDatabaseContentClass] = useState(
-  //   "accordion-collapse collapse"
-  // )
   // End Accordion UI class variables
 
   // Anime List Data Variables
-  const [animeDataList, setAnimeDataList] = useState([])
   const [animeCount, setAnimeCount] = useState()
   const [episodeCount, setEpisodeCount] = useState()
   const [timeSpent, setTImeSpent] = useState()
@@ -128,8 +121,6 @@ const Stats = ({ animeList, isLoading }) => {
       setAnimeListContentClass("accordion-collapse collapse show")
       setScoreDistributionHeaderClass("accordion-button collapsed")
       setScoreDistributionContentClass("accordion-collapse collapse")
-      setLocalDatabaseHeaderClass("accordion-button collapsed")
-      setLocalDatabaseContentClass("accordion-collapse collapse")
     }
   }
 
@@ -148,35 +139,11 @@ const Stats = ({ animeList, isLoading }) => {
     ) {
       setScoreDistributionHeaderClass("accordion-button")
       setScoreDistributionContentClass("accordion-collapse collapse show")
-      setLocalDatabaseHeaderClass("accordion-button collapsed")
-      setLocalDatabaseContentClass("accordion-collapse collapse")
       setAnimeListHeaderClass("accordion-button collapsed")
       setAnimeListContentClass("accordion-collapse collapse")
     }
   }
-
-  // const handleLocalDatabaseClick = (e) => {
-  //   e.preventDefault()
-
-  //   if (
-  //     "accordion-button" === localDatabaseHeaderClass &&
-  //     "accordion-collapse collapse show" === localDatabaseContentClass
-  //   ) {
-  //     setLocalDatabaseHeaderClass("accordion-button collapsed")
-  //     setLocalDatabaseContentClass("accordion-collapse collapse")
-  //   } else if (
-  //     "accordion-button collapsed" === localDatabaseHeaderClass &&
-  //     "accordion-collapse collapse" === localDatabaseContentClass
-  //   ) {
-  //     setLocalDatabaseHeaderClass("accordion-button")
-  //     setLocalDatabaseContentClass("accordion-collapse collapse show")
-  //     setScoreDistributionHeaderClass("accordion-button collapsed")
-  //     setScoreDistributionContentClass("accordion-collapse collapse")
-  //     setAnimeListHeaderClass("accordion-button collapsed")
-  //     setAnimeListContentClass("accordion-collapse collapse")
-  //   }
-  // }
-  // // End Accordion Functions
+  // End Accordion Functions
 
   return (
     <div className="row">
@@ -253,33 +220,6 @@ const Stats = ({ animeList, isLoading }) => {
                   </div>
                 </div>
               </div>
-              {/* <div className="accordion-item">
-                <h2 className="accordion-header">
-                  <button
-                    className={localDatabaseHeaderClass}
-                    type="button"
-                    onClick={handleLocalDatabaseClick}
-                  >
-                    Local Database
-                  </button>
-                </h2>
-                <div id="collapseThree" className={localDatabaseContentClass}>
-                  <div className="accordion-body">
-                    <table className="table table-borderless">
-                      <tbody>
-                        <tr>
-                          <td>Anime count</td>
-                          <td>Dummy Text</td>
-                        </tr>
-                        <tr>
-                          <td>Image files</td>
-                          <td>Dummy Text</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div> */}
             </div>
           </div>
         </div>

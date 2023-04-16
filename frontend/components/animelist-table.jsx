@@ -1,4 +1,5 @@
 import MalApi from "@/lib/malApi"
+import { userStatusList, userStatusReverseMap } from "@/utils/constants"
 import { getAnimeObj, getWatchedPercentage } from "@/utils/malService"
 import { useEffect, useState } from "react"
 import Loader from "./loader"
@@ -12,7 +13,6 @@ const Table = ({ animeList, malAccessToken }) => {
 
   useEffect(() => {
     let dataList = getAnimeObj(animeList)
-
     setAnimeDataList(dataList)
     isLoading(false)
   }, [])
@@ -20,23 +20,28 @@ const Table = ({ animeList, malAccessToken }) => {
   const handleWatchIncrement = async (e) => {
     e.preventDefault()
 
-    isLoading(true)
-
+    // Get anime id
     const animeId = e.target.id
 
+    // Increment watched episodes by one on click of plus
     let newList = []
+    let prevWatchedEpisodes = 0
     let watchedEpisodes = 0
+    let totalEpisodes = 0
+    let currentStatus = undefined
     animeDataList.forEach((dataObj) => {
       if (parseInt(dataObj.id) === parseInt(animeId)) {
+        prevWatchedEpisodes = dataObj.episodesWatched
         dataObj.incrementWatchedEpisodes()
         watchedEpisodes = dataObj.episodesWatched
+        totalEpisodes = dataObj.totalEpisodes
+        currentStatus = dataObj.userStatus
       }
       newList.push(dataObj)
     })
-
     setAnimeDataList(newList)
 
-    // call MAL api to update
+    // Call MAL api to update anime status
     const fieldsToUpdate = {
       num_watched_episodes: watchedEpisodes,
     }
@@ -45,6 +50,17 @@ const Table = ({ animeList, malAccessToken }) => {
       const res = await malApi.updateList(animeId, fieldsToUpdate)
 
       if (200 === res.status) {
+        if (
+          watchedEpisodes === totalEpisodes &&
+          currentStatus !== "completed"
+        ) {
+          await changeCurrentUserStatus(animeId, "completed")
+        } else if (
+          parseInt(prevWatchedEpisodes) === 0 &&
+          currentStatus !== "watching"
+        ) {
+          await changeCurrentUserStatus(animeId, "watching")
+        }
         isLoading(false)
       } else {
         alert("Couldn't update animelist")
@@ -56,10 +72,11 @@ const Table = ({ animeList, malAccessToken }) => {
 
   const handleWatchDecrement = async (e) => {
     e.preventDefault()
-    isLoading(true)
 
+    // Get anime id
     const animeId = e.target.id
 
+    // Decrement watched episodes by one on click of minus
     let newList = []
     let watchedEpisodes = 0
     animeDataList.forEach((dataObj) => {
@@ -89,6 +106,47 @@ const Table = ({ animeList, malAccessToken }) => {
       alert("Couldn't fetch access token from parent")
     }
   }
+
+  const handleStatusChange = async (e) => {
+    e.preventDefault()
+
+    // Get target status
+    const targetStatus = e.target.value
+    // Get anime id
+    const animeId = e.target.id
+
+    await changeCurrentUserStatus(animeId, targetStatus)
+  }
+
+  const changeCurrentUserStatus = async (animeId, targetStatus) => {
+    // Change status of anime in local list
+    let newList = []
+    animeDataList.forEach((dataObj) => {
+      if (parseInt(dataObj.id) === parseInt(animeId)) {
+        dataObj.setUserStatus(targetStatus)
+      } else {
+        newList.push(dataObj)
+      }
+    })
+    setAnimeDataList(newList)
+
+    // Update in MAL DB using API call
+    const fieldsToUpdate = {
+      status: targetStatus,
+    }
+    if (malAccessToken) {
+      const malApi = new MalApi(malAccessToken)
+      const res = await malApi.updateList(animeId, fieldsToUpdate)
+
+      if (200 === res.status) {
+        isLoading(false)
+      } else {
+        alert("Couldn't update animelist")
+      }
+    } else {
+      alert("Couldn't fetch local user data")
+    }
+  }
   return (
     <>
       {loading ? (
@@ -105,27 +163,47 @@ const Table = ({ animeList, malAccessToken }) => {
                   <th scope="col">Score</th>
                   <th scope="col">Type</th>
                   <th scope="col">Season</th>
+                  <th scope="col">Change Status</th>
                 </tr>
               </thead>
               <tbody>
                 {animeDataList?.map((anime) => (
                   <tr key={anime.id}>
-                    <th scope="row">
+                    <th
+                      style={{
+                        paddingRight: "0px",
+                      }}
+                    >
+                      {" "}
                       <SquareIcon
                         squareColor={anime.status.color}
                         title={anime.status.value}
                       />
                     </th>
-                    <td className="col-3">{anime.title}</td>
-                    <td>
-                      <div className="row">
+                    <td
+                      className="col-3"
+                      style={{ paddingLeft: "0px", paddingRight: "0px" }}
+                    >
+                      {anime.title}
+                    </td>
+                    <td
+                      className="col"
+                      style={{ paddingLeft: "0px", paddingRight: "0px" }}
+                    >
+                      <div
+                        className="row"
+                        style={{ paddingLeft: "0px", paddingRight: "0px" }}
+                      >
                         {/* Decrement watched episodes */}
                         <div className="col-1">
                           {anime.episodesWatched > 0 &&
                           anime.episodesWatched <= anime.totalEpisodes &&
-                          (anime.userStatus === "watching" ||
-                            anime.userStatus === "on_hold" ||
-                            anime.userStatus === "plan_to_watch") ? (
+                          (userStatusReverseMap[anime.userStatus] ===
+                            "watching" ||
+                            userStatusReverseMap[anime.userStatus] ===
+                              "on_hold" ||
+                            userStatusReverseMap[anime.userStatus] ===
+                              "plan_to_watch") ? (
                             <button
                               type="button"
                               className="btn btn-sm"
@@ -140,7 +218,7 @@ const Table = ({ animeList, malAccessToken }) => {
                         {/* End Decrement watched episodes */}
 
                         {/* Progress Bar */}
-                        <div className="col">
+                        <div className="col-5" style={{ paddingRight: "0px" }}>
                           <Progressbar
                             fillPercentage={getWatchedPercentage(
                               anime.episodesWatched,
@@ -151,13 +229,22 @@ const Table = ({ animeList, malAccessToken }) => {
                         {/* End Progress Bar */}
 
                         {/* Increment watched episodes */}
-                        <div className="col-1">
-                          {anime.userStatus === "watching" ||
-                          anime.userStatus === "on_hold" ||
-                          anime.userStatus === "plan_to_watch" ? (
+                        <div
+                          className="col-1"
+                          style={{ paddingLeft: "0px", paddingRight: "0px" }}
+                        >
+                          {anime.episodesWatched >= 0 &&
+                          anime.episodesWatched < anime.totalEpisodes &&
+                          (userStatusReverseMap[anime.userStatus] ===
+                            "watching" ||
+                            userStatusReverseMap[anime.userStatus] ===
+                              "on_hold" ||
+                            userStatusReverseMap[anime.userStatus] ===
+                              "plan_to_watch") ? (
                             <button
                               type="button"
                               className="btn btn-sm"
+                              style={{ padding: "0px" }}
                               onClick={handleWatchIncrement}
                             >
                               <i className="bi bi-plus" id={anime.id}></i>
@@ -169,13 +256,19 @@ const Table = ({ animeList, malAccessToken }) => {
                         {/* End Increment watched episodes */}
 
                         {/* Value of watched/total episodes */}
-                        <div className="col-3">
+                        <div
+                          className="col-4"
+                          style={{ paddingLeft: "0px", paddingRight: "0px" }}
+                        >
                           {anime.episodesWatched + "/" + anime.totalEpisodes}
                         </div>
                         {/* End Value of watched/total episodes */}
                       </div>
                     </td>
-                    <td className="col-2">
+                    <td
+                      className="col-1"
+                      style={{ paddingLeft: "0px", paddingRight: "0px" }}
+                    >
                       <ScoreSelect
                         selectedVal={anime.userScore}
                         animeID={anime.id}
@@ -183,11 +276,42 @@ const Table = ({ animeList, malAccessToken }) => {
                         isLoading={isLoading}
                       />
                     </td>
-                    <td className="col-2" style={{ textAlign: "center" }}>
+                    <td
+                      className="col-1"
+                      style={{
+                        textAlign: "center",
+                        paddingLeft: "0px",
+                        paddingRight: "0px",
+                      }}
+                    >
                       {anime.mediaType}
                     </td>
-                    <td className="col-1" style={{ textAlign: "center" }}>
+                    <td
+                      className="col-1"
+                      style={{
+                        textAlign: "center",
+                        paddingLeft: "0px",
+                        paddingRight: "0px",
+                      }}
+                    >
                       {anime.startSeason + " " + anime.startSeasonYear}
+                    </td>
+                    <td className="col-2" style={{ paddingRight: "0px" }}>
+                      <select
+                        className="form-select"
+                        id={anime.id}
+                        value={userStatusReverseMap[anime.userStatus]}
+                        onChange={handleStatusChange}
+                      >
+                        {userStatusList.map((userStatus) => (
+                          <option
+                            key={userStatus.apiValue}
+                            value={userStatus.apiValue}
+                          >
+                            {userStatus.pageTitle}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                   </tr>
                 ))}

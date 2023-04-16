@@ -1,4 +1,5 @@
 import Anime from "@/lib/anime"
+import { userStatusReverseMap } from "./constants"
 
 export const camelize = (str) => {
   if (str) {
@@ -89,7 +90,7 @@ export const getRemainingDuration = (animeList) => {
   if (animeList) {
     let remDuration = 0
     animeList.forEach((anime) => {
-      if (anime.userStatus === "watching") {
+      if (userStatusReverseMap[anime.userStatus] === "watching") {
         if (anime.totalEpisodes > anime.episodesWatched) {
           remDuration +=
             anime.averageEpisodeDuration *
