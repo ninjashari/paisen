@@ -2,8 +2,8 @@ import {
   calculateMeanScore,
   convertToDaysHrsMins,
   createDataArray,
-  getAnimeObj,
   getRemainingDuration,
+  getStatsAnimeObj,
   getTotalDuration,
 } from "@/utils/malService"
 import dynamic from "next/dynamic"
@@ -58,7 +58,7 @@ const Stats = ({ animeList, isLoading }) => {
     isLoading(true)
 
     // Convert animeList to node list
-    let dataList = getAnimeObj(animeList)
+    let dataList = getStatsAnimeObj(animeList)
 
     // Bar chart
     let tempArr = []

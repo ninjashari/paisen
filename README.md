@@ -1,5 +1,7 @@
-# Paisen
+## Getting Started
 
-Self hosted anime list app to detect watched anime from jellyfin and update myanimelist database.
+1. Install [Node.js](https://nodejs.org/en)
 
-## Repo is currently under construction
+2. `npm i`
+
+3. `npm run dev`

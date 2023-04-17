@@ -1,4 +1,5 @@
 import Anime from "@/lib/anime"
+import StatsAnime from "@/lib/statsAnime"
 import { userStatusReverseMap } from "./constants"
 
 export const camelize = (str) => {
@@ -69,6 +70,17 @@ export const getAnimeObj = (animeList) => {
   animeList.forEach((anime) => {
     const node = anime.node
     let animeObj = new Anime(node)
+    dataList.push(animeObj)
+  })
+
+  return dataList
+}
+
+export const getStatsAnimeObj = (animeList) => {
+  let dataList = []
+  animeList.forEach((anime) => {
+    const node = anime.node
+    let animeObj = new StatsAnime(node)
     dataList.push(animeObj)
   })
 

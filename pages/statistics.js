@@ -5,7 +5,7 @@ import Loader from "@/components/loader"
 import Sidebar from "@/components/sidebar"
 import Stats from "@/components/stats"
 import MalApi from "@/lib/malApi"
-import { fields } from "@/utils/constants"
+import { statisticsFields } from "@/utils/constants"
 import { getUserAccessToken } from "@/utils/userService"
 import { getSession } from "next-auth/react"
 import { useRouter } from "next/router"
@@ -28,7 +28,7 @@ function Statistics() {
       if (accessToken) {
         const malApi = new MalApi(accessToken)
 
-        const resp = await malApi.getAnimeList(fields)
+        const resp = await malApi.getAnimeList(statisticsFields)
         if (200 === resp.status) {
           const malData = resp.data
           setAnimeListData(malData.data)

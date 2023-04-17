@@ -28,6 +28,23 @@ export const fields = {
   ],
 }
 
+export const statisticsFields = {
+  animeList: [
+    "id",
+    "title",
+    "start_date",
+    "end_date",
+    "status",
+    "my_list_status",
+    "num_episodes",
+    "start_season",
+    "average_episode_duration",
+    "score",
+    "num_watched_episodes",
+    "finish_date",
+  ],
+}
+
 export const scoreList = [
   { score: 0, value: "(0) No Score" },
   { score: 1, value: "(1) Appaing" },
