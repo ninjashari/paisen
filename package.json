@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "paisen",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -23,5 +23,21 @@
     "react": "18.2.0",
     "react-apexcharts": "^1.4.0",
     "react-dom": "18.2.0"
-  }
+  },
+  "description": "Self hosted MAL helper made using next.js",
+  "main": "next.config.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ninjashari/paisen.git"
+  },
+  "author": "Abhinav Aggarwal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ninjashari/paisen/issues"
+  },
+  "homepage": "https://github.com/ninjashari/paisen#readme"
 }
