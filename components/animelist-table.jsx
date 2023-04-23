@@ -168,12 +168,8 @@ const Table = ({ animeList, malAccessToken }) => {
               </thead>
               <tbody>
                 {animeDataList?.map((anime) => (
-                  <tr key={anime.id}>
-                    <th
-                      style={{
-                        paddingRight: "0px",
-                      }}
-                    >
+                  <tr key={anime.id} className="col">
+                    <th>
                       {" "}
                       <SquareIcon
                         squareColor={anime.status.color}
@@ -187,7 +183,7 @@ const Table = ({ animeList, malAccessToken }) => {
                       {anime.title}
                     </td>
                     <td
-                      className="col"
+                      className="col-3"
                       style={{ paddingLeft: "0px", paddingRight: "0px" }}
                     >
                       <div
@@ -266,7 +262,7 @@ const Table = ({ animeList, malAccessToken }) => {
                       </div>
                     </td>
                     <td
-                      className="col-1"
+                      className="col-2"
                       style={{ paddingLeft: "0px", paddingRight: "0px" }}
                     >
                       <ScoreSelect
