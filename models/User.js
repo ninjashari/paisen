@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose from 'mongoose'
 
 // UserSchema will correspond to a collection in your MongoDB database.
 const UserSchema = new mongoose.Schema({
@@ -45,4 +45,4 @@ const UserSchema = new mongoose.Schema({
   },
 })
 
-export default mongoose.models.User || mongoose.model("User", UserSchema)
+export default mongoose.models.User || mongoose.model('User', UserSchema)
