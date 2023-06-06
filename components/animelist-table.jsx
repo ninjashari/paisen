@@ -29,13 +29,15 @@ const Table = ({ animeList, malAccessToken }) => {
     let watchedEpisodes = 0
     let totalEpisodes = 0
     let currentStatus = undefined
+    
     animeDataList.forEach((dataObj) => {
       if (parseInt(dataObj.id) === parseInt(animeId)) {
+        // console.log(dataObj)
         prevWatchedEpisodes = dataObj.episodesWatched
         dataObj.incrementWatchedEpisodes()
         watchedEpisodes = dataObj.episodesWatched
         totalEpisodes = dataObj.totalEpisodes
-        currentStatus = dataObj.userStatus
+        currentStatus = userStatusReverseMap[dataObj.userStatus]
       }
       newList.push(dataObj)
     })
@@ -48,6 +50,8 @@ const Table = ({ animeList, malAccessToken }) => {
     if (malAccessToken) {
       const malApi = new MalApi(malAccessToken)
       const res = await malApi.updateList(animeId, fieldsToUpdate)
+
+      // console.log(currentStatus)
 
       if (200 === res.status) {
         if (
