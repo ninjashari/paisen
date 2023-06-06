@@ -26,10 +26,10 @@ const RefreshForm = () => {
         const clientID = await getClientId()
         if (clientID) {
           const malObj = new Mal(clientID)
-          console.log(currentRefreshToken)
+          // console.log(currentRefreshToken)
           const response = await malObj.refreshAccessToken(currentRefreshToken)
           if (response) {
-            console.log(response)
+            // console.log(response)
             // Create user data to be updated
             const userUpdateData = {
               username: session.user.username,

@@ -30,14 +30,14 @@ const AuthoriseForm = () => {
         }
 
         const response = await updateUserData(userUpdateData)
-        console.log(response)
+        // console.log(response)
         if (response) {
           const clientID = await getClientId()
           if (clientID) {
             const mal = new Mal(clientID)
 
             const url = mal.generateAuthorizeUrl(userUpdateData.codeChallenge)
-            console.log(url)
+            // console.log(url)
 
             window.location.href = url
           } else {

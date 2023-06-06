@@ -38,9 +38,9 @@ const BarChart = ({ animeList, isLoading, malAccessToken }) => {
         tempArr.push(anime.userScore)
       }
     })
-    console.log(tempArr)
+    // console.log(tempArr)
     setScoreData(createDataArray(tempArr))
-    console.log(scoreData)
+    // console.log(scoreData)
     setSeries([
       {
         name: "number",

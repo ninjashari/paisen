@@ -67,9 +67,9 @@ const Stats = ({ animeList, isLoading }) => {
         tempArr.push(anime.userScore)
       }
     })
-    console.log(tempArr)
+    // console.log(tempArr)
     let scoreData = createDataArray(tempArr)
-    console.log(scoreData)
+    // console.log(scoreData)
     setSeries([
       {
         name: "number",
