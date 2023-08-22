@@ -4,9 +4,11 @@ export default async function handler(req, res) {
   switch (req.method) {
     case "POST":
       const addUser = req.body
+      console.log("addUser :: ", addUser)
 
       // Check if username exists
       const userExists = await findUser(addUser.username)
+      console.log("userExists :: ", userExists)
 
       if (userExists) {
         res.status(422).json({
