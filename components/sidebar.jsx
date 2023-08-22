@@ -142,7 +142,7 @@ const Sidebar = () => {
           </Link>
         </li>
 
-        <li className="nav-item">
+        {/* <li className="nav-item">
           <Link className={seasonsClass} href="/seasons">
             <i className="bi bi-calendar3"></i>
             <span>Seasons</span>
@@ -154,7 +154,7 @@ const Sidebar = () => {
             <i className="bi bi-link"></i>
             <span>Jellyfin</span>
           </Link>
-        </li>
+        </li> */}
 
         <li className="nav-item">
           <Link className="nav-link collapsed" href="/authorise">
