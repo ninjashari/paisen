@@ -1,7 +1,7 @@
 import MalApi from "@/lib/malApi"
 import { userStatusList, userStatusReverseMap } from "@/utils/constants"
 import { getAnimeObj, getWatchedPercentage } from "@/utils/malService"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Loader from "./loader"
 import Progressbar from "./progress-bar"
 import ScoreSelect from "./score-select"
@@ -10,12 +10,56 @@ import SquareIcon from "./square-icon"
 const Table = ({ animeList, malAccessToken }) => {
   const [animeDataList, setAnimeDataList] = useState([])
   const [loading, isLoading] = useState(true)
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "ascending" })
 
   useEffect(() => {
     let dataList = getAnimeObj(animeList)
     setAnimeDataList(dataList)
     isLoading(false)
   }, [])
+
+  const requestSort = (key) => {
+    let direction = "ascending"
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending"
+    }
+    setSortConfig({ key, direction })
+  }
+
+  const sortedAnimeDataList = useMemo(() => {
+    let sortableItems = [...animeDataList]
+    if (sortConfig.key !== null) {
+      const seasonMap = { winter: 0, spring: 1, summer: 2, fall: 3 }
+
+      sortableItems.sort((a, b) => {
+        let aValue
+        let bValue
+
+        if (sortConfig.key === "season") {
+          const aSeason = a.startSeason?.toLowerCase()
+          const bSeason = b.startSeason?.toLowerCase()
+          aValue =
+            (a.startSeasonYear || 0) * 10 + (seasonMap[aSeason] !== undefined ? seasonMap[aSeason] : -1)
+          bValue =
+            (b.startSeasonYear || 0) * 10 + (seasonMap[bSeason] !== undefined ? seasonMap[bSeason] : -1)
+        } else if (sortConfig.key === "score") {
+          aValue = a.userScore
+          bValue = b.userScore
+        } else {
+          return 0
+        }
+
+        if (aValue < bValue) {
+          return sortConfig.direction === "ascending" ? -1 : 1
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === "ascending" ? 1 : -1
+        }
+        return 0
+      })
+    }
+    return sortableItems
+  }, [animeDataList, sortConfig])
 
   const handleWatchIncrement = async (e) => {
     e.preventDefault()
@@ -124,15 +168,12 @@ const Table = ({ animeList, malAccessToken }) => {
 
   const changeCurrentUserStatus = async (animeId, targetStatus) => {
     // Change status of anime in local list
-    let newList = []
     animeDataList.forEach((dataObj) => {
       if (parseInt(dataObj.id) === parseInt(animeId)) {
         dataObj.setUserStatus(targetStatus)
-      } else {
-        newList.push(dataObj)
       }
     })
-    setAnimeDataList(newList)
+    setAnimeDataList([...animeDataList])
 
     // Update in MAL DB using API call
     const fieldsToUpdate = {
@@ -164,14 +205,41 @@ const Table = ({ animeList, malAccessToken }) => {
                   <th scope="col"></th>
                   <th scope="col">Anime Title</th>
                   <th scope="col">Progress</th>
-                  <th scope="col">Score</th>
+                  <th
+                    scope="col"
+                    onClick={() => requestSort("score")}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Score{" "}
+                    {sortConfig.key === "score"
+                      ? sortConfig.direction === "ascending"
+                        ? "▲"
+                        : "▼"
+                      : ""}
+                  </th>
                   <th scope="col">Type</th>
-                  <th scope="col">Season</th>
+                  <th
+                    scope="col"
+                    onClick={() => requestSort("season")}
+                    style={{
+                      cursor: "pointer",
+                      textAlign: "center",
+                      paddingLeft: "0px",
+                      paddingRight: "0px",
+                    }}
+                  >
+                    Season{" "}
+                    {sortConfig.key === "season"
+                      ? sortConfig.direction === "ascending"
+                        ? "▲"
+                        : "▼"
+                      : ""}
+                  </th>
                   <th scope="col">Change Status</th>
                 </tr>
               </thead>
               <tbody>
-                {animeDataList?.map((anime) => (
+                {sortedAnimeDataList?.map((anime) => (
                   <tr key={anime.id} className="col">
                     <th>
                       {" "}
