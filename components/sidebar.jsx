@@ -147,14 +147,14 @@ const Sidebar = () => {
             <i className="bi bi-calendar3"></i>
             <span>Seasons</span>
           </Link>
-        </li>
+        </li> */}
 
         <li className="nav-item">
           <Link className={jellyfinClass} href="/jellyfin">
-            <i className="bi bi-link"></i>
+            <i className="bi bi-server"></i>
             <span>Jellyfin</span>
           </Link>
-        </li> */}
+        </li>
 
         <li className="nav-item">
           <Link className="nav-link collapsed" href="/authorise">
