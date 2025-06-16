@@ -63,6 +63,27 @@ const UserSchema = new mongoose.Schema({
   jellyfinLastSync: {
     type: Date,
   },
+  // Anime Sync Metadata
+  syncMetadata: {
+    lastAnimeSync: {
+      type: Date,
+    },
+    lastSyncStats: {
+      processed: { type: Number, default: 0 },
+      created: { type: Number, default: 0 },
+      updated: { type: Number, default: 0 },
+      errors: { type: Number, default: 0 },
+      skipped: { type: Number, default: 0 },
+    },
+    autoSyncEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    syncInterval: {
+      type: Number,
+      default: 24, // hours
+    },
+  },
 })
 
 export default mongoose.models.User || mongoose.model('User', UserSchema)

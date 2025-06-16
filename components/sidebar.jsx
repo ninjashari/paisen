@@ -10,6 +10,7 @@ const Sidebar = () => {
   const [searchClass, setSearchClass] = useState("nav-link collapsed")
   const [seasonsClass, setSeasonsClass] = useState("nav-link collapsed")
   const [jellyfinClass, setJellyfinClass] = useState("nav-link collapsed")
+  const [animeDatabaseClass, setAnimeDatabaseClass] = useState("nav-link collapsed")
 
   const [animeListClass, setAnimeListClass] = useState("nav-content collapse")
   const [animeListLinkClass, setAnimeListLinkClass] =
@@ -34,6 +35,8 @@ const Sidebar = () => {
       setSeasonsClass("nav-link")
     } else if ("/jellyfin" === currentPath) {
       setJellyfinClass("nav-link")
+    } else if ("/anime-database" === currentPath) {
+      setAnimeDatabaseClass("nav-link")
     } else if ("/animelist/current" === currentPath) {
       setAnimeListClass("nav-content")
       setAnimeListLinkClass("nav-link")
@@ -153,6 +156,13 @@ const Sidebar = () => {
           <Link className={jellyfinClass} href="/jellyfin">
             <i className="bi bi-server"></i>
             <span>Jellyfin</span>
+          </Link>
+        </li>
+
+        <li className="nav-item">
+          <Link className={animeDatabaseClass} href="/anime-database">
+            <i className="bi bi-database"></i>
+            <span>Anime Database</span>
           </Link>
         </li>
 
