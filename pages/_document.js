@@ -14,9 +14,6 @@ export default function Document() {
         {/* Vendor CSS Files */}
         <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
         <link href="/bootstrap-icons/bootstrap-icons.css" rel="stylesheet" />
-        <link href="/boxicons/css/boxicons.min.css" rel="stylesheet" />
-
-        <link href="/remixicon/remixicon.css" rel="stylesheet" />
       </Head>
       <body>
         <Main />

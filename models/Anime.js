@@ -6,7 +6,7 @@
  * 
  * Features:
  * - Complete MAL anime data storage
- * - External ID mappings (TVDB, TMDB)
+ * - External ID mappings (AniDB)
  * - User-specific anime list status
  * - Sync metadata and timestamps
  */
@@ -19,16 +19,8 @@ const ExternalIdsSchema = new mongoose.Schema({
     type: Number,
     index: true,
   },
-  tvdbId: {
+  anidbId: {
     type: Number,
-    index: true,
-  },
-  tmdbId: {
-    type: Number,
-    index: true,
-  },
-  imdbId: {
-    type: String,
     index: true,
   },
 }, { _id: false })
@@ -39,13 +31,17 @@ const GenreSchema = new mongoose.Schema({
   name: String,
 }, { _id: false })
 
+// Studio schema (simplified)
+const StudioSchema = new mongoose.Schema({
+  id: Number,
+  name: String,
+}, { _id: false })
+
 // Start season schema
 const StartSeasonSchema = new mongoose.Schema({
   year: Number,
   season: String,
 }, { _id: false })
-
-
 
 // User list status schema (for storing user-specific data)
 const UserListStatusSchema = new mongoose.Schema({
@@ -117,9 +113,10 @@ const AnimeSchema = new mongoose.Schema({
   
   // Essential classification for filtering and display
   genres: [GenreSchema],
+  studios: [StudioSchema],
   media_type: {
     type: String,
-    enum: ['unknown', 'tv', 'ova', 'movie', 'special', 'ona', 'music'],
+    enum: ['unknown', 'tv', 'ova', 'movie', 'special', 'ona', 'music', 'tv_special'],
     default: 'unknown',
     required: true,
   },
@@ -172,8 +169,7 @@ const AnimeSchema = new mongoose.Schema({
 
 // Indexes for efficient querying
 AnimeSchema.index({ 'externalIds.malId': 1 })
-AnimeSchema.index({ 'externalIds.tvdbId': 1 })
-AnimeSchema.index({ 'externalIds.tmdbId': 1 })
+AnimeSchema.index({ 'externalIds.anidbId': 1 })
 AnimeSchema.index({ 'userListStatus.userId': 1 })
 AnimeSchema.index({ 'userListStatus.status': 1 })
 AnimeSchema.index({ 'syncMetadata.lastSyncedFromMal': 1 })

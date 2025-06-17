@@ -13,6 +13,8 @@ import Layout from '@/components/layout'
 import Header from '@/components/header'
 import Sidebar from '@/components/sidebar'
 import Loader from '@/components/loader'
+import SyncProgressBar from '@/components/sync-progress-bar'
+import { v4 as uuidv4 } from 'uuid';
 
 export default function AnimeLibraryPage() {
   const { data: session, status } = useSession()
@@ -20,6 +22,9 @@ export default function AnimeLibraryPage() {
   const [filteredAnime, setFilteredAnime] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [syncReport, setSyncReport] = useState(null)
+  const [sessionId, setSessionId] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [sortBy, setSortBy] = useState('title')
@@ -45,7 +50,7 @@ export default function AnimeLibraryPage() {
 
     try {
       const response = await axios.get('/api/anime/list')
-      const animeData = response.data.anime || []
+      const animeData = response.data.data || []
       
       setAnimeList(animeData)
       setFilteredAnime(animeData)
@@ -53,11 +58,11 @@ export default function AnimeLibraryPage() {
       // Calculate statistics
       const statistics = {
         total: animeData.length,
-        completed: animeData.filter(anime => anime.status === 'completed').length,
-        watching: animeData.filter(anime => anime.status === 'watching').length,
-        planToWatch: animeData.filter(anime => anime.status === 'plan_to_watch').length,
-        dropped: animeData.filter(anime => anime.status === 'dropped').length,
-        onHold: animeData.filter(anime => anime.status === 'on_hold').length
+        completed: animeData.filter(anime => anime.userStatus?.status === 'completed').length,
+        watching: animeData.filter(anime => anime.userStatus?.status === 'watching').length,
+        planToWatch: animeData.filter(anime => anime.userStatus?.status === 'plan_to_watch').length,
+        dropped: animeData.filter(anime => anime.userStatus?.status === 'dropped').length,
+        onHold: animeData.filter(anime => anime.userStatus?.status === 'on_hold').length,
       }
       setStats(statistics)
 
@@ -68,6 +73,41 @@ export default function AnimeLibraryPage() {
       setLoading(false)
     }
   }
+
+  const handleSyncToDb = async () => {
+    const newSessionId = uuidv4();
+    setSessionId(newSessionId);
+    setIsSyncing(true);
+    setSyncReport(null);
+    try {
+      const response = await axios.post('/api/mal/sync-to-db', { options: { sessionId: newSessionId } });
+      if (response.data.success) {
+        setSyncReport(response.data.data);
+        fetchAnimeList(); // Refresh the list after a successful sync
+      } else {
+        setError(response.data.message);
+      }
+    } catch (error) {
+      console.error('Sync error:', error);
+      setError('An error occurred during sync. Please try again.');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleSort = (key) => {
+    if (sortBy === key) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(key);
+      setSortOrder('asc');
+    }
+  };
+
+  const getSortIcon = (key) => {
+    if (sortBy !== key) return null;
+    return sortOrder === 'asc' ? '▲' : '▼';
+  };
 
   /**
    * Applies search and filter criteria to the anime list
@@ -80,15 +120,15 @@ export default function AnimeLibraryPage() {
     if (searchTerm) {
       filtered = filtered.filter(anime =>
         anime.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        anime.englishTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        anime.genres?.some(genre => genre.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        anime.studios?.some(studio => studio.toLowerCase().includes(searchTerm.toLowerCase()))
+        (anime.alternative_titles && anime.alternative_titles.en && anime.alternative_titles.en.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (anime.genres && anime.genres.some(genre => genre.name.toLowerCase().includes(searchTerm.toLowerCase()))) ||
+        (anime.studios && anime.studios.some(studio => studio.name.toLowerCase().includes(searchTerm.toLowerCase())))
       )
     }
 
     // Apply status filter
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(anime => anime.status === statusFilter)
+      filtered = filtered.filter(anime => anime.userStatus?.status === statusFilter)
     }
 
     // Apply sorting
@@ -225,6 +265,25 @@ export default function AnimeLibraryPage() {
         <Header />
         <Sidebar currentPage="anime-library" />
         <main id="main" className="main">
+          <div className="pagetitle">
+            <h1>Anime Library</h1>
+            <div className="d-flex justify-content-end my-3">
+              <button
+                className="btn btn-primary"
+                onClick={handleSyncToDb}
+                disabled={isSyncing}
+              >
+                {isSyncing ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Syncing...
+                  </>
+                ) : (
+                  'Sync with MyAnimeList'
+                )}
+              </button>
+            </div>
+          </div>
           <div className="container-fluid">
             <Loader />
           </div>
@@ -240,6 +299,25 @@ export default function AnimeLibraryPage() {
         <Header />
         <Sidebar currentPage="anime-library" />
         <main id="main" className="main">
+          <div className="pagetitle">
+            <h1>Anime Library</h1>
+            <div className="d-flex justify-content-end my-3">
+              <button
+                className="btn btn-primary"
+                onClick={handleSyncToDb}
+                disabled={isSyncing}
+              >
+                {isSyncing ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Syncing...
+                  </>
+                ) : (
+                  'Sync with MyAnimeList'
+                )}
+              </button>
+            </div>
+          </div>
           <div className="container-fluid">
             <div className="row">
               <div className="col-12">
@@ -273,6 +351,54 @@ export default function AnimeLibraryPage() {
       <Header />
       <Sidebar currentPage="anime-library" />
       <main id="main" className="main">
+        <div className="pagetitle">
+          <h1>Anime Library</h1>
+          <div className="d-flex justify-content-end my-3">
+            <button
+              className="btn btn-primary"
+              onClick={handleSyncToDb}
+              disabled={isSyncing}
+            >
+              {isSyncing ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Syncing...
+                </>
+              ) : (
+                'Sync with MyAnimeList'
+              )}
+            </button>
+          </div>
+        </div>
+        {isSyncing && (
+          <SyncProgressBar sessionId={sessionId} show={isSyncing} />
+        )}
+        {syncReport && !isSyncing && (
+          <div className="card">
+            <div className="card-header">
+              <h4 className="card-title">Sync Report</h4>
+            </div>
+            <div className="card-body">
+              <p>
+                <strong>Processed:</strong> {syncReport.processed} | 
+                <strong>Updated:</strong> {syncReport.updated} | 
+                <strong>Created:</strong> {syncReport.created} | 
+                <strong>Errors:</strong> {syncReport.errors}
+              </p>
+              {syncReport.errors > 0 && (
+                <>
+                  <hr />
+                  <h5>Error Details:</h5>
+                  <ul className="list-group">
+                    {syncReport.noMatches.map((item, index) => (
+                      <li key={index} className="list-group-item"><strong>{item.title}:</strong> {item.error}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+          </div>
+        )}
         <div className="container-fluid">
           {/* Page Header */}
           <div className="row mb-4">
@@ -458,13 +584,14 @@ export default function AnimeLibraryPage() {
                         <table className="table table-hover">
                           <thead>
                             <tr>
-                              <th>Title</th>
-                              <th>Status</th>
-                              <th>Score</th>
-                              <th>Episodes</th>
-                              <th>Year</th>
-                              <th>Genres</th>
-                              <th>Last Updated</th>
+                              <th scope="col" onClick={() => handleSort('title')}>Title {getSortIcon('title')}</th>
+                              <th scope="col">Genres</th>
+                              <th scope="col">Studios</th>
+                              <th scope="col" onClick={() => handleSort('status')}>Status {getSortIcon('status')}</th>
+                              <th scope="col" onClick={() => handleSort('score')}>Score {getSortIcon('score')}</th>
+                              <th scope="col" onClick={() => handleSort('episodes')}>Episodes {getSortIcon('episodes')}</th>
+                              <th scope="col" onClick={() => handleSort('year')}>Year {getSortIcon('year')}</th>
+                              <th scope="col" onClick={() => handleSort('updated')}>Last Updated {getSortIcon('updated')}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -478,18 +605,17 @@ export default function AnimeLibraryPage() {
                                         {anime.englishTitle}
                                       </small>
                                     )}
-                                    {anime.studios && anime.studios.length > 0 && (
-                                      <small className="text-muted d-block">
-                                        <i className="bi bi-building me-1"></i>
-                                        {anime.studios.slice(0, 2).join(', ')}
-                                        {anime.studios.length > 2 && ` +${anime.studios.length - 2} more`}
-                                      </small>
-                                    )}
                                   </div>
                                 </td>
+                                <td className="small">
+                                  {anime.genres?.map(genre => genre.name).join(', ')}
+                                </td>
+                                <td className="small">
+                                  {anime.studios?.map(studio => studio.name).join(', ')}
+                                </td>
                                 <td>
-                                  <span className={`badge ${getStatusBadge(anime.status)}`}>
-                                    {getStatusText(anime.status)}
+                                  <span className={`badge ${getStatusBadge(anime.userStatus?.status)}`}>
+                                    {getStatusText(anime.userStatus?.status)}
                                   </span>
                                 </td>
                                 <td>
@@ -516,18 +642,6 @@ export default function AnimeLibraryPage() {
                                   </div>
                                 </td>
                                 <td>{anime.year || 'Unknown'}</td>
-                                <td>
-                                  {anime.genres && anime.genres.slice(0, 3).map((genre, idx) => (
-                                    <span key={idx} className="badge bg-light text-dark me-1 mb-1">
-                                      {genre}
-                                    </span>
-                                  ))}
-                                  {anime.genres && anime.genres.length > 3 && (
-                                    <span className="badge bg-light text-dark">
-                                      +{anime.genres.length - 3} more
-                                    </span>
-                                  )}
-                                </td>
                                 <td>
                                   <small className="text-muted">
                                     {formatDate(anime.updatedAt || anime.createdAt)}

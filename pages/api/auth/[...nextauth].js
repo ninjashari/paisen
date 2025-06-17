@@ -2,6 +2,8 @@ import { findUser } from "@/lib/dbUtil"
 import { isPasswordValid } from "@/utils/hash"
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import User from "@/models/User"
+import dbConnect from "@/lib/dbConnect"
 
 export const authOptions = {
   pages: {
@@ -44,11 +46,21 @@ export const authOptions = {
 
   callbacks: {
     jwt: async ({ token, user }) => {
-      user && (token.user = user)
+      if (user) {
+        token.user = user
+      }
+      if (token.user?.username) {
+        await dbConnect()
+        const dbUser = await User.findOne({ username: token.user.username })
+        if (dbUser && dbUser.accessToken) {
+          token.malAccessToken = dbUser.accessToken
+        }
+      }
       return token
     },
     session: async ({ session, token }) => {
       session.user = token.user
+      session.malAccessToken = token.malAccessToken
       return session
     },
   },
