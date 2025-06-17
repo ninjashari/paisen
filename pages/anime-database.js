@@ -23,6 +23,11 @@ export default function AnimeDatabase() {
   const [syncResult, setSyncResult] = useState(null)
   const [includeExternalIds, setIncludeExternalIds] = useState(true)
   const [forceUpdate, setForceUpdate] = useState(false)
+  const [apiTesting, setApiTesting] = useState({
+    activeEndpoint: null,
+    results: {},
+    loading: {}
+  })
 
   useEffect(() => {
     if (session) {
@@ -81,6 +86,82 @@ export default function AnimeDatabase() {
   const formatDate = (dateString) => {
     if (!dateString) return 'Never'
     return new Date(dateString).toLocaleString()
+  }
+
+  /**
+   * Test API endpoints with different parameters
+   * @param {string} endpoint - API endpoint to test
+   * @param {Object} options - Request options
+   */
+  const testApiEndpoint = async (endpoint, options = {}) => {
+    const endpointKey = `${endpoint}-${JSON.stringify(options)}`
+    
+    setApiTesting(prev => ({
+      ...prev,
+      activeEndpoint: endpointKey,
+      loading: { ...prev.loading, [endpointKey]: true }
+    }))
+
+    try {
+      const response = await fetch(endpoint, {
+        method: options.method || 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers
+        },
+        ...(options.body && { body: JSON.stringify(options.body) })
+      })
+
+      const data = await response.json()
+      const result = {
+        status: response.status,
+        statusText: response.statusText,
+        data: data,
+        timestamp: new Date().toISOString(),
+        success: response.ok
+      }
+
+      setApiTesting(prev => ({
+        ...prev,
+        results: { ...prev.results, [endpointKey]: result },
+        loading: { ...prev.loading, [endpointKey]: false }
+      }))
+
+    } catch (error) {
+      const result = {
+        status: 0,
+        statusText: 'Network Error',
+        data: { error: error.message },
+        timestamp: new Date().toISOString(),
+        success: false
+      }
+
+      setApiTesting(prev => ({
+        ...prev,
+        results: { ...prev.results, [endpointKey]: result },
+        loading: { ...prev.loading, [endpointKey]: false }
+      }))
+    }
+  }
+
+  /**
+   * Get API test result for display
+   * @param {string} endpoint - API endpoint
+   * @param {Object} options - Request options
+   */
+  const getApiTestResult = (endpoint, options = {}) => {
+    const endpointKey = `${endpoint}-${JSON.stringify(options)}`
+    return apiTesting.results[endpointKey]
+  }
+
+  /**
+   * Check if API test is loading
+   * @param {string} endpoint - API endpoint
+   * @param {Object} options - Request options
+   */
+  const isApiTestLoading = (endpoint, options = {}) => {
+    const endpointKey = `${endpoint}-${JSON.stringify(options)}`
+    return apiTesting.loading[endpointKey] || false
   }
 
   return (
@@ -323,6 +404,156 @@ export default function AnimeDatabase() {
   -H "Content-Type: application/json" \\
   -d '{"syncKey":"your-sync-key","maxUsers":10,"includeExternalIds":true}'`}
                           </pre>
+                        </div>
+
+                        <h6 className="mt-4">Interactive API Testing</h6>
+                        <p>Test the API endpoints directly from this interface:</p>
+                        
+                        <div className="row g-3">
+                          {/* Test Sync Status */}
+                          <div className="col-md-6">
+                            <div className="card border-primary">
+                              <div className="card-header bg-primary text-white">
+                                <h6 className="mb-0">GET /api/anime/sync</h6>
+                              </div>
+                              <div className="card-body">
+                                <p className="small">Get synchronization statistics and status</p>
+                                <button
+                                  className="btn btn-outline-primary btn-sm"
+                                  onClick={() => testApiEndpoint('/api/anime/sync')}
+                                  disabled={isApiTestLoading('/api/anime/sync')}
+                                >
+                                  {isApiTestLoading('/api/anime/sync') ? (
+                                    <>
+                                      <span className="spinner-border spinner-border-sm me-1"></span>
+                                      Testing...
+                                    </>
+                                  ) : (
+                                    'Test Endpoint'
+                                  )}
+                                </button>
+                                
+                                {getApiTestResult('/api/anime/sync') && (
+                                  <div className={`mt-2 p-2 rounded small ${getApiTestResult('/api/anime/sync').success ? 'bg-success-subtle' : 'bg-danger-subtle'}`}>
+                                    <strong>Status:</strong> {getApiTestResult('/api/anime/sync').status} {getApiTestResult('/api/anime/sync').statusText}<br/>
+                                    <strong>Response:</strong>
+                                    <pre className="mt-1 mb-0 small">
+                                      {JSON.stringify(getApiTestResult('/api/anime/sync').data, null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Test Anime List */}
+                          <div className="col-md-6">
+                            <div className="card border-info">
+                              <div className="card-header bg-info text-white">
+                                <h6 className="mb-0">GET /api/anime/list</h6>
+                              </div>
+                              <div className="card-body">
+                                <p className="small">Query local anime database with filtering</p>
+                                <button
+                                  className="btn btn-outline-info btn-sm"
+                                  onClick={() => testApiEndpoint('/api/anime/list')}
+                                  disabled={isApiTestLoading('/api/anime/list')}
+                                >
+                                  {isApiTestLoading('/api/anime/list') ? (
+                                    <>
+                                      <span className="spinner-border spinner-border-sm me-1"></span>
+                                      Testing...
+                                    </>
+                                  ) : (
+                                    'Test Endpoint'
+                                  )}
+                                </button>
+                                
+                                {getApiTestResult('/api/anime/list') && (
+                                  <div className={`mt-2 p-2 rounded small ${getApiTestResult('/api/anime/list').success ? 'bg-success-subtle' : 'bg-danger-subtle'}`}>
+                                    <strong>Status:</strong> {getApiTestResult('/api/anime/list').status} {getApiTestResult('/api/anime/list').statusText}<br/>
+                                    <strong>Count:</strong> {getApiTestResult('/api/anime/list').data?.anime?.length || 0} anime found<br/>
+                                    <strong>Sample Data:</strong>
+                                    <pre className="mt-1 mb-0 small" style={{maxHeight: '150px', overflow: 'auto'}}>
+                                      {JSON.stringify(getApiTestResult('/api/anime/list').data?.anime?.slice(0, 2) || [], null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Test Database Stats */}
+                          <div className="col-md-6">
+                            <div className="card border-success">
+                              <div className="card-header bg-success text-white">
+                                <h6 className="mb-0">GET /api/database/anime-stats</h6>
+                              </div>
+                              <div className="card-body">
+                                <p className="small">Get comprehensive anime database statistics</p>
+                                <button
+                                  className="btn btn-outline-success btn-sm"
+                                  onClick={() => testApiEndpoint('/api/database/anime-stats')}
+                                  disabled={isApiTestLoading('/api/database/anime-stats')}
+                                >
+                                  {isApiTestLoading('/api/database/anime-stats') ? (
+                                    <>
+                                      <span className="spinner-border spinner-border-sm me-1"></span>
+                                      Testing...
+                                    </>
+                                  ) : (
+                                    'Test Endpoint'
+                                  )}
+                                </button>
+                                
+                                {getApiTestResult('/api/database/anime-stats') && (
+                                  <div className={`mt-2 p-2 rounded small ${getApiTestResult('/api/database/anime-stats').success ? 'bg-success-subtle' : 'bg-danger-subtle'}`}>
+                                    <strong>Status:</strong> {getApiTestResult('/api/database/anime-stats').status} {getApiTestResult('/api/database/anime-stats').statusText}<br/>
+                                    <strong>Response:</strong>
+                                    <pre className="mt-1 mb-0 small">
+                                      {JSON.stringify(getApiTestResult('/api/database/anime-stats').data, null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Test Sync History */}
+                          <div className="col-md-6">
+                            <div className="card border-warning">
+                              <div className="card-header bg-warning text-dark">
+                                <h6 className="mb-0">GET /api/database/sync-stats</h6>
+                              </div>
+                              <div className="card-body">
+                                <p className="small">Get synchronization history and performance metrics</p>
+                                <button
+                                  className="btn btn-outline-warning btn-sm"
+                                  onClick={() => testApiEndpoint('/api/database/sync-stats')}
+                                  disabled={isApiTestLoading('/api/database/sync-stats')}
+                                >
+                                  {isApiTestLoading('/api/database/sync-stats') ? (
+                                    <>
+                                      <span className="spinner-border spinner-border-sm me-1"></span>
+                                      Testing...
+                                    </>
+                                  ) : (
+                                    'Test Endpoint'
+                                  )}
+                                </button>
+                                
+                                {getApiTestResult('/api/database/sync-stats') && (
+                                  <div className={`mt-2 p-2 rounded small ${getApiTestResult('/api/database/sync-stats').success ? 'bg-success-subtle' : 'bg-danger-subtle'}`}>
+                                    <strong>Status:</strong> {getApiTestResult('/api/database/sync-stats').status} {getApiTestResult('/api/database/sync-stats').statusText}<br/>
+                                    <strong>Response:</strong>
+                                    <pre className="mt-1 mb-0 small">
+                                      {JSON.stringify(getApiTestResult('/api/database/sync-stats').data, null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

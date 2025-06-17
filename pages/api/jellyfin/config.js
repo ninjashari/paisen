@@ -33,6 +33,9 @@ export default async function handler(req, res) {
   // Try both username and name fields for compatibility
   const username = session.user.username || session.user.name
   
+  console.log('Session user:', session.user)
+  console.log('Extracted username:', username)
+  
   if (!username) {
     console.error('No username found in session:', session.user)
     return res.status(400).json({
@@ -91,9 +94,24 @@ async function handleGetConfig(req, res, username) {
   }
   
   console.log('User found:', user.username)
+  console.log('Jellyfin fields:', {
+    serverUrl: !!user.jellyfinServerUrl,
+    apiKey: !!user.jellyfinApiKey,
+    userId: !!user.jellyfinUserId,
+    serverUrlValue: user.jellyfinServerUrl,
+    userIdValue: user.jellyfinUserId
+  })
+
+  // Check if Jellyfin is properly configured
+  const configured = !!(
+    user.jellyfinServerUrl && 
+    user.jellyfinApiKey && 
+    user.jellyfinUserId
+  )
 
   // Return configuration without sensitive data
   const config = {
+    configured,
     serverUrl: user.jellyfinServerUrl || '',
     username: user.jellyfinUsername || '',
     syncEnabled: user.jellyfinSyncEnabled || false,
@@ -104,6 +122,7 @@ async function handleGetConfig(req, res, username) {
 
   res.status(200).json({
     success: true,
+    configured,
     data: config
   })
 }
