@@ -15,6 +15,7 @@ import User from '@/models/User'
 import AnimeSyncService from '@/lib/animeSyncService'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../auth/[...nextauth]'
+import axios from 'axios'
 
 export default async function handler(req, res) {
   const { method } = req
@@ -84,16 +85,49 @@ async function handleSyncRequest(req, res, username) {
       })
     }
 
-    // Check if token is expired
-    if (user.expiryTime && Date.now() > user.expiryTime) {
-      return res.status(401).json({
-        success: false,
-        message: 'MAL access token has expired. Please re-authenticate.'
-      })
+    // Check if token is expired (with some buffer time)
+    const bufferTime = 5 * 60 * 1000 // 5 minutes buffer
+    if (user.expiryTime && Date.now() > (user.expiryTime + bufferTime)) {
+      // Try to refresh the token first if we have a refresh token
+      if (user.refreshToken) {
+        try {
+          const refreshResult = await refreshMalToken(user)
+          if (refreshResult.success) {
+            // Update user with new token
+            await User.findByIdAndUpdate(user._id, {
+              accessToken: refreshResult.accessToken,
+              expiryTime: refreshResult.expiryTime,
+              refreshToken: refreshResult.refreshToken || user.refreshToken
+            })
+            // Update user object for this request
+            user.accessToken = refreshResult.accessToken
+            user.expiryTime = refreshResult.expiryTime
+          } else {
+            return res.status(401).json({
+              success: false,
+              message: 'MAL access token has expired and refresh failed. Please re-authenticate.'
+            })
+          }
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError)
+          return res.status(401).json({
+            success: false,
+            message: 'MAL access token has expired and refresh failed. Please re-authenticate.'
+          })
+        }
+      } else {
+        return res.status(401).json({
+          success: false,
+          message: 'MAL access token has expired. Please re-authenticate.'
+        })
+      }
     }
 
-    // Initialize sync service
-    const syncService = new AnimeSyncService(user._id, user.accessToken)
+    // Generate session ID for progress tracking
+    const sessionId = `sync_${user._id}_${Date.now()}`
+    
+    // Initialize sync service with progress tracking
+    const syncService = new AnimeSyncService(user._id, user.accessToken, sessionId)
 
     // Perform sync
     const syncResult = await syncService.syncUserAnimeList({
@@ -177,5 +211,42 @@ async function handleGetSyncStats(req, res, username) {
       message: 'Internal server error while retrieving sync statistics',
       error: error.message
     })
+  }
+}
+
+/**
+ * Refresh MAL access token using refresh token
+ * 
+ * @param {Object} user - User document
+ * @returns {Promise<Object>} Refresh result
+ */
+async function refreshMalToken(user) {
+  try {
+    const response = await axios.post('https://myanimelist.net/v1/oauth2/token', {
+      client_id: process.env.MAL_CLIENT_ID,
+      client_secret: process.env.MAL_CLIENT_SECRET,
+      grant_type: 'refresh_token',
+      refresh_token: user.refreshToken
+    }, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+
+    const tokenData = response.data
+    const expiryTime = Date.now() + (tokenData.expires_in * 1000)
+
+    return {
+      success: true,
+      accessToken: tokenData.access_token,
+      expiryTime: expiryTime,
+      refreshToken: tokenData.refresh_token
+    }
+  } catch (error) {
+    console.error('Token refresh error:', error.response?.data || error.message)
+    return {
+      success: false,
+      error: error.response?.data?.error || error.message
+    }
   }
 } 
