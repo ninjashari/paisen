@@ -20,6 +20,7 @@
 - [📋 Prerequisites](#-prerequisites)
 - [⚙️ Installation](#️-installation)
 - [🔧 Configuration](#-configuration)
+- [🗺️ Anime Mapping Setup](#️-anime-mapping-setup)
 - [🎬 Jellyfin Integration](#-jellyfin-integration)
 - [🔌 API Documentation](#-api-documentation)
 - [🧪 Testing](#-testing)
@@ -50,9 +51,17 @@
 - **🚀 Lightning Speed** - 90% faster than direct API calls
 - **🔍 Full-text Search** - Advanced indexing across all metadata
 - **📱 Offline Support** - Complete functionality without internet
-- **🆔 Universal IDs** - Cross-platform mapping (MAL, TVDB, TMDB)
+- **🆔 Universal IDs** - Cross-platform mapping (MAL, AniDB)
 - **📊 Analytics Engine** - Detailed statistics and performance metrics
 - **🔄 Smart Caching** - Intelligent data synchronization and updates
+
+### 🗺️ Anime Mapping System
+- **🔗 Offline Database** - Uses [manami-project/anime-offline-database](https://github.com/manami-project/anime-offline-database) for cross-platform mappings
+- **🤖 Auto-Mapping** - Automatic MAL to AniDB ID mapping suggestions
+- **✅ User Confirmation** - Review and confirm suggested mappings
+- **✏️ Manual Override** - Enter custom AniDB IDs when auto-mapping fails
+- **📊 Mapping Statistics** - Track confirmed vs suggested mappings
+- **🔄 Periodic Updates** - Regular offline database updates for latest mappings
 
 ---
 
@@ -198,6 +207,44 @@ JELLYFIN_API_KEY=your_jellyfin_api_key
 Start MongoDB service:
 
 ```bash
+# On macOS (with Homebrew)
+brew services start mongodb-community
+
+# On Ubuntu/Debian
+sudo systemctl start mongod
+
+# On Windows
+net start MongoDB
+```
+
+### 5. Initialize Anime Mapping Database
+
+Set up the offline anime database for cross-platform mappings:
+
+```bash
+# Download and process the latest anime mappings
+npm run db:init
+```
+
+This will:
+- Download the latest anime-offline-database from GitHub
+- Extract MAL to AniDB ID mappings
+- Store mappings in your local MongoDB database
+- Provide statistics on processed entries
+
+### 6. Start Development Server
+
+```bash
+npm run dev
+```
+
+🎉 **Your Paisen instance is now running at [http://localhost:3000](http://localhost:3000)**
+
+### 7. Production Build
+
+For production deployment:
+
+```bash
 # Ubuntu/Debian
 sudo systemctl start mongod
 
@@ -250,6 +297,154 @@ openssl rand -base64 32
 
 ---
 
+## 🗺️ Anime Mapping Setup
+
+Paisen uses the [manami-project/anime-offline-database](https://github.com/manami-project/anime-offline-database) to create cross-platform mappings between MyAnimeList and AniDB. This enables enhanced compatibility and metadata enrichment.
+
+### Prerequisites
+- MongoDB running and connected
+- User account created and logged in
+- MyAnimeList data synchronized
+
+### Initial Database Setup
+
+#### 1. Initialize Offline Database
+
+Run the initialization script to download and process the latest anime mappings:
+
+```bash
+# Download and process anime-offline-database
+npm run db:init
+```
+
+This script will:
+- Download `anime-offline-database-minified.json` from manami-project
+- Extract MAL to AniDB mappings
+- Store mappings in your local MongoDB database
+- Show progress and statistics
+
+#### 2. Verify Database Status
+
+Navigate to the **Anime Mapping** page to check database status:
+- Last update timestamp
+- Total mappings available
+- Processing statistics
+- Error status (if any)
+
+### Using the Anime Mapping Interface
+
+#### 1. Access Anime Mapping Page
+
+1. **Log in** to your Paisen account
+2. **Navigate to** "Anime Mapping" in the sidebar
+3. **View** your anime list with mapping status
+
+#### 2. Understanding Mapping Status
+
+| Status | Description | Action Required |
+|--------|-------------|----------------|
+| ✅ **Mapped** | Anime has confirmed AniDB mapping | None |
+| ⚠️ **Unmapped** | No mapping found in offline database | Manual mapping required |
+| 🔍 **Suggested** | Automatic mapping found, needs confirmation | Review and confirm |
+
+#### 3. Mapping Workflow
+
+**For Automatic Mappings:**
+1. **Click "Map" button** next to unmapped anime
+2. **Review suggested mapping** from offline database
+3. **Confirm mapping** if correct, or **reject** if incorrect
+4. **Mapping saved** and marked as user-confirmed
+
+**For Manual Mappings:**
+1. **Click "Map" button** next to anime
+2. **No suggestion found** - manual input required
+3. **Enter AniDB ID** manually (find on [anidb.net](https://anidb.net/))
+4. **Save mapping** - marked as manual mapping
+
+#### 4. Search and Filter
+
+Use the filtering options to manage large anime lists:
+
+- **Search by title or genre**
+- **Filter by watch status** (watching, completed, etc.)
+- **Filter by mapping status** (mapped, unmapped)
+- **Sort** by title, status, episodes, or mapping status
+
+### Advanced Features
+
+#### 1. Periodic Updates
+
+Keep your mapping database current:
+
+```bash
+# Manual update via script
+npm run db:init
+
+# Or use the web interface
+# Navigate to Anime Mapping → Click "Update Database"
+```
+
+#### 2. Database Status Monitoring
+
+The interface shows important metrics:
+- **Last Updated:** When database was last refreshed
+- **Total Mappings:** Number of available mappings
+- **Confirmed Mappings:** User-confirmed and manual mappings
+- **Update Status:** Success/failure of last update
+
+#### 3. Mapping Sources
+
+Paisen tracks mapping sources for transparency:
+- **`offline_database`** - From manami-project database
+- **`user_confirmed`** - User confirmed suggested mapping
+- **`manual`** - User manually entered mapping
+
+### API Endpoints
+
+For developers and advanced users:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/anime/mapping` | GET | Get mapping for MAL ID |
+| `/api/anime/mapping` | POST | Create manual mapping |
+| `/api/anime/mapping` | PUT | Confirm suggested mapping |
+| `/api/anime/db-status` | GET | Get database status |
+| `/api/anime/update-offline-db` | POST | Update offline database |
+
+### Troubleshooting
+
+**❌ Database Update Failed**
+```
+Error: Failed to download offline database
+```
+**✅ Solution:**
+1. Check internet connection
+2. Verify GitHub access (database hosted on GitHub)
+3. Check disk space for database storage
+4. Review logs for specific error details
+
+**❌ No Mappings Found**
+```
+Warning: No mappings available for anime
+```
+**✅ Solution:**
+1. Ensure offline database is initialized
+2. Check if anime exists in manami-project database
+3. Consider manual mapping for obscure/new anime
+4. Verify MAL ID is correct
+
+**❌ Mapping Interface Not Loading**
+```
+Error: Failed to load anime list
+```
+**✅ Solution:**
+1. Ensure user is logged in
+2. Check MyAnimeList data is synced
+3. Verify database connection
+4. Check browser console for errors
+
+---
+
 ## 🎬 Jellyfin Integration
 
 ### Prerequisites
@@ -297,96 +492,35 @@ For real-time sync when episodes are watched:
 
 ## 🔌 API Documentation
 
-### Authentication Endpoints
+Paisen provides a comprehensive REST API for integration with other applications.
 
-| Endpoint | Method | Description | Authentication |
-|----------|--------|-------------|----------------|
-| `/api/auth/[...nextauth]` | GET/POST | NextAuth.js authentication | None |
-
-### Data Retrieval Endpoints
-
-| Endpoint | Method | Description | Authentication |
-|----------|--------|-------------|----------------|
-| `/api/anime/list` | GET | Query local anime database | Session |
-| `/api/user/[username]` | GET | Get user profile and stats | Session |
-
-### Integration Endpoints
-
-| Endpoint | Method | Description | Authentication |
-|----------|--------|-------------|----------------|
-| `/api/jellyfin/config` | GET/POST | Jellyfin server configuration | Session |
-| `/api/jellyfin/sync` | POST | Manual Jellyfin synchronization | Session |
-| `/api/jellyfin/webhook` | POST | Jellyfin webhook handler | Webhook Key |
-| `/api/jellyfin/test` | GET | Test Jellyfin connection | Session |
-
-### Status and Monitoring
-
-| Endpoint | Method | Description | Authentication |
-|----------|--------|-------------|----------------|
-| `/api/sync/progress/[sessionId]` | GET | Sync progress monitoring | Session |
-
----
+**API documentation coming soon.**
 
 ## 🧪 Testing
 
-Paisen includes comprehensive test suites for all major components.
-
-### Running Tests
+Run the full test suite:
 
 ```bash
-# Run all tests
 npm test
-
-# Run tests with coverage
-npm run test:coverage
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run specific test suites
-npm test -- --testPathPattern=jellyfin
-npm test -- --testPathPattern=integration
 ```
 
-### Test Categories
-
-#### Unit Tests
-- **Jellyfin Integration** - Server communication, webhook handling
-- **Database Models** - Data validation, relationships
-- **Utility Functions** - Helper functions, data transformation
-
-#### Integration Tests
-- **API Endpoints** - HTTP request/response handling
-- **Authentication Flow** - Session management, OAuth
-- **Database Operations** - CRUD operations, data consistency
-- **External API Integration** - MyAnimeList, Jellyfin
-
-#### End-to-End Tests
-- **Complete User Workflows** - Registration to anime tracking
-- **Cross-platform Sync** - Data consistency across services
-- **Error Recovery** - Graceful handling of failures
-- **Performance Benchmarks** - Response times, throughput
-
-### Test Coverage Goals
-
-| Component | Target Coverage |
-|-----------|----------------|
-| **API Endpoints** | 90%+ |
-| **Database Models** | 85%+ |
-| **Core Libraries** | 90%+ |
-| **Utility Functions** | 95%+ |
-| **Integration Flows** | 80%+ |
-
-### Running Specific Tests
+To run tests in watch mode:
 
 ```bash
-# Test Jellyfin integration
-npm test __tests__/jellyfin-simple.test.js
+npm test -- --watch
 ```
 
----
+To initialize the database for testing:
+
+```bash
+npm run db:init
+```
 
 ## 🔧 Troubleshooting
+
+**"Error: Could not connect to MongoDB"**
+- Ensure your MongoDB server is running.
+- Verify that `MONGODB_URI` in `.env.local` is correct.
 
 ### Common Issues and Solutions
 
@@ -429,7 +563,7 @@ Error: Failed to sync anime data
 **✅ Solution:**
 1. Check anime library permissions
 2. Verify metadata providers are configured
-3. Ensure TVDB/TMDB IDs are present
+3. Ensure anime has proper MAL and AniDB mapping
 4. Review sync logs for specific errors
 
 **❌ Webhook Not Working**
@@ -668,7 +802,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ### 🔌 External Services
 - **[MyAnimeList](https://myanimelist.net/)** - Primary anime database and user lists
 - **[Jellyfin](https://jellyfin.org/)** - Open source media server integration
-- **[TVDB](https://thetvdb.com/)** - Television database for additional metadata
+- **[AniDB](https://anidb.net/)** - Anime database for cross-platform mapping
 
 ### 👥 Community
 - **Contributors** - Everyone who has contributed code, documentation, or feedback

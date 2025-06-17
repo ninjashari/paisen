@@ -11,8 +11,11 @@ const Header = ({ isLoading, malAccessToken, setSearchData }) => {
   useEffect(() => {
     if (router.asPath === "/search") {
       setShowSearch(true)
+    } else {
+      setShowSearch(false)
     }
-  })
+  }, [router.asPath])
+
   return (
     <header id="header" className="header fixed-top d-flex align-items-center">
       <Logo />

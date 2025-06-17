@@ -6,16 +6,19 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "db:init": "node scripts/init-offline-db.js",
+    "db:backfill": "node scripts/backfill-anidb-ids.js",
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "init-offline-db": "node scripts/init-offline-db.js"
   },
   "dependencies": {
     "apexcharts": "^3.37.3",
-    "axios": "^1.10.0",
+    "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
-    "bootstrap": "^5.2.3",
+    "bootstrap": "^5.3.3",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "mongoose": "^7.0.3",
@@ -27,6 +30,7 @@
     "react": "18.2.0",
     "react-apexcharts": "^1.4.0",
     "react-dom": "18.2.0",
+    "uuid": "^11.1.0",
     "xml2js": "^0.6.2"
   },
   "description": "Self hosted MAL helper made using next.js",

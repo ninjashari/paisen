@@ -323,8 +323,6 @@ async function createAnimeFromJellyfin(animeInfo, userId) {
   // Get external IDs if available
   const externalIds = {}
   if (animeInfo.malId) externalIds.malId = animeInfo.malId
-  if (animeInfo.tvdbId) externalIds.tvdbId = animeInfo.tvdbId
-  if (animeInfo.tmdbId) externalIds.tmdbId = animeInfo.tmdbId
   
   // Create minimal anime document with only essential fields
   const animeData = {

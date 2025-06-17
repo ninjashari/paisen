@@ -34,3 +34,5 @@ yarn-error.log*
 
 #chrome
 ~/
+data/anime-offline-database-minified.json
+data/anime-offline-database-minified.schema.json

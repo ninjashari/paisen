@@ -7,6 +7,10 @@
 
 import '@testing-library/jest-dom'
 
+// Add Node.js polyfills for test environment
+global.TextEncoder = require('util').TextEncoder
+global.TextDecoder = require('util').TextDecoder
+
 // Mock Next.js router
 jest.mock('next/router', () => ({
   useRouter() {

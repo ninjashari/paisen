@@ -7,7 +7,7 @@
  * Features:
  * - Retrieve user's anime list by status
  * - Search and filter anime entries
- * - Include external ID mappings (TVDB, TMDB)
+ * - Include external ID mappings (AniDB)
  * - Pagination support
  */
 
@@ -146,26 +146,28 @@ async function handleGetAnimeList(req, res, username) {
 
     // Add pagination
     const skip = (parseInt(page) - 1) * parseInt(limit)
-    pipeline.push({ $skip: skip })
-    pipeline.push({ $limit: parseInt(limit) })
+    if (parseInt(limit) > 0) {
+      pipeline.push({ $skip: skip })
+      pipeline.push({ $limit: parseInt(limit) })
+    }
 
-    // Project only essential fields used by our application
+    // Project essential fields for the anime library view
     const projectStage = {
       malId: 1,
+      anidbId: '$externalIds.anidbId',
       title: 1,
+      englishTitle: '$alternative_titles.en',
       genres: 1,
-      media_type: 1,
-      status: 1,
-      num_episodes: 1,
-      start_season: 1,
-      userStatus: 1,
-      'syncMetadata.lastSyncedFromMal': 1,
-      'syncMetadata.lastUpdatedOnMal': 1
-    }
-
-    if (includeExternalIds === 'true') {
-      projectStage.externalIds = 1
-    }
+      studios: 1,
+      episodes: '$num_episodes',
+      year: '$start_season.year',
+      score: '$userStatus.score',
+      status: '$userStatus.status', // This is the user's status (e.g., watching), not the anime's airing status
+      watchedEpisodes: '$userStatus.num_episodes_watched',
+      updatedAt: 1,
+      createdAt: 1,
+      userStatus: 1, // Keep the full userStatus object for any other frontend needs
+    };
 
     pipeline.push({ $project: projectStage })
 
