@@ -10,6 +10,10 @@ const Sidebar = () => {
   const [searchClass, setSearchClass] = useState("nav-link collapsed")
   const [seasonsClass, setSeasonsClass] = useState("nav-link collapsed")
   const [jellyfinClass, setJellyfinClass] = useState("nav-link collapsed")
+  const [jellyfinInfoClass, setJellyfinInfoClass] = useState("nav-link collapsed")
+  const [databaseInfoClass, setDatabaseInfoClass] = useState("nav-link collapsed")
+  const [animeDatabaseClass, setAnimeDatabaseClass] = useState("nav-link collapsed")
+  const [animeLibraryClass, setAnimeLibraryClass] = useState("nav-link collapsed")
 
   const [animeListClass, setAnimeListClass] = useState("nav-content collapse")
   const [animeListLinkClass, setAnimeListLinkClass] =
@@ -34,6 +38,14 @@ const Sidebar = () => {
       setSeasonsClass("nav-link")
     } else if ("/jellyfin" === currentPath) {
       setJellyfinClass("nav-link")
+    } else if ("/jellyfin-info" === currentPath) {
+      setJellyfinInfoClass("nav-link")
+    } else if ("/database-info" === currentPath) {
+      setDatabaseInfoClass("nav-link")
+    } else if ("/anime-database" === currentPath) {
+      setAnimeDatabaseClass("nav-link")
+    } else if ("/anime-library" === currentPath) {
+      setAnimeLibraryClass("nav-link")
     } else if ("/animelist/current" === currentPath) {
       setAnimeListClass("nav-content")
       setAnimeListLinkClass("nav-link")
@@ -147,14 +159,42 @@ const Sidebar = () => {
             <i className="bi bi-calendar3"></i>
             <span>Seasons</span>
           </Link>
-        </li>
+        </li> */}
 
         <li className="nav-item">
           <Link className={jellyfinClass} href="/jellyfin">
-            <i className="bi bi-link"></i>
+            <i className="bi bi-server"></i>
             <span>Jellyfin</span>
           </Link>
-        </li> */}
+        </li>
+
+        <li className="nav-item">
+          <Link className={jellyfinInfoClass} href="/jellyfin-info">
+            <i className="bi bi-info-circle"></i>
+            <span>Jellyfin Info</span>
+          </Link>
+        </li>
+
+        <li className="nav-item">
+          <Link className={animeDatabaseClass} href="/anime-database">
+            <i className="bi bi-database"></i>
+            <span>Anime Database</span>
+          </Link>
+        </li>
+
+        <li className="nav-item">
+          <Link className={animeLibraryClass} href="/anime-library">
+            <i className="bi bi-collection"></i>
+            <span>Anime Library</span>
+          </Link>
+        </li>
+
+        <li className="nav-item">
+          <Link className={databaseInfoClass} href="/database-info">
+            <i className="bi bi-bar-chart-line"></i>
+            <span>Database Info</span>
+          </Link>
+        </li>
 
         <li className="nav-item">
           <Link className="nav-link collapsed" href="/authorise">

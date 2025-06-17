@@ -43,6 +43,47 @@ const UserSchema = new mongoose.Schema({
   tokenType: {
     type: String,
   },
+  // Jellyfin Integration Fields
+  jellyfinServerUrl: {
+    type: String,
+  },
+  jellyfinApiKey: {
+    type: String,
+  },
+  jellyfinUserId: {
+    type: String,
+  },
+  jellyfinUsername: {
+    type: String,
+  },
+  jellyfinSyncEnabled: {
+    type: Boolean,
+    default: false,
+  },
+  jellyfinLastSync: {
+    type: Date,
+  },
+  // Anime Sync Metadata
+  syncMetadata: {
+    lastAnimeSync: {
+      type: Date,
+    },
+    lastSyncStats: {
+      processed: { type: Number, default: 0 },
+      created: { type: Number, default: 0 },
+      updated: { type: Number, default: 0 },
+      errors: { type: Number, default: 0 },
+      skipped: { type: Number, default: 0 },
+    },
+    autoSyncEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    syncInterval: {
+      type: Number,
+      default: 24, // hours
+    },
+  },
 })
 
 export default mongoose.models.User || mongoose.model('User', UserSchema)

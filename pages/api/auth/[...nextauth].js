@@ -3,7 +3,7 @@ import { isPasswordValid } from "@/utils/hash"
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
-export default NextAuth({
+export const authOptions = {
   pages: {
     signIn: "/",
   },
@@ -52,4 +52,6 @@ export default NextAuth({
       return session
     },
   },
-})
+}
+
+export default NextAuth(authOptions)
