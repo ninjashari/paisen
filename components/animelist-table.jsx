@@ -6,7 +6,6 @@ import Loader from "./loader"
 import Progressbar from "./progress-bar"
 import ScoreSelect from "./score-select"
 import SquareIcon from "./square-icon"
-import axios from "axios"
 
 const Table = ({ animeList, malAccessToken }) => {
   const [animeDataList, setAnimeDataList] = useState([])
@@ -246,73 +245,138 @@ const Table = ({ animeList, malAccessToken }) => {
                       {" "}
                       <SquareIcon
                         squareColor={anime.status.color}
-                        title={anime.status.pageTitle}
+                        title={anime.status.value}
                       />
                     </th>
-                    <td style={{ textAlign: "left" }}>
-                      <a href={`/anime/${anime.id}`}>{anime.title}</a>
+                    <td
+                      className="col-3"
+                      style={{ paddingLeft: "0px", paddingRight: "0px" }}
+                    >
+                      {anime.title}
                     </td>
-                    <td>
-                      <div className="row" style={{ alignItems: "center" }}>
-                        <div className="col-md-2">
-                          <button
-                            type="button"
-                            id={anime.id}
-                            className="btn btn-primary-outline"
-                            onClick={handleWatchIncrement}
-                            style={{ all: "unset", cursor: "pointer" }}
-                          >
-                            <i id={anime.id} className="bi bi-plus-circle"></i>
-                          </button>
+                    <td
+                      className="col-3"
+                      style={{ paddingLeft: "0px", paddingRight: "0px" }}
+                    >
+                      <div
+                        className="row"
+                        style={{ paddingLeft: "0px", paddingRight: "0px" }}
+                      >
+                        {/* Decrement watched episodes */}
+                        <div className="col-1">
+                          {anime.episodesWatched > 0 &&
+                          anime.episodesWatched <= anime.totalEpisodes &&
+                          (userStatusReverseMap[anime.userStatus] ===
+                            "watching" ||
+                            userStatusReverseMap[anime.userStatus] ===
+                              "on_hold" ||
+                            userStatusReverseMap[anime.userStatus] ===
+                              "plan_to_watch") ? (
+                            <button
+                              type="button"
+                              className="btn btn-sm"
+                              onClick={handleWatchDecrement}
+                            >
+                              <i className="bi bi-dash" id={anime.id}></i>
+                            </button>
+                          ) : (
+                            ""
+                          )}
                         </div>
-                        <div className="col-md-8">
-                          {anime.episodesWatched + " / " + anime.totalEpisodes}
-                        </div>
-                        <div className="col-md-2">
-                          <button
-                            type="button"
-                            id={anime.id}
-                            className="btn btn-primary-outline"
-                            onClick={handleWatchDecrement}
-                            style={{ all: "unset", cursor: "pointer" }}
-                          >
-                            <i id={anime.id} className="bi bi-dash-circle"></i>
-                          </button>
-                        </div>
-                        <div className="col-md-12">
+                        {/* End Decrement watched episodes */}
+
+                        {/* Progress Bar */}
+                        <div className="col-5" style={{ paddingRight: "0px" }}>
                           <Progressbar
-                            progress={getWatchedPercentage(
+                            fillPercentage={getWatchedPercentage(
                               anime.episodesWatched,
                               anime.totalEpisodes
                             )}
                           />
                         </div>
+                        {/* End Progress Bar */}
+
+                        {/* Increment watched episodes */}
+                        <div
+                          className="col-1"
+                          style={{ paddingLeft: "0px", paddingRight: "0px" }}
+                        >
+                          {anime.episodesWatched >= 0 &&
+                          anime.episodesWatched < anime.totalEpisodes &&
+                          (userStatusReverseMap[anime.userStatus] ===
+                            "watching" ||
+                            userStatusReverseMap[anime.userStatus] ===
+                              "on_hold" ||
+                            userStatusReverseMap[anime.userStatus] ===
+                              "plan_to_watch") ? (
+                            <button
+                              type="button"
+                              className="btn btn-sm"
+                              style={{ padding: "0px" }}
+                              onClick={handleWatchIncrement}
+                            >
+                              <i className="bi bi-plus" id={anime.id}></i>
+                            </button>
+                          ) : (
+                            ""
+                          )}
+                        </div>
+                        {/* End Increment watched episodes */}
+
+                        {/* Value of watched/total episodes */}
+                        <div
+                          className="col-4"
+                          style={{ paddingLeft: "0px", paddingRight: "0px" }}
+                        >
+                          {anime.episodesWatched + "/" + anime.totalEpisodes}
+                        </div>
+                        {/* End Value of watched/total episodes */}
                       </div>
                     </td>
-                    <td>
+                    <td
+                      className="col-2"
+                      style={{ paddingLeft: "0px", paddingRight: "0px" }}
+                    >
                       <ScoreSelect
-                        score={anime.userScore}
+                        selectedVal={anime.userScore}
+                        animeID={anime.id}
                         malAccessToken={malAccessToken}
-                        animeId={anime.id}
+                        isLoading={isLoading}
                       />
                     </td>
-                    <td>{anime.mediaType.toUpperCase()}</td>
-                    <td style={{ textAlign: "center" }}>
-                      {anime.startSeason?.replace("_", " ")}
-                      <br />
-                      {anime.startSeasonYear}
+                    <td
+                      className="col-1"
+                      style={{
+                        textAlign: "center",
+                        paddingLeft: "0px",
+                        paddingRight: "0px",
+                      }}
+                    >
+                      {anime.mediaType}
                     </td>
-                    <td>
+                    <td
+                      className="col-1"
+                      style={{
+                        textAlign: "center",
+                        paddingLeft: "0px",
+                        paddingRight: "0px",
+                      }}
+                    >
+                      {anime.startSeason + " " + anime.startSeasonYear}
+                    </td>
+                    <td className="col-2" style={{ paddingRight: "0px" }}>
                       <select
-                        id={anime.id}
                         className="form-select"
-                        aria-label="Default select example"
-                        onChange={handleStatusChange}
+                        id={anime.id}
                         value={userStatusReverseMap[anime.userStatus]}
+                        onChange={handleStatusChange}
                       >
-                        {userStatusList.map((status, key) => (
-                          <option key={key} value={status}>
-                            {status}
+                        {userStatusList.map((userStatus) => (
+                          <option
+                            key={userStatus.apiValue}
+                            value={userStatus.apiValue}
+                          >
+                            {userStatus.pageTitle}
                           </option>
                         ))}
                       </select>
