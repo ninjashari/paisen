@@ -146,8 +146,10 @@ async function handleGetAnimeList(req, res, username) {
 
     // Add pagination
     const skip = (parseInt(page) - 1) * parseInt(limit)
-    pipeline.push({ $skip: skip })
-    pipeline.push({ $limit: parseInt(limit) })
+    if (parseInt(limit) > 0) {
+      pipeline.push({ $skip: skip })
+      pipeline.push({ $limit: parseInt(limit) })
+    }
 
     // Project essential fields for the anime library view
     const projectStage = {

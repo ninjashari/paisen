@@ -246,7 +246,7 @@ const Table = ({ animeList, malAccessToken }) => {
                       {" "}
                       <SquareIcon
                         squareColor={anime.status.color}
-                        title={anime.status.value}
+                        title={anime.status.pageTitle}
                       />
                     </th>
                     <td style={{ textAlign: "left" }}>
