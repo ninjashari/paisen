@@ -118,20 +118,20 @@ const UserListStatusSchema = new mongoose.Schema({
   },
 }, { _id: false })
 
-// Main Anime schema
+// Optimized Anime schema - storing only relevant information
 const AnimeSchema = new mongoose.Schema({
-  // MAL ID (primary identifier)
+  // MAL ID (primary identifier, optional for Jellyfin-only entries)
   malId: {
     type: Number,
-    required: true,
-    unique: true,
+    required: false,
+    sparse: true, // Allows null values while maintaining uniqueness for non-null values
     index: true,
   },
   
-  // External ID mappings
+  // External ID mappings (essential for cross-platform sync)
   externalIds: ExternalIdsSchema,
   
-  // Basic anime information
+  // Essential anime information
   title: {
     type: String,
     required: true,
@@ -140,51 +140,37 @@ const AnimeSchema = new mongoose.Schema({
   alternative_titles: AlternativeTitlesSchema,
   main_picture: MainPictureSchema,
   
-  // Dates
+  // Essential dates
   start_date: Date,
   end_date: Date,
   
-  // Content information
+  // Essential content information
   synopsis: String,
-  mean: Number, // Average score
-  rank: Number,
-  popularity: Number,
-  num_list_users: Number,
-  num_scoring_users: Number,
+  mean: Number, // Average score (useful for recommendations)
   
-  // Classification
-  nsfw: {
-    type: String,
-    enum: ['white', 'gray', 'black'],
-    default: 'white',
-  },
+  // Essential classification
   genres: [GenreSchema],
   media_type: {
     type: String,
     enum: ['unknown', 'tv', 'ova', 'movie', 'special', 'ona', 'music'],
+    default: 'unknown',
     required: true,
   },
   status: {
     type: String,
     enum: ['finished_airing', 'currently_airing', 'not_yet_aired'],
+    default: 'finished_airing',
     required: true,
   },
   
-  // Episode information
+  // Essential episode information
   num_episodes: {
     type: Number,
     default: 0,
   },
   start_season: StartSeasonSchema,
-  broadcast: BroadcastSchema,
-  source: String,
-  average_episode_duration: Number, // in seconds
-  rating: {
-    type: String,
-    enum: ['g', 'pg', 'pg_13', 'r', 'r+', 'rx'],
-  },
   
-  // Production
+  // Essential production info
   studios: [StudioSchema],
   
   // User-specific data (array to support multiple users)
@@ -197,6 +183,8 @@ const AnimeSchema = new mongoose.Schema({
       default: Date.now,
     },
     lastUpdatedOnMal: Date,
+    lastSyncedFromJellyfin: Date,
+    jellyfinId: String, // Jellyfin item ID for reference
     syncVersion: {
       type: Number,
       default: 1,
@@ -205,14 +193,6 @@ const AnimeSchema = new mongoose.Schema({
       type: Boolean,
       default: true,
     },
-    syncErrors: [{
-      error: String,
-      timestamp: Date,
-      resolved: {
-        type: Boolean,
-        default: false,
-      },
-    }],
   },
   
   // Timestamps
@@ -233,7 +213,24 @@ AnimeSchema.index({ 'externalIds.tmdb': 1 })
 AnimeSchema.index({ 'userListStatus.userId': 1 })
 AnimeSchema.index({ 'userListStatus.status': 1 })
 AnimeSchema.index({ 'syncMetadata.lastSyncedFromMal': 1 })
+AnimeSchema.index({ 'syncMetadata.lastSyncedFromJellyfin': 1 })
+AnimeSchema.index({ 'syncMetadata.jellyfinId': 1 })
 AnimeSchema.index({ title: 'text', 'alternative_titles.en': 'text', 'alternative_titles.synonyms': 'text' })
+
+// Compound index for Jellyfin entries (ensure uniqueness by title + external IDs)
+AnimeSchema.index({ 
+  title: 1, 
+  'externalIds.anidb': 1, 
+  'syncMetadata.jellyfinId': 1 
+}, { 
+  sparse: true,
+  partialFilterExpression: { 
+    $or: [
+      { 'externalIds.anidb': { $exists: true } },
+      { 'syncMetadata.jellyfinId': { $exists: true } }
+    ]
+  }
+})
 
 // Update the updatedAt field before saving
 AnimeSchema.pre('save', function(next) {

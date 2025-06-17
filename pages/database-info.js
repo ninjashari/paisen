@@ -14,6 +14,7 @@ import Header from '@/components/header'
 import Sidebar from '@/components/sidebar'
 import Loader from '@/components/loader'
 import BarChart from '@/components/bar-chart'
+import SyncProgressBar from '@/components/sync-progress-bar'
 
 /**
  * DatabaseInfoPage Component
@@ -27,6 +28,16 @@ export default function DatabaseInfoPage() {
   const { data: session, status } = useSession()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [syncLoading, setSyncLoading] = useState(false)
+  const [syncResult, setSyncResult] = useState(null)
+  const [syncSessionId, setSyncSessionId] = useState(null)
+  const [showSyncProgress, setShowSyncProgress] = useState(false)
+  const [jellyfinSyncLoading, setJellyfinSyncLoading] = useState(false)
+  const [jellyfinSyncResult, setJellyfinSyncResult] = useState(null)
+  const [debugLoading, setDebugLoading] = useState(false)
+  const [debugResult, setDebugResult] = useState(null)
+  const [jellyfinTestLoading, setJellyfinTestLoading] = useState(false)
+  const [jellyfinTestResult, setJellyfinTestResult] = useState(null)
   const [dbData, setDbData] = useState({
     animeCollection: {
       totalAnime: 0,
@@ -185,6 +196,145 @@ export default function DatabaseInfoPage() {
           '#20c997'  // music - teal
         ]
       }]
+    }
+  }
+
+  /**
+   * Handles anime list sync from MyAnimeList to local database
+   * Syncs all user's MAL anime data including external IDs
+   */
+  const handleSyncAnimeList = async () => {
+    setSyncLoading(true)
+    setSyncResult(null)
+    setShowSyncProgress(true)
+
+    try {
+      const response = await axios.post('/api/anime/sync', {
+        includeExternalIds: true,
+        forceUpdate: false,
+        statusFilter: ['watching', 'completed', 'on_hold', 'dropped', 'plan_to_watch']
+      })
+
+      // Set session ID for progress tracking
+      if (response.data.sessionId) {
+        setSyncSessionId(response.data.sessionId)
+      }
+
+      setSyncResult({
+        success: true,
+        message: response.data.message,
+        stats: response.data.stats
+      })
+
+    } catch (error) {
+      console.error('Anime sync failed:', error)
+      setSyncResult({
+        success: false,
+        message: error.response?.data?.message || error.message || 'Sync failed'
+      })
+      setShowSyncProgress(false)
+    } finally {
+      setSyncLoading(false)
+    }
+  }
+
+  const handleSyncComplete = (progressData) => {
+    setShowSyncProgress(false)
+    setSyncSessionId(null)
+    
+    // Refresh database info after successful sync
+    setTimeout(() => {
+      fetchDatabaseInfo()
+    }, 1000)
+  }
+
+  const handleSyncError = (progressData) => {
+    setShowSyncProgress(false)
+    setSyncSessionId(null)
+    
+    setSyncResult({
+      success: false,
+      message: progressData.message || 'Sync failed'
+    })
+  }
+
+  /**
+   * Handles Jellyfin sync to local database
+   * Syncs Jellyfin watch history to local anime database using AniDB ID matching
+   */
+  const handleSyncJellyfin = async () => {
+    setJellyfinSyncLoading(true)
+    setJellyfinSyncResult(null)
+
+    try {
+      const response = await axios.post('/api/jellyfin/sync-to-db', {
+        syncToLocalDb: true,
+        useAnidbMatching: true
+      })
+
+      setJellyfinSyncResult({
+        success: true,
+        message: response.data.message,
+        data: response.data.data
+      })
+
+      // Refresh database info after successful sync
+      setTimeout(() => {
+        fetchDatabaseInfo()
+      }, 2000)
+
+    } catch (error) {
+      console.error('Jellyfin sync failed:', error)
+      setJellyfinSyncResult({
+        success: false,
+        message: error.response?.data?.message || error.message || 'Jellyfin sync failed'
+      })
+    } finally {
+      setJellyfinSyncLoading(false)
+    }
+  }
+
+  /**
+   * Handles debug configuration check
+   * Fetches detailed user configuration for troubleshooting
+   */
+  const handleDebugConfig = async () => {
+    setDebugLoading(true)
+    setDebugResult(null)
+
+    try {
+      const response = await axios.get('/api/debug/user-config')
+      setDebugResult(response.data.data)
+    } catch (error) {
+      console.error('Debug config failed:', error)
+      setDebugResult({
+        error: error.response?.data?.message || error.message || 'Debug failed'
+      })
+    } finally {
+      setDebugLoading(false)
+    }
+  }
+
+  /**
+   * Handles Jellyfin connection test
+   * Tests Jellyfin connectivity and configuration
+   */
+  const handleTestJellyfin = async () => {
+    setJellyfinTestLoading(true)
+    setJellyfinTestResult(null)
+
+    try {
+      const response = await axios.get('/api/debug/jellyfin-test')
+      setJellyfinTestResult(response.data)
+    } catch (error) {
+      console.error('Jellyfin test failed:', error)
+      setJellyfinTestResult({
+        success: false,
+        message: error.response?.data?.message || error.message || 'Jellyfin test failed',
+        data: error.response?.data?.data || null
+      })
+    } finally {
+      setJellyfinTestLoading(false)
     }
   }
 
@@ -473,6 +623,157 @@ export default function DatabaseInfoPage() {
               </div>
             </div>
           </div>
+
+          {/* API Testing Section */}
+          <div className="row mb-4">
+            <div className="col-12">
+              <div className="card">
+                <div className="card-header">
+                  <h5 className="mb-0">
+                    <i className="bi bi-gear me-2"></i>
+                    Sync & API Testing
+                  </h5>
+                </div>
+                <div className="card-body">
+                  <div className="row">
+                    <div className="col-md-6">
+                      <h6>Anime List Sync</h6>
+                      <p className="text-muted small">Sync all your MyAnimeList anime data to the local database</p>
+                      <button 
+                        className="btn btn-primary me-2" 
+                        onClick={handleSyncAnimeList}
+                        disabled={syncLoading}
+                      >
+                        {syncLoading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                            Syncing...
+                          </>
+                        ) : (
+                          <>
+                            <i className="bi bi-arrow-repeat me-2"></i>
+                            Sync Anime List
+                          </>
+                        )}
+                      </button>
+                      <button 
+                        className="btn btn-outline-info btn-sm me-2" 
+                        onClick={handleDebugConfig}
+                        disabled={debugLoading}
+                      >
+                        {debugLoading ? (
+                          <span className="spinner-border spinner-border-sm" role="status"></span>
+                        ) : (
+                          <i className="bi bi-bug"></i>
+                        )}
+                        {' '}Debug Config
+                      </button>
+                      {syncResult && (
+                        <div className={`alert alert-${syncResult.success ? 'success' : 'danger'} mt-2`} role="alert">
+                          <small>{syncResult.message}</small>
+                          {syncResult.stats && (
+                            <div className="mt-1">
+                              <small>
+                                Created: {syncResult.stats.created}, 
+                                Updated: {syncResult.stats.updated}, 
+                                Errors: {syncResult.stats.errors}
+                              </small>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {debugResult && (
+                        <div className="alert alert-info mt-2" role="alert">
+                          <small><strong>Debug Info:</strong></small>
+                          <div className="mt-1">
+                            <small>
+                              MAL Token: {debugResult.malToken?.isExpired ? 'EXPIRED' : 'Valid'} 
+                              {debugResult.malToken?.expiresInHours !== null && ` (${debugResult.malToken.expiresInHours}h remaining)`}
+                              <br />
+                              Jellyfin: {debugResult.jellyfin?.isConfigured ? 'Configured' : 'Not Configured'}
+                              {debugResult.jellyfin?.isConfigured && ` (User: ${debugResult.jellyfin.username || debugResult.jellyfin.userId})`}
+                            </small>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="col-md-6">
+                      <h6>Jellyfin Sync</h6>
+                      <p className="text-muted small">Sync Jellyfin watch history to local database</p>
+                      <button 
+                        className="btn btn-secondary me-2" 
+                        onClick={handleSyncJellyfin}
+                        disabled={jellyfinSyncLoading}
+                      >
+                        {jellyfinSyncLoading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                            Syncing...
+                          </>
+                        ) : (
+                          <>
+                            <i className="bi bi-broadcast me-2"></i>
+                            Sync from Jellyfin
+                          </>
+                        )}
+                      </button>
+                      <button 
+                        className="btn btn-outline-info btn-sm me-2" 
+                        onClick={handleTestJellyfin}
+                        disabled={jellyfinTestLoading}
+                      >
+                        {jellyfinTestLoading ? (
+                          <span className="spinner-border spinner-border-sm" role="status"></span>
+                        ) : (
+                          <i className="bi bi-wifi"></i>
+                        )}
+                        {' '}Test Connection
+                      </button>
+                      {jellyfinSyncResult && (
+                        <div className={`alert alert-${jellyfinSyncResult.success ? 'success' : 'danger'} mt-2`} role="alert">
+                          <small>{jellyfinSyncResult.message}</small>
+                          {jellyfinSyncResult.data && jellyfinSyncResult.data.updated > 0 && (
+                            <div className="mt-1">
+                              <small>
+                                Updated: {jellyfinSyncResult.data.updated} anime
+                              </small>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {jellyfinTestResult && (
+                        <div className={`alert alert-${jellyfinTestResult.success ? 'success' : 'warning'} mt-2`} role="alert">
+                          <small><strong>Jellyfin Test:</strong> {jellyfinTestResult.message}</small>
+                          {jellyfinTestResult.data?.errors && jellyfinTestResult.data.errors.length > 0 && (
+                            <div className="mt-1">
+                              <small>
+                                Issues: {jellyfinTestResult.data.errors.join(', ')}
+                              </small>
+                            </div>
+                          )}
+                          {jellyfinTestResult.data?.animeLibraryCount !== undefined && (
+                            <div className="mt-1">
+                              <small>
+                                Anime found: {jellyfinTestResult.data.animeLibraryCount}
+                              </small>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Sync Progress Bar */}
+          <SyncProgressBar 
+            sessionId={syncSessionId}
+            show={showSyncProgress}
+            onComplete={handleSyncComplete}
+            onError={handleSyncError}
+          />
 
           {/* Recently Added Anime */}
           <div className="row">
