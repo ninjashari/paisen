@@ -34,6 +34,8 @@ export default function DatabaseInfoPage() {
   const [showSyncProgress, setShowSyncProgress] = useState(false)
   const [jellyfinSyncLoading, setJellyfinSyncLoading] = useState(false)
   const [jellyfinSyncResult, setJellyfinSyncResult] = useState(null)
+  const [jellyfinSyncSessionId, setJellyfinSyncSessionId] = useState(null)
+  const [showJellyfinSyncProgress, setShowJellyfinSyncProgress] = useState(false)
   const [debugLoading, setDebugLoading] = useState(false)
   const [debugResult, setDebugResult] = useState(null)
   const [jellyfinTestLoading, setJellyfinTestLoading] = useState(false)
@@ -265,12 +267,20 @@ export default function DatabaseInfoPage() {
   const handleSyncJellyfin = async () => {
     setJellyfinSyncLoading(true)
     setJellyfinSyncResult(null)
+    setShowJellyfinSyncProgress(true)
 
     try {
       const response = await axios.post('/api/jellyfin/sync-to-db', {
-        syncToLocalDb: true,
-        useAnidbMatching: true
+        options: {
+          syncToLocalDb: true,
+          useAnidbMatching: true
+        }
       })
+
+      // Set session ID for progress tracking
+      if (response.data.sessionId) {
+        setJellyfinSyncSessionId(response.data.sessionId)
+      }
 
       setJellyfinSyncResult({
         success: true,
@@ -278,20 +288,42 @@ export default function DatabaseInfoPage() {
         data: response.data.data
       })
 
-      // Refresh database info after successful sync
-      setTimeout(() => {
-        fetchDatabaseInfo()
-      }, 2000)
-
     } catch (error) {
       console.error('Jellyfin sync failed:', error)
       setJellyfinSyncResult({
         success: false,
         message: error.response?.data?.message || error.message || 'Jellyfin sync failed'
       })
+      setShowJellyfinSyncProgress(false)
     } finally {
       setJellyfinSyncLoading(false)
     }
+  }
+
+  /**
+   * Handles Jellyfin sync completion
+   */
+  const handleJellyfinSyncComplete = (progressData) => {
+    setShowJellyfinSyncProgress(false)
+    setJellyfinSyncSessionId(null)
+    
+    // Refresh database info after successful sync
+    setTimeout(() => {
+      fetchDatabaseInfo()
+    }, 1000)
+  }
+
+  /**
+   * Handles Jellyfin sync error
+   */
+  const handleJellyfinSyncError = (progressData) => {
+    setShowJellyfinSyncProgress(false)
+    setJellyfinSyncSessionId(null)
+    
+    setJellyfinSyncResult({
+      success: false,
+      message: progressData.message || 'Jellyfin sync failed'
+    })
   }
 
   /**
@@ -767,12 +799,20 @@ export default function DatabaseInfoPage() {
             </div>
           </div>
 
-          {/* Sync Progress Bar */}
+          {/* MAL Sync Progress Bar */}
           <SyncProgressBar 
             sessionId={syncSessionId}
             show={showSyncProgress}
             onComplete={handleSyncComplete}
             onError={handleSyncError}
+          />
+
+          {/* Jellyfin Sync Progress Bar */}
+          <SyncProgressBar 
+            sessionId={jellyfinSyncSessionId}
+            show={showJellyfinSyncProgress}
+            onComplete={handleJellyfinSyncComplete}
+            onError={handleJellyfinSyncError}
           />
 
           {/* Recently Added Anime */}

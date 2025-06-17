@@ -33,41 +33,10 @@ const ExternalIdsSchema = new mongoose.Schema({
   },
 }, { _id: false })
 
-// Alternative titles schema
-const AlternativeTitlesSchema = new mongoose.Schema({
-  en: [String],
-  ja: [String],
-  synonyms: [String],
-}, { _id: false })
-
-// Main picture schema
-const MainPictureSchema = new mongoose.Schema({
-  medium: String,
-  large: String,
-}, { _id: false })
-
-// Genre schema
+// Genre schema (simplified)
 const GenreSchema = new mongoose.Schema({
   id: Number,
   name: String,
-}, { _id: false })
-
-// Studio schema
-const StudioSchema = new mongoose.Schema({
-  id: Number,
-  name: String,
-}, { _id: false })
-
-// Start season schema
-const StartSeasonSchema = new mongoose.Schema({
-  year: Number,
-  season: String,
-}, { _id: false })
-
-// Broadcast schema
-const BroadcastSchema = new mongoose.Schema({
-  day_of_the_week: String,
-  start_time: String,
 }, { _id: false })
 
 // User list status schema (for storing user-specific data)
@@ -118,7 +87,7 @@ const UserListStatusSchema = new mongoose.Schema({
   },
 }, { _id: false })
 
-// Optimized Anime schema - storing only relevant information
+// Minimal Anime schema - storing only essential fields for our website functionality
 const AnimeSchema = new mongoose.Schema({
   // MAL ID (primary identifier, optional for Jellyfin-only entries)
   malId: {
@@ -131,24 +100,14 @@ const AnimeSchema = new mongoose.Schema({
   // External ID mappings (essential for cross-platform sync)
   externalIds: ExternalIdsSchema,
   
-  // Essential anime information
+  // Core anime information (minimal set)
   title: {
     type: String,
     required: true,
     index: true,
   },
-  alternative_titles: AlternativeTitlesSchema,
-  main_picture: MainPictureSchema,
   
-  // Essential dates
-  start_date: Date,
-  end_date: Date,
-  
-  // Essential content information
-  synopsis: String,
-  mean: Number, // Average score (useful for recommendations)
-  
-  // Essential classification
+  // Essential classification for filtering and display
   genres: [GenreSchema],
   media_type: {
     type: String,
@@ -163,15 +122,11 @@ const AnimeSchema = new mongoose.Schema({
     required: true,
   },
   
-  // Essential episode information
+  // Essential episode information for progress tracking
   num_episodes: {
     type: Number,
     default: 0,
   },
-  start_season: StartSeasonSchema,
-  
-  // Essential production info
-  studios: [StudioSchema],
   
   // User-specific data (array to support multiple users)
   userListStatus: [UserListStatusSchema],
@@ -215,7 +170,7 @@ AnimeSchema.index({ 'userListStatus.status': 1 })
 AnimeSchema.index({ 'syncMetadata.lastSyncedFromMal': 1 })
 AnimeSchema.index({ 'syncMetadata.lastSyncedFromJellyfin': 1 })
 AnimeSchema.index({ 'syncMetadata.jellyfinId': 1 })
-AnimeSchema.index({ title: 'text', 'alternative_titles.en': 'text', 'alternative_titles.synonyms': 'text' })
+AnimeSchema.index({ title: 'text' })
 
 // Compound index for Jellyfin entries (ensure uniqueness by title + external IDs)
 AnimeSchema.index({ 

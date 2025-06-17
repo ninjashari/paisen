@@ -149,27 +149,14 @@ async function handleGetAnimeList(req, res, username) {
     pipeline.push({ $skip: skip })
     pipeline.push({ $limit: parseInt(limit) })
 
-    // Project fields (exclude sensitive data, include external IDs if requested)
+    // Project only essential fields used by our application
     const projectStage = {
       malId: 1,
       title: 1,
-      alternative_titles: 1,
-      main_picture: 1,
-      start_date: 1,
-      end_date: 1,
-      synopsis: 1,
-      mean: 1,
-      rank: 1,
-      popularity: 1,
       genres: 1,
       media_type: 1,
       status: 1,
       num_episodes: 1,
-      start_season: 1,
-      source: 1,
-      average_episode_duration: 1,
-      rating: 1,
-      studios: 1,
       userStatus: 1,
       'syncMetadata.lastSyncedFromMal': 1,
       'syncMetadata.lastUpdatedOnMal': 1

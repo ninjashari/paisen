@@ -19,6 +19,7 @@ import dbConnect from '@/lib/dbConnect'
 import User from '@/models/User'
 import Anime from '@/models/Anime'
 import JellyfinApi from '@/lib/jellyfin'
+import syncProgressTracker from '@/lib/syncProgress'
 import axios from 'axios'
 
 export default async function handler(req, res) {
@@ -63,8 +64,11 @@ export default async function handler(req, res) {
       })
     }
 
-    // Perform sync to local database
-    const syncResult = await performJellyfinToDbSync(user, req.body.options || {})
+    // Generate session ID for progress tracking
+    const sessionId = `jellyfin_sync_${user._id}_${Date.now()}`
+
+    // Perform sync to local database with progress tracking
+    const syncResult = await performJellyfinToDbSync(user, { ...req.body.options, sessionId })
 
     // Update last sync time
     await User.findByIdAndUpdate(user._id, {
@@ -74,7 +78,8 @@ export default async function handler(req, res) {
     res.status(200).json({
       success: true,
       message: `Jellyfin sync to local database completed: ${syncResult.updated} anime updated`,
-      data: syncResult
+      data: syncResult,
+      sessionId: sessionId
     })
 
   } catch (error) {
@@ -112,7 +117,8 @@ async function performJellyfinToDbSync(user, options = {}) {
   const {
     useAnidbMatching = true,    // Use AniDB ID for matching
     maxItems = 100,             // Maximum number of items to process
-    onlyRecent = false          // Process all anime or only recent
+    onlyRecent = false,         // Process all anime or only recent
+    sessionId = null            // Progress tracking session ID
   } = options
 
   console.log(`Starting Jellyfin to DB sync for user: ${user.username}`)
@@ -135,12 +141,25 @@ async function performJellyfinToDbSync(user, options = {}) {
   }
 
   try {
+    // Start progress tracking
+    if (sessionId) {
+      syncProgressTracker.startSession(sessionId, 0, 'jellyfin_sync')
+      syncProgressTracker.updateProgress(sessionId, {
+        message: 'Fetching Jellyfin anime library...'
+      })
+    }
+
     // Get anime library from Jellyfin
     console.log('Fetching Jellyfin anime library...')
     const animeLibrary = await jellyfinApi.getAnimeItems(user.jellyfinUserId)
     
     if (!animeLibrary || animeLibrary.length === 0) {
       console.log('No anime found in Jellyfin library')
+      
+      if (sessionId) {
+        syncProgressTracker.completeSession(sessionId, true, 'No anime found in Jellyfin library')
+      }
+      
       return {
         processed: 0,
         updated: 0,
@@ -155,12 +174,25 @@ async function performJellyfinToDbSync(user, options = {}) {
     
     console.log(`Found ${animeLibrary.length} anime series in Jellyfin library`)
 
+    // Update progress with total items
+    if (sessionId) {
+      syncProgressTracker.updateProgress(sessionId, {
+        totalItems: Math.min(animeLibrary.length, maxItems),
+        message: `Processing ${Math.min(animeLibrary.length, maxItems)} anime series...`
+      })
+    }
+
     // Process each anime series
     for (const jellyfinAnime of animeLibrary.slice(0, maxItems)) {
       syncResults.processed++
       
       try {
         console.log(`Processing: ${jellyfinAnime.Name}`)
+        
+        // Update progress
+        if (sessionId) {
+          syncProgressTracker.incrementProgress(sessionId, jellyfinAnime.Name, 'processed')
+        }
         
         // Extract anime information from Jellyfin item
         const animeInfo = jellyfinApi.extractAnimeInfo(jellyfinAnime)
@@ -187,10 +219,18 @@ async function performJellyfinToDbSync(user, options = {}) {
           console.log(`Creating new anime entry: ${animeInfo.title}`)
           localAnime = await createAnimeFromJellyfin(animeInfo, user._id)
           syncResults.created++
+          
+          if (sessionId) {
+            syncProgressTracker.incrementProgress(sessionId, animeInfo.title, 'added')
+          }
         } else {
           // Update existing anime with Jellyfin data
           await updateAnimeFromJellyfin(localAnime, animeInfo, user._id)
           syncResults.updated++
+          
+          if (sessionId) {
+            syncProgressTracker.incrementProgress(sessionId, animeInfo.title, 'updated')
+          }
         }
         
         syncResults.matches.push({
@@ -207,14 +247,32 @@ async function performJellyfinToDbSync(user, options = {}) {
           title: jellyfinAnime.Name,
           error: error.message
         })
+        
+        if (sessionId) {
+          syncProgressTracker.incrementProgress(sessionId, jellyfinAnime.Name, 'error')
+        }
       }
     }
 
     console.log('Jellyfin to DB sync completed:', syncResults)
+    
+    // Complete progress tracking
+    if (sessionId) {
+      syncProgressTracker.completeSession(sessionId, true, 
+        `Sync completed: ${syncResults.created} created, ${syncResults.updated} updated, ${syncResults.errors} errors`
+      )
+    }
+    
     return syncResults
 
   } catch (error) {
     console.error('Jellyfin to DB sync failed:', error)
+    
+    // Fail progress tracking
+    if (sessionId) {
+      syncProgressTracker.failSession(sessionId, error.message)
+    }
+    
     throw error
   }
 }
@@ -268,25 +326,14 @@ async function createAnimeFromJellyfin(animeInfo, userId) {
   if (animeInfo.tvdbId) externalIds.tvdb = animeInfo.tvdbId
   if (animeInfo.tmdbId) externalIds.tmdb = animeInfo.tmdbId
   
-  // Create anime document
+  // Create minimal anime document with only essential fields
   const animeData = {
     malId: null, // Placeholder - will be updated when MAL sync happens
     title: animeInfo.title || animeInfo.seriesName,
-    alternative_titles: {
-      en: animeInfo.alternativeTitles || [],
-      synonyms: []
-    },
-    main_picture: {
-      medium: animeInfo.imageUrl,
-      large: animeInfo.imageUrl
-    },
-    start_date: animeInfo.releaseDate ? new Date(animeInfo.releaseDate) : null,
-    synopsis: animeInfo.overview || '',
     genres: animeInfo.genres.map(genre => ({ name: genre })),
     media_type: determineMediaType(animeInfo),
     status: 'finished_airing', // Default status
     num_episodes: animeInfo.totalEpisodes || 0,
-    studios: animeInfo.studios.map(studio => ({ name: studio })),
     externalIds: externalIds,
     userListStatus: [{
       userId: userId,
