@@ -1,33 +1,19 @@
+// Essential fields for anime list API calls (minimal set)
 export const fields = {
   animeList: [
     "id",
     "title",
-    "main_picture",
-    "alternative_titles",
-    "start_date",
-    "end_date",
-    "synopsis",
-    "mean",
-    "popularity",
     "genres",
     "media_type",
     "status",
+    "start_season",
     "my_list_status",
     "num_episodes",
-    "start_season",
-    "broadcast",
-    "source",
-    "average_episode_duration",
-    "rating",
-    "studios",
-    "score",
-    "num_watched_episodes",
-    "finish_date",
-    "tags",
     "updated_at",
   ],
 }
 
+// Fields for statistics page (includes additional fields needed for stats)
 export const statisticsFields = {
   animeList: [
     "id",
@@ -39,9 +25,6 @@ export const statisticsFields = {
     "num_episodes",
     "start_season",
     "average_episode_duration",
-    "score",
-    "num_watched_episodes",
-    "finish_date",
   ],
 }
 

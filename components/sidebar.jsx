@@ -8,10 +8,8 @@ const Sidebar = () => {
   const [homeClass, setHomeClass] = useState("nav-link collapsed")
   const [statisticsClass, setStatisticsClass] = useState("nav-link collapsed")
   const [searchClass, setSearchClass] = useState("nav-link collapsed")
-  const [seasonsClass, setSeasonsClass] = useState("nav-link collapsed")
   const [jellyfinClass, setJellyfinClass] = useState("nav-link collapsed")
   const [jellyfinInfoClass, setJellyfinInfoClass] = useState("nav-link collapsed")
-  const [databaseInfoClass, setDatabaseInfoClass] = useState("nav-link collapsed")
 
   const [animeLibraryClass, setAnimeLibraryClass] = useState("nav-link collapsed")
 
@@ -34,15 +32,10 @@ const Sidebar = () => {
       setStatisticsClass("nav-link")
     } else if ("/search" === currentPath) {
       setSearchClass("nav-link")
-    } else if ("/seasons" === currentPath) {
-      setSeasonsClass("nav-link")
     } else if ("/jellyfin" === currentPath) {
       setJellyfinClass("nav-link")
     } else if ("/jellyfin-info" === currentPath) {
       setJellyfinInfoClass("nav-link")
-    } else if ("/database-info" === currentPath) {
-      setDatabaseInfoClass("nav-link")
-
     } else if ("/anime-library" === currentPath) {
       setAnimeLibraryClass("nav-link")
     } else if ("/animelist/current" === currentPath) {
@@ -153,13 +146,6 @@ const Sidebar = () => {
           </Link>
         </li>
 
-        {/* <li className="nav-item">
-          <Link className={seasonsClass} href="/seasons">
-            <i className="bi bi-calendar3"></i>
-            <span>Seasons</span>
-          </Link>
-        </li> */}
-
         <li className="nav-item">
           <Link className={jellyfinClass} href="/jellyfin">
             <i className="bi bi-server"></i>
@@ -174,19 +160,10 @@ const Sidebar = () => {
           </Link>
         </li>
 
-
-
         <li className="nav-item">
           <Link className={animeLibraryClass} href="/anime-library">
             <i className="bi bi-collection"></i>
             <span>Anime Library</span>
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link className={databaseInfoClass} href="/database-info">
-            <i className="bi bi-bar-chart-line"></i>
-            <span>Database Info</span>
           </Link>
         </li>
 
