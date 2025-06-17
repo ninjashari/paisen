@@ -105,7 +105,7 @@ function isAnimeContent(animeInfo) {
   )
   
   const hasAnimeProvider = animeInfo.externalIds && (
-    animeInfo.externalIds.anidb || animeInfo.externalIds.mal
+            animeInfo.externalIds.mal
   )
   
   return hasAnimeGenres || hasAnimeStudio || hasAnimeProvider

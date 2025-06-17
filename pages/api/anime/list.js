@@ -7,7 +7,7 @@
  * Features:
  * - Retrieve user's anime list by status
  * - Search and filter anime entries
- * - Include external ID mappings (AniDB, TVDB, TMDB)
+ * - Include external ID mappings (TVDB, TMDB)
  * - Pagination support
  */
 
@@ -157,6 +157,7 @@ async function handleGetAnimeList(req, res, username) {
       media_type: 1,
       status: 1,
       num_episodes: 1,
+      start_season: 1,
       userStatus: 1,
       'syncMetadata.lastSyncedFromMal': 1,
       'syncMetadata.lastUpdatedOnMal': 1

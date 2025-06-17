@@ -2,12 +2,12 @@
  * Jellyfin to Local Database Sync API Endpoint
  * 
  * This endpoint synchronizes Jellyfin anime watch history with the local
- * anime database using AniDB ID matching. Unlike the regular sync that
+ * anime database using external ID matching. Unlike the regular sync that
  * updates MyAnimeList, this updates the local database directly.
  * 
  * Features:
  * - Fetches anime library from Jellyfin
- * - Matches anime using AniDB IDs from external mappings
+ * - Matches anime using external IDs from external mappings
  * - Updates local database with watch progress
  * - Creates new anime entries if not found locally
  * - Updates user list status in local database
@@ -64,8 +64,8 @@ export default async function handler(req, res) {
       })
     }
 
-    // Generate session ID for progress tracking
-    const sessionId = `jellyfin_sync_${user._id}_${Date.now()}`
+    // Use provided session ID or generate a new one
+    const sessionId = req.body.options?.sessionId || `jellyfin_sync_${user._id}_${Date.now()}`
 
     // Perform sync to local database with progress tracking
     const syncResult = await performJellyfinToDbSync(user, { ...req.body.options, sessionId })
@@ -115,7 +115,7 @@ export default async function handler(req, res) {
  */
 async function performJellyfinToDbSync(user, options = {}) {
   const {
-    useAnidbMatching = true,    // Use AniDB ID for matching
+    useExternalIdMatching = true,    // Use external ID for matching
     maxItems = 100,             // Maximum number of items to process
     onlyRecent = false,         // Process all anime or only recent
     sessionId = null            // Progress tracking session ID
@@ -197,19 +197,19 @@ async function performJellyfinToDbSync(user, options = {}) {
         // Extract anime information from Jellyfin item
         const animeInfo = jellyfinApi.extractAnimeInfo(jellyfinAnime)
         
-        // Find matching anime in local database using AniDB ID
+        // Find matching anime in local database using external ID
         let localAnime = null
         
-        if (useAnidbMatching && animeInfo.anidbId) {
-          // Try to match using AniDB ID
-          localAnime = await Anime.findOne({ 'externalIds.anidb': animeInfo.anidbId })
+        if (useExternalIdMatching && animeInfo.malId) {
+          // Try to match using MAL ID
+          localAnime = await Anime.findOne({ 'externalIds.malId': animeInfo.malId })
           
           if (localAnime) {
-            console.log(`Found AniDB match: ${localAnime.title} (AniDB: ${animeInfo.anidbId})`)
+            console.log(`Found MAL match: ${localAnime.title} (MAL: ${animeInfo.malId})`)
           }
         }
         
-        // If no AniDB match, try title matching
+        // If no MAL match, try title matching
         if (!localAnime) {
           localAnime = await findAnimeByTitle(animeInfo.title || animeInfo.seriesName)
         }
@@ -236,8 +236,8 @@ async function performJellyfinToDbSync(user, options = {}) {
         syncResults.matches.push({
           jellyfinTitle: animeInfo.title,
           localTitle: localAnime.title,
-          anidbId: animeInfo.anidbId,
-          matchType: animeInfo.anidbId ? 'anidb' : 'title'
+          malId: animeInfo.malId,
+          matchType: animeInfo.malId ? 'mal' : 'title'
         })
 
       } catch (error) {
@@ -322,9 +322,9 @@ async function findAnimeByTitle(title) {
 async function createAnimeFromJellyfin(animeInfo, userId) {
   // Get external IDs if available
   const externalIds = {}
-  if (animeInfo.anidbId) externalIds.anidb = animeInfo.anidbId
-  if (animeInfo.tvdbId) externalIds.tvdb = animeInfo.tvdbId
-  if (animeInfo.tmdbId) externalIds.tmdb = animeInfo.tmdbId
+  if (animeInfo.malId) externalIds.malId = animeInfo.malId
+  if (animeInfo.tvdbId) externalIds.tvdbId = animeInfo.tvdbId
+  if (animeInfo.tmdbId) externalIds.tmdbId = animeInfo.tmdbId
   
   // Create minimal anime document with only essential fields
   const animeData = {
@@ -363,9 +363,9 @@ async function createAnimeFromJellyfin(animeInfo, userId) {
  */
 async function updateAnimeFromJellyfin(localAnime, animeInfo, userId) {
   // Update external IDs if available
-  if (animeInfo.anidbId && !localAnime.externalIds?.anidb) {
+  if (animeInfo.malId && !localAnime.externalIds?.malId) {
     if (!localAnime.externalIds) localAnime.externalIds = {}
-    localAnime.externalIds.anidb = animeInfo.anidbId
+    localAnime.externalIds.malId = animeInfo.malId
   }
   
   // Update or create user list status

@@ -52,7 +52,7 @@ describe('Jellyfin Integration', () => {
         Genres: ['Animation', 'Action'],
         Studios: [{ Name: 'MAPPA' }],
         ProviderIds: {
-          AniDb: '9541',
+  
           MyAnimeList: '16498'
         },
         UserData: {
@@ -71,7 +71,7 @@ describe('Jellyfin Integration', () => {
       expect(result.year).toBe(2013)
       expect(result.genres).toEqual(['Animation', 'Action'])
       expect(result.studios).toEqual(['MAPPA'])
-      expect(result.providerIds.anidb).toBe('9541')
+  
       expect(result.providerIds.mal).toBe('16498')
       expect(result.userData.Played).toBe(true)
     })

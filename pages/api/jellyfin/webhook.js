@@ -200,7 +200,7 @@ function isAnimeContent(animeInfo) {
     isKnownAnimeStudio(studio)
   )
 
-  const hasAnimeProvider = animeInfo.providerIds.anidb || animeInfo.providerIds.mal
+        const hasAnimeProvider = animeInfo.providerIds.mal
 
   // Check for Japanese origin indicators
   const hasJapaneseTitle = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(

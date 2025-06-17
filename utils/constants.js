@@ -6,6 +6,7 @@ export const fields = {
     "genres",
     "media_type",
     "status",
+    "start_season",
     "my_list_status",
     "num_episodes",
     "updated_at",

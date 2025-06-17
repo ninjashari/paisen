@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "apexcharts": "^3.37.3",
-    "axios": "^1.3.5",
+    "axios": "^1.10.0",
     "bcryptjs": "^2.4.3",
     "bootstrap": "^5.2.3",
     "cors": "^2.8.5",
@@ -26,7 +26,8 @@
     "querystring": "^0.2.1",
     "react": "18.2.0",
     "react-apexcharts": "^1.4.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "xml2js": "^0.6.2"
   },
   "description": "Self hosted MAL helper made using next.js",
   "main": "next.config.js",

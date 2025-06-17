@@ -63,6 +63,7 @@ const UserSchema = new mongoose.Schema({
   jellyfinLastSync: {
     type: Date,
   },
+
   // Anime Sync Metadata
   syncMetadata: {
     lastAnimeSync: {

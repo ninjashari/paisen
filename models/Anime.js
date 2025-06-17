@@ -6,7 +6,7 @@
  * 
  * Features:
  * - Complete MAL anime data storage
- * - External ID mappings (AniDB, TVDB, TMDB)
+ * - External ID mappings (TVDB, TMDB)
  * - User-specific anime list status
  * - Sync metadata and timestamps
  */
@@ -15,19 +15,19 @@ import mongoose from 'mongoose'
 
 // External ID mappings schema
 const ExternalIdsSchema = new mongoose.Schema({
-  anidb: {
+  malId: {
     type: Number,
     index: true,
   },
-  tvdb: {
+  tvdbId: {
     type: Number,
     index: true,
   },
-  tmdb: {
+  tmdbId: {
     type: Number,
     index: true,
   },
-  imdb: {
+  imdbId: {
     type: String,
     index: true,
   },
@@ -38,6 +38,14 @@ const GenreSchema = new mongoose.Schema({
   id: Number,
   name: String,
 }, { _id: false })
+
+// Start season schema
+const StartSeasonSchema = new mongoose.Schema({
+  year: Number,
+  season: String,
+}, { _id: false })
+
+
 
 // User list status schema (for storing user-specific data)
 const UserListStatusSchema = new mongoose.Schema({
@@ -127,6 +135,7 @@ const AnimeSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  start_season: StartSeasonSchema,
   
   // User-specific data (array to support multiple users)
   userListStatus: [UserListStatusSchema],
@@ -162,9 +171,9 @@ const AnimeSchema = new mongoose.Schema({
 })
 
 // Indexes for efficient querying
-AnimeSchema.index({ 'externalIds.anidb': 1 })
-AnimeSchema.index({ 'externalIds.tvdb': 1 })
-AnimeSchema.index({ 'externalIds.tmdb': 1 })
+AnimeSchema.index({ 'externalIds.malId': 1 })
+AnimeSchema.index({ 'externalIds.tvdbId': 1 })
+AnimeSchema.index({ 'externalIds.tmdbId': 1 })
 AnimeSchema.index({ 'userListStatus.userId': 1 })
 AnimeSchema.index({ 'userListStatus.status': 1 })
 AnimeSchema.index({ 'syncMetadata.lastSyncedFromMal': 1 })
@@ -175,13 +184,13 @@ AnimeSchema.index({ title: 'text' })
 // Compound index for Jellyfin entries (ensure uniqueness by title + external IDs)
 AnimeSchema.index({ 
   title: 1, 
-  'externalIds.anidb': 1, 
+  'externalIds.malId': 1, 
   'syncMetadata.jellyfinId': 1 
 }, { 
   sparse: true,
   partialFilterExpression: { 
     $or: [
-      { 'externalIds.anidb': { $exists: true } },
+      { 'externalIds.malId': { $exists: true } },
       { 'syncMetadata.jellyfinId': { $exists: true } }
     ]
   }
