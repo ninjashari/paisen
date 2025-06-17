@@ -22,6 +22,11 @@ jest.mock('axios')
 import axios from 'axios'
 const mockedAxios = axios
 
+// Mock fs for testing
+jest.mock('fs')
+import fs from 'fs'
+const mockedFs = fs
+
 describe('Anime Mapping System', () => {
   let offlineDbService
 
@@ -193,61 +198,69 @@ describe('Anime Mapping System', () => {
     })
 
     describe('Database Update (Integration)', () => {
-      test('should update offline database successfully', async () => {
+      beforeEach(() => {
+        // Reset mocks before each test in this block
+        mockedFs.readFileSync.mockReset();
+      });
+
+      test('should update offline database successfully from local files', async () => {
         const mockMinifiedData = {
           data: [
             { title: 'Anime 1', sources: ['https://myanimelist.net/anime/1', 'https://anidb.net/anime/101'] }
           ]
-        }
-        const mockSchemaData = { $schema: 'test-schema' }
+        };
+        const mockSchemaData = { $schema: 'test-schema' };
 
-        mockedAxios.get.mockImplementation(url => {
-          if (url.includes('minified.json')) {
-            return Promise.resolve({ data: mockMinifiedData })
+        // Mock reading from filesystem
+        mockedFs.readFileSync.mockImplementation(path => {
+          if (path.includes('minified.json')) {
+            return JSON.stringify(mockMinifiedData);
           }
-          if (url.includes('schema.json')) {
-            return Promise.resolve({ data: mockSchemaData })
+          if (path.includes('schema.json')) {
+            return JSON.stringify(mockSchemaData);
           }
-          return Promise.reject(new Error('Not found'))
-        })
+          return '';
+        });
         
-        const result = await offlineDbService.updateOfflineDatabase()
+        const result = await offlineDbService.updateOfflineDatabase();
         
-        expect(result.success).toBe(true)
-        expect(result.stats.completeMappings).toBe(1)
+        expect(result.success).toBe(true);
+        expect(result.stats.completeMappings).toBe(1);
         
-        const dbStatus = await OfflineDatabase.getMostRecent()
-        expect(dbStatus.downloadStatus).toBe('success')
-        expect(dbStatus.totalEntries).toBe(1)
-      })
+        const dbStatus = await OfflineDatabase.getMostRecent();
+        expect(dbStatus.downloadStatus).toBe('success');
+        expect(dbStatus.totalEntries).toBe(1);
+      });
 
-      test('should handle network error during update', async () => {
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-        mockedAxios.get.mockRejectedValue(new Error('Network error'))
+      test('should handle file read error during update', async () => {
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        mockedFs.readFileSync.mockImplementation(() => {
+          throw new Error('File not found');
+        });
 
-        const result = await offlineDbService.updateOfflineDatabase()
+        const result = await offlineDbService.updateOfflineDatabase();
 
-        expect(result.success).toBe(false)
-        expect(result.error).toBe('Network error')
+        expect(result.success).toBe(false);
+        expect(result.error).toBe('File not found');
 
-        const dbStatus = await OfflineDatabase.getMostRecent()
-        expect(dbStatus.downloadStatus).toBe('failed')
-        consoleErrorSpy.mockRestore()
-      })
+        const dbStatus = await OfflineDatabase.getMostRecent();
+        expect(dbStatus.downloadStatus).toBe('failed');
+        consoleErrorSpy.mockRestore();
+      });
 
-      test('should handle invalid data from API', async () => {
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-        mockedAxios.get.mockResolvedValue({ data: null })
+      test('should handle invalid JSON data from local file', async () => {
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        mockedFs.readFileSync.mockReturnValue('invalid json');
 
-        const result = await offlineDbService.updateOfflineDatabase()
+        const result = await offlineDbService.updateOfflineDatabase();
         
-        expect(result.success).toBe(false)
-        expect(result.error).toBe("Cannot read properties of null (reading 'data')")
+        expect(result.success).toBe(false);
+        expect(result.error).toMatch(/Unexpected token/); // Check for JSON parsing error
 
-        const dbStatus = await OfflineDatabase.getMostRecent()
-        expect(dbStatus.downloadStatus).toBe('failed')
-        consoleErrorSpy.mockRestore()
-      })
+        const dbStatus = await OfflineDatabase.getMostRecent();
+        expect(dbStatus.downloadStatus).toBe('failed');
+        consoleErrorSpy.mockRestore();
+      });
     })
   })
 

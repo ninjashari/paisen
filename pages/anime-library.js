@@ -587,16 +587,18 @@ export default function AnimeLibraryPage() {
                               <th scope="col" onClick={() => handleSort('title')}>Title {getSortIcon('title')}</th>
                               <th scope="col">Genres</th>
                               <th scope="col">Studios</th>
-                              <th scope="col" onClick={() => handleSort('status')}>Status {getSortIcon('status')}</th>
+                              <th scope="col">Status</th>
                               <th scope="col" onClick={() => handleSort('score')}>Score {getSortIcon('score')}</th>
                               <th scope="col" onClick={() => handleSort('episodes')}>Episodes {getSortIcon('episodes')}</th>
                               <th scope="col" onClick={() => handleSort('year')}>Year {getSortIcon('year')}</th>
                               <th scope="col" onClick={() => handleSort('updated')}>Last Updated {getSortIcon('updated')}</th>
+                              <th scope="col">MAL ID</th>
+                              <th scope="col">AniDB ID</th>
                             </tr>
                           </thead>
                           <tbody>
                             {paginatedData.items.map((anime, index) => (
-                              <tr key={anime._id || index}>
+                              <tr key={anime._id || anime.malId || index}>
                                 <td>
                                   <div>
                                     <strong>{anime.title}</strong>
@@ -614,8 +616,8 @@ export default function AnimeLibraryPage() {
                                   {anime.studios?.map(studio => studio.name).join(', ')}
                                 </td>
                                 <td>
-                                  <span className={`badge ${getStatusBadge(anime.userStatus?.status)}`}>
-                                    {getStatusText(anime.userStatus?.status)}
+                                  <span className={`badge ${getStatusBadge(anime.status)}`}>
+                                    {getStatusText(anime.status)}
                                   </span>
                                 </td>
                                 <td>
@@ -647,6 +649,8 @@ export default function AnimeLibraryPage() {
                                     {formatDate(anime.updatedAt || anime.createdAt)}
                                   </small>
                                 </td>
+                                <td>{anime.malId || 'N/A'}</td>
+                                <td>{anime.anidbId || 'N/A'}</td>
                               </tr>
                             ))}
                           </tbody>
