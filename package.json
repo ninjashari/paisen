@@ -33,6 +33,9 @@
     "uuid": "^11.1.0",
     "xml2js": "^0.6.2"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "description": "Self hosted MAL helper made using next.js",
   "main": "next.config.js",
   "directories": {
