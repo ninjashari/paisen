@@ -111,7 +111,7 @@ async function performMalToDbSync(user, malAccessToken, options = {}) {
       'id', 'title', 'main_picture', 'alternative_titles', 'start_date', 'end_date',
       'synopsis', 'mean', 'rank', 'popularity', 'num_list_users', 'num_scoring_users',
       'nsfw', 'created_at', 'updated_at', 'media_type', 'status', 'genres',
-      'my_list_status', 'num_episodes', 'start_season', 'broadcast', 'source',
+      'list_status', 'num_episodes', 'start_season', 'broadcast', 'source',
       'average_episode_duration', 'rating', 'pictures', 'background', 'related_anime',
       'related_manga', 'recommendations', 'studios', 'statistics'
     ]
@@ -156,7 +156,26 @@ async function performMalToDbSync(user, malAccessToken, options = {}) {
 
       if (localAnime) {
         Object.assign(localAnime, animeData)
-        localAnime.updateUserListStatus(user._id, malAnime.list_status)
+        
+        // Properly map the list_status data from MAL response
+        if (malAnime.list_status) {
+          const userListStatusData = {
+            status: malAnime.list_status.status,
+            score: malAnime.list_status.score,
+            num_episodes_watched: malAnime.list_status.num_episodes_watched,
+            is_rewatching: malAnime.list_status.is_rewatching,
+            start_date: malAnime.list_status.start_date ? new Date(malAnime.list_status.start_date) : null,
+            finish_date: malAnime.list_status.finish_date ? new Date(malAnime.list_status.finish_date) : null,
+            priority: malAnime.list_status.priority,
+            num_times_rewatched: malAnime.list_status.num_times_rewatched,
+            rewatch_value: malAnime.list_status.rewatch_value,
+            tags: malAnime.list_status.tags,
+            comments: malAnime.list_status.comments,
+            updated_at: malAnime.list_status.updated_at ? new Date(malAnime.list_status.updated_at) : new Date()
+          }
+          localAnime.updateUserListStatus(user._id, userListStatusData)
+        }
+
         await localAnime.save()
         syncResults.updated++
         if (sessionId) {
@@ -164,7 +183,26 @@ async function performMalToDbSync(user, malAccessToken, options = {}) {
         }
       } else {
         localAnime = new Anime(animeData)
-        localAnime.updateUserListStatus(user._id, malAnime.list_status)
+        
+        // Properly map the list_status data from MAL response
+        if (malAnime.list_status) {
+          const userListStatusData = {
+            status: malAnime.list_status.status,
+            score: malAnime.list_status.score,
+            num_episodes_watched: malAnime.list_status.num_episodes_watched,
+            is_rewatching: malAnime.list_status.is_rewatching,
+            start_date: malAnime.list_status.start_date ? new Date(malAnime.list_status.start_date) : null,
+            finish_date: malAnime.list_status.finish_date ? new Date(malAnime.list_status.finish_date) : null,
+            priority: malAnime.list_status.priority,
+            num_times_rewatched: malAnime.list_status.num_times_rewatched,
+            rewatch_value: malAnime.list_status.rewatch_value,
+            tags: malAnime.list_status.tags,
+            comments: malAnime.list_status.comments,
+            updated_at: malAnime.list_status.updated_at ? new Date(malAnime.list_status.updated_at) : new Date()
+          }
+          localAnime.updateUserListStatus(user._id, userListStatusData)
+        }
+
         await localAnime.save()
         syncResults.created++
         if (sessionId) {
