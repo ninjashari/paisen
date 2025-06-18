@@ -220,6 +220,9 @@ AnimeSchema.methods.updateUserListStatus = function(userId, statusUpdate) {
       updated_at: new Date(),
     })
   }
+  
+  // Explicitly mark the array as modified to ensure Mongoose saves the changes
+  this.markModified('userListStatus');
 }
 
 AnimeSchema.methods.removeUserListStatus = function(userId) {

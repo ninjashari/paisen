@@ -1,6 +1,14 @@
+/**
+ * Jellyfin Integration Page
+ * 
+ * This page provides comprehensive Jellyfin server integration functionality,
+ * including configuration, synchronization, and troubleshooting tools.
+ * Enables automatic anime list updates from Jellyfin media server activity.
+ */
+
 import { useSession, getSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Breadcrumb from "@/components/breadcrumb"
 import Header from "@/components/header"
 import Layout from "@/components/layout"
@@ -8,10 +16,12 @@ import Sidebar from "@/components/sidebar"
 import JellyfinConfig from "@/components/jellyfin-config"
 import JellyfinSync from "@/components/jellyfin-sync"
 import JellyfinTroubleshoot from "@/components/jellyfin-troubleshoot"
+import Loader from "@/components/loader"
 
 function Jellyfin() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [isPageLoading, setIsPageLoading] = useState(true)
 
   useEffect(() => {
     if (status === 'loading') return // Still loading
@@ -20,10 +30,15 @@ function Jellyfin() {
       router.push('/login')
       return
     }
+    
+    // Page is ready when session is authenticated
+    if (status === 'authenticated') {
+      setIsPageLoading(false)
+    }
   }, [session, status, router])
 
-  // Show loading while checking authentication
-  if (status === 'loading') {
+  // Show loading while checking authentication or page is loading
+  if (status === 'loading' || isPageLoading) {
     return (
       <>
         <Layout titleName="Jellyfin Integration" />
@@ -31,14 +46,7 @@ function Jellyfin() {
         <Sidebar currentPage="jellyfin" />
         <main id="main" className="main">
           <div className="container-fluid">
-            <div className="row">
-              <div className="col-12 text-center">
-                <div className="spinner-border" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-                <p className="mt-2">Loading...</p>
-              </div>
-            </div>
+            <Loader />
           </div>
         </main>
       </>
@@ -49,6 +57,7 @@ function Jellyfin() {
   if (!session) {
     return null
   }
+
   return (
     <>
       <Layout titleName="Jellyfin Integration" />

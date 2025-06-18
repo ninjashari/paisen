@@ -87,10 +87,15 @@
 
 <div align="center">
 
-| Anime List Management | Advanced Search |
+| Anime Library | Advanced Search |
 |:---:|:---:|
-| ![Anime List](screens/anime-list.jpg) | ![Search](screens/search.jpg) |
-| *Comprehensive anime list with status tracking* | *Powerful search with real-time results* |
+| ![Anime Library](screens/anime-library-1.jpg) | ![Search](screens/search.jpg) |
+| *Comprehensive anime library with status, scores, and sorting* | *Powerful search with real-time results* |
+
+| Original Anime List |
+|:---:|
+| ![Anime List](screens/anime-list.jpg) |
+| *Original list view with status tracking* |
 
 </div>
 

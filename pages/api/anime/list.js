@@ -20,35 +20,46 @@ import { authOptions } from '../auth/[...nextauth]'
 export default async function handler(req, res) {
   const { method } = req
 
-  // Connect to database
-  await dbConnect()
+  try {
+    // Connect to database
+    await dbConnect()
 
-  // Get session for authentication
-  const session = await getServerSession(req, res, authOptions)
-  if (!session || !session.user) {
-    return res.status(401).json({
-      success: false,
-      message: 'Authentication required'
-    })
-  }
+    // Get session for authentication
+    const session = await getServerSession(req, res, authOptions)
 
-  const username = session.user.username || session.user.name
-  if (!username) {
-    return res.status(400).json({
-      success: false,
-      message: 'Username not found in session'
-    })
-  }
-
-  switch (method) {
-    case 'GET':
-      return handleGetAnimeList(req, res, username)
-    default:
-      res.setHeader('Allow', ['GET'])
-      return res.status(405).json({ 
-        success: false, 
-        message: `Method ${method} Not Allowed` 
+    if (!session || !session.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
       })
+    }
+
+    const username = session.user.username || session.user.name
+
+    if (!username) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username not found in session'
+      })
+    }
+
+    switch (method) {
+      case 'GET':
+        return handleGetAnimeList(req, res, username)
+      default:
+        res.setHeader('Allow', ['GET'])
+        return res.status(405).json({ 
+          success: false, 
+          message: `Method ${method} Not Allowed` 
+        })
+    }
+  } catch (error) {
+    console.error('[ANIME-LIST] Error in main handler:', error)
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    })
   }
 }
 
@@ -98,10 +109,10 @@ async function handleGetAnimeList(req, res, username) {
           userStatus: {
             $arrayElemAt: [
               {
-                                 $filter: {
-                   input: '$userListStatus',
-                   cond: { $eq: ['$$this.userId', user._id] }
-                 }
+                $filter: {
+                  input: '$userListStatus',
+                  cond: { $eq: ['$$this.userId', user._id] }
+                }
               },
               0
             ]
@@ -153,7 +164,7 @@ async function handleGetAnimeList(req, res, username) {
 
     // Project essential fields for the anime library view
     const projectStage = {
-      malId: 1,
+      malId: '$externalIds.malId',
       anidbId: '$externalIds.anidbId',
       title: 1,
       englishTitle: '$alternative_titles.en',
@@ -161,6 +172,7 @@ async function handleGetAnimeList(req, res, username) {
       studios: 1,
       episodes: '$num_episodes',
       year: '$start_season.year',
+      season: '$start_season.season',
       score: '$userStatus.score',
       status: '$userStatus.status', // This is the user's status (e.g., watching), not the anime's airing status
       watchedEpisodes: '$userStatus.num_episodes_watched',
@@ -200,7 +212,7 @@ async function handleGetAnimeList(req, res, username) {
     })
 
   } catch (error) {
-    console.error('Anime list API error:', error)
+    console.error('[GET-ANIME-LIST] Error in handleGetAnimeList:', error)
     return res.status(500).json({
       success: false,
       message: 'Internal server error while retrieving anime list',
@@ -240,7 +252,7 @@ async function getAnimeStats(userId) {
       return acc
     }, {})
   } catch (error) {
-    console.error('Error getting anime stats:', error)
+    console.error('[GET-ANIME-STATS] Error getting anime stats:', error)
     return {}
   }
 } 

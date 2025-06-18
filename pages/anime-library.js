@@ -22,6 +22,7 @@ export default function AnimeLibraryPage() {
   const [animeList, setAnimeList] = useState([])
   const [filteredAnime, setFilteredAnime] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState(null)
   const [isSyncing, setIsSyncing] = useState(false)
   const [syncReport, setSyncReport] = useState(null)
@@ -41,8 +42,12 @@ export default function AnimeLibraryPage() {
    * Fetches anime list from the local database
    * Retrieves comprehensive anime data with user statistics
    */
-  const fetchAnimeList = async () => {
-    setLoading(true)
+  const fetchAnimeList = async (isRefresh = false) => {
+    if (isRefresh) {
+      setIsRefreshing(true)
+    } else {
+      setLoading(true)
+    }
     setError(null)
 
     try {
@@ -67,7 +72,11 @@ export default function AnimeLibraryPage() {
       console.error('Failed to fetch anime list:', err)
       setError(err.response?.data?.message || 'Failed to fetch anime library')
     } finally {
-      setLoading(false)
+      if (isRefresh) {
+        setIsRefreshing(false)
+      } else {
+        setLoading(false)
+      }
     }
   }
 
@@ -172,10 +181,20 @@ export default function AnimeLibraryPage() {
                   <p>{error}</p>
                   <button 
                     className="btn btn-outline-danger" 
-                    onClick={fetchAnimeList}
+                    onClick={() => fetchAnimeList(true)}
+                    disabled={isRefreshing}
                   >
-                    <i className="bi bi-arrow-clockwise me-2"></i>
-                    Retry
+                    {isRefreshing ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Retrying...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-arrow-clockwise me-2"></i>
+                        Retry
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -251,11 +270,20 @@ export default function AnimeLibraryPage() {
                 </h1>
                 <button 
                   className="btn btn-outline-primary" 
-                  onClick={fetchAnimeList}
-                  disabled={loading}
+                  onClick={() => fetchAnimeList(true)}
+                  disabled={loading || isRefreshing}
                 >
-                  <i className="bi bi-arrow-clockwise me-2"></i>
-                  Refresh
+                  {isRefreshing ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Refreshing...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-arrow-clockwise me-2"></i>
+                      Refresh
+                    </>
+                  )}
                 </button>
               </div>
               <p className="text-muted">
@@ -368,7 +396,7 @@ export default function AnimeLibraryPage() {
           {/* Anime List */}
           <div className="row">
             <div className="col-12">
-              <DbAnimeTable animeList={filteredAnime} loading={loading} />
+              <DbAnimeTable animeList={filteredAnime} loading={loading || isRefreshing} />
             </div>
           </div>
         </div>
