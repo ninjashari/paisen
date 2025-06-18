@@ -153,7 +153,7 @@ async function handleGetAnimeList(req, res, username) {
 
     // Project essential fields for the anime library view
     const projectStage = {
-      malId: 1,
+      malId: '$externalIds.malId',
       anidbId: '$externalIds.anidbId',
       title: 1,
       englishTitle: '$alternative_titles.en',
@@ -161,6 +161,7 @@ async function handleGetAnimeList(req, res, username) {
       studios: 1,
       episodes: '$num_episodes',
       year: '$start_season.year',
+      season: '$start_season.season',
       score: '$userStatus.score',
       status: '$userStatus.status', // This is the user's status (e.g., watching), not the anime's airing status
       watchedEpisodes: '$userStatus.num_episodes_watched',

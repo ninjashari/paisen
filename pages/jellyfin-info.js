@@ -25,6 +25,7 @@ import Loader from '@/components/loader'
 export default function JellyfinInfoPage() {
   const { data: session, status } = useSession()
   const [loading, setLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState(null)
   const [jellyfinData, setJellyfinData] = useState({
     serverInfo: null,
@@ -40,8 +41,12 @@ export default function JellyfinInfoPage() {
    * Fetches comprehensive Jellyfin information from the API
    * Retrieves server details, user data, anime content, and activity
    */
-  const fetchJellyfinInfo = async () => {
-    setLoading(true)
+  const fetchJellyfinInfo = async (isRefresh = false) => {
+    if (isRefresh) {
+      setIsRefreshing(true)
+    } else {
+      setLoading(true)
+    }
     setError(null)
 
     try {
@@ -54,6 +59,7 @@ export default function JellyfinInfoPage() {
         console.log('Jellyfin not configured. Config data:', configResponse.data.data)
         setError('Jellyfin is not configured. Please configure your Jellyfin settings first.')
         setLoading(false)
+        setIsRefreshing(false)
         return
       }
 
@@ -95,7 +101,11 @@ export default function JellyfinInfoPage() {
         setError(errorMessage)
       }
     } finally {
-      setLoading(false)
+      if (isRefresh) {
+        setIsRefreshing(false)
+      } else {
+        setLoading(false)
+      }
     }
   }
 
@@ -237,7 +247,7 @@ export default function JellyfinInfoPage() {
                     ) : (
                       <button 
                         className="btn btn-outline-danger me-2" 
-                        onClick={fetchJellyfinInfo}
+                        onClick={() => fetchJellyfinInfo(true)}
                       >
                         <i className="bi bi-arrow-clockwise me-2"></i>
                         Retry
@@ -272,13 +282,22 @@ export default function JellyfinInfoPage() {
             <div className="col-12">
               <div className="d-flex justify-content-between align-items-center">
                 <h1>Jellyfin Information</h1>
-                <button 
-                  className="btn btn-primary" 
-                  onClick={fetchJellyfinInfo}
-                  disabled={loading}
+                <button
+                  className="btn btn-primary"
+                  onClick={() => fetchJellyfinInfo(true)}
+                  disabled={loading || isRefreshing}
                 >
-                  <i className="bi bi-arrow-clockwise me-2"></i>
-                  Refresh
+                  {isRefreshing ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Refreshing...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-arrow-clockwise me-2"></i>
+                      Refresh
+                    </>
+                  )}
                 </button>
               </div>
               <p className="text-muted">
@@ -301,7 +320,7 @@ export default function JellyfinInfoPage() {
                   <div className="card-body">
                     <div className="row">
                       <div className="col-md-6">
-                        <p><strong>Server Name:</strong> {jellyfinData.serverInfo.serverName}</p>
+                        <p><strong>Server Name:</strong> {jellyfinData.serverInfo.name}</p>
                         <p><strong>Version:</strong> {jellyfinData.serverInfo.version}</p>
                       </div>
                       <div className="col-md-6">
@@ -331,12 +350,12 @@ export default function JellyfinInfoPage() {
                   <div className="card-body">
                     <div className="row">
                       <div className="col-md-6">
-                        <p><strong>Username:</strong> {jellyfinData.userInfo.Name}</p>
-                        <p><strong>User ID:</strong> {jellyfinData.userInfo.Id}</p>
+                        <p><strong>Username:</strong> {jellyfinData.userInfo.name}</p>
+                        <p><strong>User ID:</strong> {jellyfinData.userInfo.id}</p>
                       </div>
                       <div className="col-md-6">
-                        <p><strong>Last Activity:</strong> {formatDate(jellyfinData.userInfo.LastActivityDate)}</p>
-                        <p><strong>Last Login:</strong> {formatDate(jellyfinData.userInfo.LastLoginDate)}</p>
+                        <p><strong>Last Activity:</strong> {formatDate(jellyfinData.userInfo.lastActivityDate)}</p>
+                        <p><strong>Last Login:</strong> {formatDate(jellyfinData.userInfo.lastLoginDate)}</p>
                       </div>
                     </div>
                   </div>
@@ -411,7 +430,6 @@ export default function JellyfinInfoPage() {
                               <th>Episodes</th>
                               <th>Progress</th>
                               <th>Type</th>
-                              <th>Year</th>
                               <th>Genres</th>
                               <th>External IDs</th>
                             </tr>
@@ -458,9 +476,6 @@ export default function JellyfinInfoPage() {
                                 </td>
                                 <td>
                                   <span className="badge bg-secondary">{anime.Type}</span>
-                                </td>
-                                <td>
-                                  {anime.ProductionYear || 'Unknown'}
                                 </td>
                                 <td>
                                   {anime.Genres && anime.Genres.slice(0, 2).map((genre, idx) => (

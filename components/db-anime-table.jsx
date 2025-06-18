@@ -15,6 +15,29 @@ const DbAnimeTable = ({ animeList, loading }) => {
   const [itemsPerPage] = useState(20);
 
   /**
+   * Formats year and season into readable format (e.g., "Fall 2020")
+   * @param {number} year - The year
+   * @param {string} season - The season (spring, summer, fall, winter)
+   * @returns {string} Formatted season and year
+   */
+  const formatYearSeason = (year, season) => {
+    if (!year) return 'Unknown';
+    
+    if (season) {
+      const seasonMap = {
+        'spring': 'Spring',
+        'summer': 'Summer', 
+        'fall': 'Fall',
+        'winter': 'Winter'
+      };
+      const formattedSeason = seasonMap[season.toLowerCase()] || season;
+      return `${formattedSeason} ${year}`;
+    }
+    
+    return year.toString();
+  };
+
+  /**
    * Applies sorting to the anime list
    */
   const applySorting = () => {
@@ -166,14 +189,24 @@ const DbAnimeTable = ({ animeList, loading }) => {
               <table className="table table-hover">
                 <thead>
                   <tr>
-                    <th scope="col" onClick={() => handleSort('title')}>Title {getSortIcon('title')}</th>
+                    <th scope="col" onClick={() => handleSort('title')} style={{ cursor: 'pointer' }}>
+                      Title {getSortIcon('title')}
+                    </th>
                     <th scope="col">Genres</th>
                     <th scope="col">Studios</th>
                     <th scope="col">Status</th>
-                    <th scope="col" onClick={() => handleSort('score')}>Score {getSortIcon('score')}</th>
-                    <th scope="col" onClick={() => handleSort('episodes')}>Episodes {getSortIcon('episodes')}</th>
-                    <th scope="col" onClick={() => handleSort('year')}>Year {getSortIcon('year')}</th>
-                    <th scope="col" onClick={() => handleSort('updated')}>Last Updated {getSortIcon('updated')}</th>
+                    <th scope="col" onClick={() => handleSort('score')} style={{ cursor: 'pointer' }}>
+                      Score {getSortIcon('score')}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('episodes')} style={{ cursor: 'pointer' }}>
+                      Episodes {getSortIcon('episodes')}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('year')} style={{ cursor: 'pointer' }}>
+                      Year {getSortIcon('year')}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('updated')} style={{ cursor: 'pointer' }}>
+                      Last Updated {getSortIcon('updated')}
+                    </th>
                     <th scope="col">MAL ID</th>
                     <th scope="col">AniDB ID</th>
                   </tr>
@@ -213,12 +246,38 @@ const DbAnimeTable = ({ animeList, loading }) => {
                           )}
                         </div>
                       </td>
-                      <td>{anime.year || 'Unknown'}</td>
+                      <td>{formatYearSeason(anime.year, anime.season)}</td>
                       <td>
                         <small className="text-muted">{formatDate(anime.updatedAt || anime.createdAt)}</small>
                       </td>
-                      <td>{anime.malId || 'N/A'}</td>
-                      <td>{anime.anidbId || 'N/A'}</td>
+                      <td>
+                        {anime.malId ? (
+                          <a 
+                            href={`https://myanimelist.net/anime/${anime.malId}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-decoration-none"
+                          >
+                            {anime.malId}
+                          </a>
+                        ) : (
+                          <span className="text-muted">N/A</span>
+                        )}
+                      </td>
+                      <td>
+                        {anime.anidbId ? (
+                          <a 
+                            href={`https://anidb.net/anime/${anime.anidbId}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-decoration-none"
+                          >
+                            {anime.anidbId}
+                          </a>
+                        ) : (
+                          <span className="text-muted">N/A</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
