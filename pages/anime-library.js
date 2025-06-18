@@ -26,7 +26,6 @@ export default function AnimeLibraryPage() {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState(null)
   const [isSyncing, setIsSyncing] = useState(false)
-  const [syncReport, setSyncReport] = useState(null)
   const [sessionId, setSessionId] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -108,21 +107,29 @@ export default function AnimeLibraryPage() {
     const newSessionId = uuidv4();
     setSessionId(newSessionId);
     setIsSyncing(true);
-    setSyncReport(null);
+    setError(null); // Clear previous errors
     try {
-      const response = await axios.post('/api/mal/sync-to-db', { options: { sessionId: newSessionId } });
-      if (response.data.success) {
-        setSyncReport(response.data.data);
-        fetchAnimeList(); // Refresh the list after a successful sync
-      } else {
-        setError(response.data.message);
-      }
+      // This now returns immediately with a 202
+      await axios.post('/api/mal/sync-to-db', { options: { sessionId: newSessionId } });
     } catch (error) {
-      console.error('Sync error:', error);
-      setError('An error occurred during sync. Please try again.');
-    } finally {
-      setIsSyncing(false);
+      console.error('Error starting sync:', error);
+      setError(error.response?.data?.message || 'Failed to start the sync process.');
+      setIsSyncing(false); // Stop the sync UI if it fails to start
     }
+  };
+
+  const onSyncComplete = (report) => {
+    console.log('Sync completed!', report);
+    setIsSyncing(false);
+    // Optionally, you can show a success message here
+    // And refresh the list to show updated data
+    fetchAnimeList(); 
+  };
+
+  const onSyncError = (error) => {
+    console.error('Sync failed:', error);
+    setIsSyncing(false);
+    setError(error.message || 'The synchronization process encountered an error.');
   };
 
   /**
@@ -255,33 +262,12 @@ export default function AnimeLibraryPage() {
           </div>
         </div>
         {isSyncing && (
-          <SyncProgressBar sessionId={sessionId} show={isSyncing} />
-        )}
-        {syncReport && !isSyncing && (
-          <div className="card">
-            <div className="card-header">
-              <h4 className="card-title">Sync Report</h4>
-            </div>
-            <div className="card-body">
-              <p>
-                <strong>Processed:</strong> {syncReport.processed} | 
-                <strong>Updated:</strong> {syncReport.updated} | 
-                <strong>Created:</strong> {syncReport.created} | 
-                <strong>Errors:</strong> {syncReport.errors}
-              </p>
-              {syncReport.errors > 0 && (
-                <>
-                  <hr />
-                  <h5>Error Details:</h5>
-                  <ul className="list-group">
-                    {syncReport.noMatches.map((item, index) => (
-                      <li key={index} className="list-group-item"><strong>{item.title}:</strong> {item.error}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </div>
-          </div>
+          <SyncProgressBar 
+            sessionId={sessionId} 
+            show={isSyncing}
+            onComplete={onSyncComplete}
+            onError={onSyncError}
+          />
         )}
         <div className="container-fluid">
           {/* Page Header */}

@@ -1,12 +1,15 @@
 /**
  * Sync Progress Bar Component
  * 
- * This component displays real-time sync progress with percentage,
- * entry counts, and current status. It connects to the sync progress
- * tracking system for live updates.
+ * This component displays a progress bar and status information for long-running
+ * synchronization processes. It polls the server for progress updates and
+ * provides visual feedback to the user.
  */
+import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 
-import { useState, useEffect } from 'react'
+const POLL_INTERVAL = 1000; // Poll every second
+const MAX_RETRIES = 3; // Maximum number of consecutive errors before stopping
 
 /**
  * SyncProgressBar Component
@@ -21,190 +24,131 @@ import { useState, useEffect } from 'react'
  * @param {function} props.onError - Callback when sync fails
  * @returns {JSX.Element} The sync progress bar component
  */
-export default function SyncProgressBar({ 
-  sessionId, 
-  show = false, 
-  onComplete = null, 
-  onError = null 
-}) {
+export default function SyncProgressBar({ sessionId, onComplete, onError }) {
   const [progress, setProgress] = useState({
     percentage: 0,
+    status: 'idle',
+    message: '',
     processedItems: 0,
     totalItems: 0,
     addedEntries: 0,
     updatedEntries: 0,
     errorEntries: 0,
-    skippedEntries: 0,
-    status: 'idle',
-    message: '',
     currentItem: null
-  })
+  });
+  const [errorCount, setErrorCount] = useState(0);
+  const [isPolling, setIsPolling] = useState(true);
 
-  const [isVisible, setIsVisible] = useState(show)
+  const fetchProgress = useCallback(async () => {
+    if (!sessionId || !isPolling) return;
 
-  useEffect(() => {
-    setIsVisible(show)
-  }, [show])
+    try {
+      const response = await axios.get(`/api/sync/progress/${sessionId}`);
+      const progressData = response.data;
 
-  useEffect(() => {
-    if (!sessionId || !isVisible) return
+      setProgress(progressData);
+      setErrorCount(0); // Reset error count on successful fetch
 
-    let pollInterval = null
-
-    const pollProgress = async () => {
-      try {
-        const response = await fetch(`/api/sync/progress/${sessionId}`)
-        if (response.ok) {
-          const progressData = await response.json()
-          setProgress(progressData)
-
-          // Handle completion
-          if (progressData.status === 'completed' && onComplete) {
-            onComplete(progressData)
-            clearInterval(pollInterval)
-          } else if (progressData.status === 'failed' && onError) {
-            onError(progressData)
-            clearInterval(pollInterval)
-          }
-        } else if (response.status === 404) {
-          // Session not found, stop polling
-          clearInterval(pollInterval)
+      // Handle completion
+      if (progressData.status === 'completed') {
+        setIsPolling(false);
+        if (onComplete) {
+          onComplete(progressData);
         }
-      } catch (error) {
-        console.error('Error polling progress:', error)
+      }
+      // Handle error state
+      else if (progressData.status === 'error') {
+        setIsPolling(false);
+        if (onError) {
+          onError(new Error(progressData.message || 'Sync failed'));
+        }
+      }
+    } catch (error) {
+      // Increment error count and stop polling if we exceed MAX_RETRIES
+      const newErrorCount = errorCount + 1;
+      setErrorCount(newErrorCount);
+      
+      if (newErrorCount >= MAX_RETRIES) {
+        setIsPolling(false);
+        if (onError) {
+          onError(error);
+        }
       }
     }
+  }, [sessionId, isPolling, errorCount, onComplete, onError]);
 
-    // Start polling every 500ms
-    pollInterval = setInterval(pollProgress, 500)
-    
-    // Initial poll
-    pollProgress()
+  useEffect(() => {
+    if (!sessionId) return;
+
+    // Start polling
+    const pollInterval = setInterval(fetchProgress, POLL_INTERVAL);
+
+    // Initial fetch
+    fetchProgress();
 
     return () => {
-      if (pollInterval) {
-        clearInterval(pollInterval)
-      }
-    }
-  }, [sessionId, isVisible, onComplete, onError])
+      clearInterval(pollInterval);
+      setIsPolling(false);
+    };
+  }, [sessionId, fetchProgress]);
 
-  if (!isVisible || !sessionId) {
-    return null
-  }
+  // Don't render anything if no session ID
+  if (!sessionId) return null;
 
-  const getStatusColor = () => {
+  // Calculate the progress bar color based on status
+  const getProgressBarColor = () => {
     switch (progress.status) {
+      case 'error':
+        return 'bg-danger';
       case 'completed':
-        return 'success'
-      case 'failed':
-        return 'danger'
+        return 'bg-success';
       case 'running':
-        return 'primary'
+        return 'bg-primary';
       default:
-        return 'secondary'
+        return 'bg-info';
     }
-  }
-
-  const getStatusIcon = () => {
-    switch (progress.status) {
-      case 'completed':
-        return 'bi-check-circle'
-      case 'failed':
-        return 'bi-x-circle'
-      case 'running':
-        return 'bi-arrow-clockwise'
-      default:
-        return 'bi-clock'
-    }
-  }
+  };
 
   return (
-    <div className="card mt-3">
-      <div className="card-header d-flex justify-content-between align-items-center">
-        <h6 className="mb-0">
-          <i className={`bi ${getStatusIcon()} me-2`}></i>
-          Sync Progress
-        </h6>
-        <span className={`badge bg-${getStatusColor()}`}>
-          {progress.status.toUpperCase()}
-        </span>
+    <div className="sync-progress mb-4">
+      <div className="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <strong>Status:</strong> {progress.status.charAt(0).toUpperCase() + progress.status.slice(1)}
+        </div>
+        <div>
+          <strong>Progress:</strong> {progress.percentage}%
+        </div>
       </div>
-      <div className="card-body">
-        {/* Progress Bar */}
-        <div className="mb-3">
-          <div className="d-flex justify-content-between mb-1">
-            <span className="small">Progress</span>
-            <span className="small font-weight-bold">{progress.percentage}%</span>
-          </div>
-          <div className="progress">
-            <div 
-              className={`progress-bar bg-${getStatusColor()}`}
-              role="progressbar" 
-              style={{ width: `${progress.percentage}%` }}
-              aria-valuenow={progress.percentage}
-              aria-valuemin="0" 
-              aria-valuemax="100"
-            >
-              {progress.percentage > 10 && `${progress.percentage}%`}
-            </div>
-          </div>
-        </div>
 
-        {/* Entry Counts */}
-        <div className="row mb-3">
-          <div className="col-6 col-md-3">
-            <div className="text-center">
-              <div className="h5 text-primary mb-0">{progress.processedItems}</div>
-              <small className="text-muted">Processed</small>
-            </div>
-          </div>
-          <div className="col-6 col-md-3">
-            <div className="text-center">
-              <div className="h5 text-success mb-0">{progress.addedEntries}</div>
-              <small className="text-muted">Added</small>
-            </div>
-          </div>
-          <div className="col-6 col-md-3">
-            <div className="text-center">
-              <div className="h5 text-info mb-0">{progress.updatedEntries}</div>
-              <small className="text-muted">Updated</small>
-            </div>
-          </div>
-          <div className="col-6 col-md-3">
-            <div className="text-center">
-              <div className="h5 text-danger mb-0">{progress.errorEntries}</div>
-              <small className="text-muted">Errors</small>
-            </div>
-          </div>
-        </div>
-
-        {/* Current Status */}
-        <div className="mb-2">
-          <div className="d-flex justify-content-between">
-            <span className="small text-muted">Items:</span>
-            <span className="small">
-              {progress.processedItems} / {progress.totalItems}
-            </span>
-          </div>
-        </div>
-
-        {/* Current Item */}
-        {progress.currentItem && (
-          <div className="mb-2">
-            <div className="small text-muted">Currently processing:</div>
-            <div className="small font-weight-bold text-truncate" title={progress.currentItem}>
-              {progress.currentItem}
-            </div>
-          </div>
-        )}
-
-        {/* Status Message */}
-        {progress.message && (
-          <div className="alert alert-light border-0 py-2 mb-0">
-            <small>{progress.message}</small>
-          </div>
-        )}
+      <div className="progress mb-2" style={{ height: '20px' }}>
+        <div
+          className={`progress-bar ${getProgressBarColor()}`}
+          role="progressbar"
+          style={{ width: `${progress.percentage}%` }}
+          aria-valuenow={progress.percentage}
+          aria-valuemin="0"
+          aria-valuemax="100"
+        />
       </div>
+
+      {progress.message && (
+        <div className="text-muted small mb-2">{progress.message}</div>
+      )}
+
+      {progress.currentItem && (
+        <div className="text-muted small">
+          Currently processing: {progress.currentItem}
+        </div>
+      )}
+
+      {progress.totalItems > 0 && (
+        <div className="d-flex justify-content-between text-muted small mt-2">
+          <span>Processed: {progress.processedItems} / {progress.totalItems}</span>
+          <span>Added: {progress.addedEntries}</span>
+          <span>Updated: {progress.updatedEntries}</span>
+          <span>Errors: {progress.errorEntries}</span>
+        </div>
+      )}
     </div>
-  )
+  );
 } 
