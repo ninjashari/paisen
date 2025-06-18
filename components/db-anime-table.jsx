@@ -7,7 +7,7 @@
  */
 import { useState, useEffect } from 'react';
 
-const DbAnimeTable = ({ animeList, loading }) => {
+const DbAnimeTable = ({ animeList, loading, onMap, mappings = {} }) => {
   const [filteredAnime, setFilteredAnime] = useState([]);
   const [sortBy, setSortBy] = useState('title');
   const [sortOrder, setSortOrder] = useState('asc');
@@ -265,15 +265,22 @@ const DbAnimeTable = ({ animeList, loading }) => {
                         )}
                       </td>
                       <td>
-                        {anime.anidbId ? (
+                        {mappings[anime.malId] ? (
                           <a 
-                            href={`https://anidb.net/anime/${anime.anidbId}`} 
+                            href={`https://anidb.net/anime/${mappings[anime.malId].anidbId}`} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-decoration-none"
                           >
-                            {anime.anidbId}
+                            {mappings[anime.malId].anidbId}
                           </a>
+                        ) : onMap ? (
+                          <button 
+                            className="btn btn-sm btn-outline-primary"
+                            onClick={() => onMap(anime)}
+                          >
+                            Map
+                          </button>
                         ) : (
                           <span className="text-muted">N/A</span>
                         )}

@@ -159,28 +159,25 @@ export default function AnimeMappingPage() {
    * Load existing mappings for the anime list
    */
   const loadExistingMappings = async (animeData) => {
-    const mappingPromises = animeData.map(async (anime) => {
-      try {
-        const response = await axios.get(
-          `/api/anime/mapping?malId=${anime.malId}`
-        );
-        if (response.data.success) {
-          return { malId: anime.malId, mapping: response.data.mapping };
-        }
-      } catch (err) {
-        // Mapping not found - this is normal
-        return { malId: anime.malId, mapping: null };
+    if (animeData.length === 0) {
+      return;
+    }
+
+    const malIds = animeData.map(anime => anime.malId);
+
+    try {
+      const response = await axios.get(`/api/anime/mapping?malIds=${malIds.join(',')}`);
+      if (response.data.success) {
+        const mappingMap = {};
+        response.data.mappings.forEach(mapping => {
+          mappingMap[mapping.malId] = mapping;
+        });
+        setMappings(mappingMap);
       }
-    });
-
-    const mappingResults = await Promise.all(mappingPromises);
-    const mappingMap = {};
-
-    mappingResults.forEach((result) => {
-      mappingMap[result.malId] = result.mapping;
-    });
-
-    setMappings(mappingMap);
+    } catch (err) {
+      console.error("Error loading existing mappings:", err);
+      // It's not critical if this fails, so we don't set a page-level error
+    }
   };
 
   /**
@@ -306,6 +303,8 @@ export default function AnimeMappingPage() {
         {/* Modal for mapping */}
         {isModalOpen && (
           <AnimeMappingModal
+            key={selectedAnime?.malId}
+            isOpen={isModalOpen}
             anime={selectedAnime}
             onClose={handleModalClosed}
             onMappingConfirmed={handleMappingConfirmed}
@@ -422,7 +421,12 @@ export default function AnimeMappingPage() {
         </div>
 
         {/* Anime List Table */}
-        <DbAnimeTable animeList={filteredAnimeList} loading={isLoading} />
+        <DbAnimeTable 
+          animeList={filteredAnimeList} 
+          loading={isLoading}
+          mappings={mappings}
+          onMap={handleMapAnime}
+        />
       </main>
     </Layout>
   );

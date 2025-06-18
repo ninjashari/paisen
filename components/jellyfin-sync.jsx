@@ -262,10 +262,7 @@ function JellyfinSync() {
                     <thead>
                       <tr>
                         <th>Series</th>
-                        <th>MAL ID</th>
-                        <th>Episodes</th>
-                        <th>Status</th>
-                        <th>Confidence</th>
+                        <th>Sync Details</th>
                         {options.dryRun && <th>Action</th>}
                       </tr>
                     </thead>
@@ -273,38 +270,7 @@ function JellyfinSync() {
                       {syncResult.matches.map((match, index) => (
                         <tr key={index}>
                           <td>{match.series}</td>
-                          <td>
-                            <a 
-                              href={`https://myanimelist.net/anime/${match.malId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-decoration-none"
-                            >
-                              {match.malId}
-                            </a>
-                          </td>
-                          <td>
-                            {match.previousEpisodes} → {match.newEpisodes}
-                          </td>
-                          <td>
-                            <span className={`badge bg-${getStatusColor(match.status)}`}>
-                              {match.status}
-                            </span>
-                          </td>
-                          <td>
-                            <div className="progress" style={{ width: '60px', height: '20px' }}>
-                              <div 
-                                className="progress-bar" 
-                                role="progressbar" 
-                                style={{ width: `${(match.confidence || 0) * 100}%` }}
-                                aria-valuenow={(match.confidence || 0) * 100}
-                                aria-valuemin="0" 
-                                aria-valuemax="100"
-                              >
-                                {Math.round((match.confidence || 0) * 100)}%
-                              </div>
-                            </div>
-                          </td>
+                          <td>{match.message}</td>
                           {options.dryRun && (
                             <td>
                               <span className="badge bg-info">Would Update</span>
@@ -339,19 +305,19 @@ function JellyfinSync() {
             )}
 
             {/* Errors */}
-            {syncResult.errors && syncResult.errors.length > 0 && (
+            {syncResult.errorDetails && syncResult.errorDetails.length > 0 && (
               <div className="mb-3">
                 <h6 className="text-danger">
                   <i className="bi bi-exclamation-circle me-2"></i>
-                  Errors ({syncResult.errors.length})
+                  Errors ({syncResult.errorDetails.length})
                 </h6>
                 <div className="list-group">
-                  {syncResult.errors.map((error, index) => (
+                  {syncResult.errorDetails.map((error, index) => (
                     <div key={index} className="list-group-item list-group-item-danger">
                       <div className="d-flex w-100 justify-content-between">
                         <h6 className="mb-1">{error.series}</h6>
                       </div>
-                      <p className="mb-1">{error.error}</p>
+                      <p className="mb-1">{error.reason}</p>
                     </div>
                   ))}
                 </div>

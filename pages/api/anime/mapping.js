@@ -38,14 +38,6 @@ export default async function handler(req, res) {
   }
 
   const username = session.user.username || session.user.name
-  if (!username) {
-    return res.status(400).json({
-      success: false,
-      message: 'Username not found in session'
-    })
-  }
-
-  // Get user document
   const user = await User.findOne({ username })
   if (!user) {
     return res.status(404).json({
@@ -58,9 +50,9 @@ export default async function handler(req, res) {
 
   switch (method) {
     case 'GET':
-      return handleGetMapping(req, res, user, offlineDbService)
+      return handleGet(req, res, offlineDbService)
     case 'POST':
-      return handleCreateMapping(req, res, user, offlineDbService)
+      return handlePost(req, res, offlineDbService, user._id)
     case 'PUT':
       return handleConfirmMapping(req, res, user, offlineDbService)
     default:
@@ -77,69 +69,31 @@ export default async function handler(req, res) {
  * 
  * @param {Object} req - Request object
  * @param {Object} res - Response object
- * @param {Object} user - User document
  * @param {OfflineDatabaseService} offlineDbService - Offline database service
  */
-async function handleGetMapping(req, res, user, offlineDbService) {
+async function handleGet(req, res, service) {
+  const { malId, malIds } = req.query;
+
+  if (!malId && !malIds) {
+    return res.status(400).json({ success: false, message: 'malId or malIds is required' });
+  }
+
   try {
-    const { malId, search, limit = 10 } = req.query
-
-    if (malId) {
-      // Get specific mapping by MAL ID
-      const mapping = await offlineDbService.findMappingByMalId(parseInt(malId))
-      
-      if (!mapping) {
-        return res.status(404).json({
-          success: false,
-          message: 'Mapping not found'
-        })
-      }
-
-      return res.status(200).json({
-        success: true,
-        mapping: {
-          malId: mapping.malId,
-          anidbId: mapping.anidbId,
-          animeTitle: mapping.animeTitle,
-          mappingSource: mapping.mappingSource,
-          isConfirmed: mapping.mappingSource === 'user_confirmed' || mapping.mappingSource === 'manual',
-          confirmedByUser: mapping.confirmedByUserId?.toString() === user._id.toString(),
-          metadata: mapping.offlineDbMetadata,
-          createdAt: mapping.createdAt,
-          updatedAt: mapping.updatedAt
-        }
-      })
-
-    } else if (search) {
-      // Search mappings by title
-      const mappings = await offlineDbService.searchMappingsByTitle(search, parseInt(limit))
-      
-      return res.status(200).json({
-        success: true,
-        mappings: mappings.map(mapping => ({
-          malId: mapping.malId,
-          anidbId: mapping.anidbId,
-          animeTitle: mapping.animeTitle,
-          mappingSource: mapping.mappingSource,
-          isConfirmed: mapping.mappingSource === 'user_confirmed' || mapping.mappingSource === 'manual',
-          metadata: mapping.offlineDbMetadata
-        }))
-      })
-
+    if (malIds) {
+      const ids = malIds.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+      const mappings = await service.findMappingsByMalIds(ids);
+      return res.status(200).json({ success: true, mappings });
     } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Either malId or search parameter is required'
-      })
+      const mapping = await service.findMappingByMalId(parseInt(malId));
+      if (mapping) {
+        return res.status(200).json({ success: true, mapping });
+      } else {
+        return res.status(404).json({ success: false, message: 'Mapping not found' });
+      }
     }
-
   } catch (error) {
-    console.error('Error getting anime mapping:', error)
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: error.message
-    })
+    console.error('Error fetching mapping(s):', error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 }
 
@@ -148,70 +102,27 @@ async function handleGetMapping(req, res, user, offlineDbService) {
  * 
  * @param {Object} req - Request object
  * @param {Object} res - Response object
- * @param {Object} user - User document
  * @param {OfflineDatabaseService} offlineDbService - Offline database service
+ * @param {ObjectId} userId - User ID
  */
-async function handleCreateMapping(req, res, user, offlineDbService) {
+async function handlePost(req, res, service, userId) {
+  const { malId, anidbId, animeTitle } = req.body
+
+  if (!malId || !anidbId || !animeTitle) {
+    return res.status(400).json({ success: false, message: 'malId, anidbId, and animeTitle are required' })
+  }
+
   try {
-    const { malId, anidbId, animeTitle } = req.body
-
-    // Validate required fields
-    if (!malId || !anidbId || !animeTitle) {
-      return res.status(400).json({
-        success: false,
-        message: 'malId, anidbId, and animeTitle are required'
-      })
-    }
-
-    // Validate numeric IDs
-    const numericMalId = parseInt(malId)
-    const numericAnidbId = parseInt(anidbId)
-
-    if (isNaN(numericMalId) || isNaN(numericAnidbId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'malId and anidbId must be valid numbers'
-      })
-    }
-
-    // Create manual mapping
-    const mapping = await offlineDbService.createManualMapping(
-      numericMalId,
-      numericAnidbId,
+    const mapping = await service.createManualMapping(
+      parseInt(malId),
+      parseInt(anidbId),
       animeTitle,
-      user._id
+      userId
     )
-
-    return res.status(201).json({
-      success: true,
-      message: 'Manual mapping created successfully',
-      mapping: {
-        malId: mapping.malId,
-        anidbId: mapping.anidbId,
-        animeTitle: mapping.animeTitle,
-        mappingSource: mapping.mappingSource,
-        isConfirmed: true,
-        confirmedByUser: true,
-        createdAt: mapping.createdAt,
-        updatedAt: mapping.updatedAt
-      }
-    })
-
+    return res.status(201).json({ success: true, mapping })
   } catch (error) {
-    console.error('Error creating anime mapping:', error)
-    
-    if (error.code === 11000) {
-      return res.status(409).json({
-        success: false,
-        message: 'A mapping for this MAL ID already exists'
-      })
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: error.message
-    })
+    console.error('Error creating manual mapping:', error)
+    return res.status(500).json({ success: false, message: 'Internal server error' })
   }
 }
 

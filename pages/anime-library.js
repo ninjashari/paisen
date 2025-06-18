@@ -20,6 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 export default function AnimeLibraryPage() {
   const { data: session, status } = useSession()
   const [animeList, setAnimeList] = useState([])
+  const [mappings, setMappings] = useState({})
   const [filteredAnime, setFilteredAnime] = useState([])
   const [loading, setLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -51,11 +52,15 @@ export default function AnimeLibraryPage() {
     setError(null)
 
     try {
-      const response = await axios.get('/api/anime/list', { params: { limit: 0 } })
+      const response = await axios.get('/api/anime/list', { params: { limit: 0, includeExternalIds: true } })
       const animeData = response.data.data || []
       
       setAnimeList(animeData)
       setFilteredAnime(animeData)
+
+      if (animeData.length > 0) {
+        fetchMappings(animeData);
+      }
       
       // Calculate statistics
       const statistics = {
@@ -79,6 +84,25 @@ export default function AnimeLibraryPage() {
       }
     }
   }
+
+  const fetchMappings = async (animeData) => {
+    const malIds = animeData.map(a => a.malId).filter(Boolean);
+    if (malIds.length === 0) return;
+
+    try {
+      const response = await axios.get(`/api/anime/mapping?malIds=${malIds.join(',')}`);
+      if (response.data.success) {
+        const mappingMap = {};
+        response.data.mappings.forEach(mapping => {
+          mappingMap[mapping.malId] = mapping;
+        });
+        setMappings(mappingMap);
+      }
+    } catch (error) {
+      console.error('Failed to fetch mappings:', error);
+      // Non-critical error
+    }
+  };
 
   const handleSyncToDb = async () => {
     const newSessionId = uuidv4();
@@ -396,7 +420,11 @@ export default function AnimeLibraryPage() {
           {/* Anime List */}
           <div className="row">
             <div className="col-12">
-              <DbAnimeTable animeList={filteredAnime} loading={loading || isRefreshing} />
+              <DbAnimeTable 
+                animeList={filteredAnime} 
+                loading={loading || isRefreshing}
+                mappings={mappings}
+              />
             </div>
           </div>
         </div>
