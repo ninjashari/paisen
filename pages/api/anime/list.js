@@ -98,7 +98,8 @@ async function handleGetAnimeList(req, res, username) {
 
     // Add status filter if provided
     if (status && status !== 'all') {
-      matchStage['userListStatus.status'] = status
+      const statuses = status.split(',');
+      matchStage['userListStatus.status'] = { $in: statuses };
     }
 
     // Build aggregation pipeline

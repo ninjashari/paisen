@@ -321,7 +321,9 @@ export default function AnimeMappingPage() {
                 <h5 className="card-title">Mapping Progress</h5>
                 <p>
                   {mappingStats.mapped} of {mappingStats.total} anime mapped (
-                  {((mappingStats.mapped / mappingStats.total) * 100).toFixed(2)}
+                  {mappingStats.total > 0
+                    ? ((mappingStats.mapped / mappingStats.total) * 100).toFixed(2)
+                    : '0.00'}
                   %)
                 </p>
                 <div className="progress">
@@ -354,7 +356,7 @@ export default function AnimeMappingPage() {
                     <p className="mb-1">
                       <strong>Last Updated:</strong>{" "}
                       {new Date(
-                        databaseStatus.lastDownloadedAt
+                        databaseStatus.lastUpdated
                       ).toLocaleDateString()}
                     </p>
                     <p className="mb-0">
