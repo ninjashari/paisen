@@ -144,8 +144,6 @@ const AnimeSchema = new mongoose.Schema({
       default: Date.now,
     },
     lastUpdatedOnMal: Date,
-    lastSyncedFromJellyfin: Date,
-    jellyfinId: String, // Jellyfin item ID for reference
     syncVersion: {
       type: Number,
       default: 1,
@@ -173,24 +171,7 @@ AnimeSchema.index({ 'externalIds.anidbId': 1 })
 AnimeSchema.index({ 'userListStatus.userId': 1 })
 AnimeSchema.index({ 'userListStatus.status': 1 })
 AnimeSchema.index({ 'syncMetadata.lastSyncedFromMal': 1 })
-AnimeSchema.index({ 'syncMetadata.lastSyncedFromJellyfin': 1 })
-AnimeSchema.index({ 'syncMetadata.jellyfinId': 1 })
 AnimeSchema.index({ title: 'text' })
-
-// Compound index for Jellyfin entries (ensure uniqueness by title + external IDs)
-AnimeSchema.index({ 
-  title: 1, 
-  'externalIds.malId': 1, 
-  'syncMetadata.jellyfinId': 1 
-}, { 
-  sparse: true,
-  partialFilterExpression: { 
-    $or: [
-      { 'externalIds.malId': { $exists: true } },
-      { 'syncMetadata.jellyfinId': { $exists: true } }
-    ]
-  }
-})
 
 // Update the updatedAt field before saving
 AnimeSchema.pre('save', function(next) {

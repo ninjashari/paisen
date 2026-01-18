@@ -43,26 +43,6 @@ const UserSchema = new mongoose.Schema({
   tokenType: {
     type: String,
   },
-  // Jellyfin Integration Fields
-  jellyfinServerUrl: {
-    type: String,
-  },
-  jellyfinApiKey: {
-    type: String,
-  },
-  jellyfinUserId: {
-    type: String,
-  },
-  jellyfinUsername: {
-    type: String,
-  },
-  jellyfinSyncEnabled: {
-    type: Boolean,
-    default: false,
-  },
-  jellyfinLastSync: {
-    type: Date,
-  },
 
   // Anime Sync Metadata
   syncMetadata: {

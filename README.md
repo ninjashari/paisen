@@ -1,14 +1,13 @@
 # 🎌 Paisen
 
-> **Self-hosted MyAnimeList Manager with Jellyfin Integration**
+> **Self-hosted MyAnimeList Manager**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-13-black.svg)](https://nextjs.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-6.0%2B-green.svg)](https://www.mongodb.com/)
-[![Jellyfin](https://img.shields.io/badge/Jellyfin-Compatible-purple.svg)](https://jellyfin.org/)
 
-**Paisen** is a powerful, self-hosted anime management application that seamlessly integrates MyAnimeList and Jellyfin to provide a comprehensive anime tracking experience. With its lightning-fast local database and intelligent cross-platform synchronization, Paisen transforms how you discover, track, and manage your anime collection.
+**Paisen** is a powerful, self-hosted anime management application that integrates with MyAnimeList to provide a comprehensive anime tracking experience. With its lightning-fast local database, Paisen transforms how you discover, track, and manage your anime collection.
 
 ---
 
@@ -20,9 +19,7 @@
 - [📋 Prerequisites](#-prerequisites)
 - [⚙️ Installation](#️-installation)
 - [🔧 Configuration](#-configuration)
-- [🗺️ Anime Mapping Setup](#️-anime-mapping-setup)
-- [🎬 Jellyfin Integration](#-jellyfin-integration)
-- [🔌 API Documentation](#-api-documentation)
+- [ API Documentation](#-api-documentation)
 - [🧪 Testing](#-testing)
 - [🔧 Troubleshooting](#-troubleshooting)
 - [🤝 Contributing](#-contributing)
@@ -39,13 +36,6 @@
 - **🔍 Universal Search** - Lightning-fast search across multiple databases
 - **📊 Rich Analytics** - Comprehensive statistics and watching pattern insights
 - **👥 Multi-user Support** - Isolated accounts with personal data protection
-
-### 🎬 Media Server Integration
-- **⚡ Real-time Sync** - Automatic Jellyfin updates via webhooks
-- **🧠 Smart Matching** - Intelligent anime identification across platforms
-- **📈 Progress Tracking** - Seamless episode progress synchronization
-- **📡 Server Monitoring** - Real-time connection and activity status
-- **📂 Library Management** - Complete media collection overview
 
 ### 🗄️ Database & Performance
 - **🚀 Lightning Speed** - 90% faster than direct API calls
@@ -87,11 +77,6 @@
 
 <div align="center">
 
-| Anime Library | Advanced Search |
-|:---:|:---:|
-| ![Anime Library](screens/anime-library-1.jpg) | ![Search](screens/search.jpg) |
-| *Comprehensive anime library with status, scores, and sorting* | *Powerful search with real-time results* |
-
 | Original Anime List |
 |:---:|
 | ![Anime List](screens/anime-list.jpg) |
@@ -107,17 +92,6 @@
 |:---:|:---:|
 | ![Statistics](screens/statistics-list.jpg) | ![Score Distribution](screens/statistics-score-distribution.jpg) |
 | *Detailed analytics and watching patterns* | *Score distribution and rating insights* |
-
-</div>
-
-### 🎬 Jellyfin Integration
-
-<div align="center">
-
-| Jellyfin Setup | Sync Management |
-|:---:|:---:|
-| ![Jellyfin Integration](screens/jellyfin-integration.jpg) | ![Jellyfin Sync](screens/jellyfin-sync.jpg) |
-| *Server configuration and monitoring* | *Real-time sync with progress tracking* |
 
 </div>
 
@@ -157,9 +131,6 @@ Before installing Paisen, ensure you have the following:
 ### Required Accounts
 - **MyAnimeList Account** ([Create Account](https://myanimelist.net/register.php))
 - **MyAnimeList API Application** ([Create App](https://myanimelist.net/blog.php?eid=835707))
-
-### Optional (For Enhanced Features)
-- **Jellyfin Server** ([Download](https://jellyfin.org/downloads/)) - For media server integration
 
 ---
 
@@ -201,10 +172,6 @@ MONGODB_URI=mongodb://localhost:27017/paisen
 
 # Application URL
 NEXTAUTH_URL=http://localhost:3000
-
-# Optional: Jellyfin Configuration (can be set via UI)
-JELLYFIN_SERVER_URL=http://your-jellyfin-server:8096
-JELLYFIN_API_KEY=your_jellyfin_api_key
 ```
 
 ### 4. Database Setup
@@ -222,22 +189,7 @@ sudo systemctl start mongod
 net start MongoDB
 ```
 
-### 5. Initialize Anime Mapping Database
-
-Set up the offline anime database for cross-platform mappings:
-
-```bash
-# Download and process the latest anime mappings
-npm run db:init
-```
-
-This will:
-- Download the latest anime-offline-database from GitHub
-- Extract MAL to AniDB ID mappings
-- Store mappings in your local MongoDB database
-- Provide statistics on processed entries
-
-### 6. Start Development Server
+### 5. Start Development Server
 
 ```bash
 npm run dev
@@ -245,7 +197,7 @@ npm run dev
 
 🎉 **Your Paisen instance is now running at [http://localhost:3000](http://localhost:3000)**
 
-### 7. Production Build
+### 6. Production Build
 
 For production deployment:
 
@@ -302,200 +254,7 @@ openssl rand -base64 32
 
 ---
 
-## 🗺️ Anime Mapping Setup
-
-Paisen uses the [manami-project/anime-offline-database](https://github.com/manami-project/anime-offline-database) to create cross-platform mappings between MyAnimeList and AniDB. This enables enhanced compatibility and metadata enrichment.
-
-### Prerequisites
-- MongoDB running and connected
-- User account created and logged in
-- MyAnimeList data synchronized
-
-### Initial Database Setup
-
-#### 1. Initialize Offline Database
-
-Run the initialization script to download and process the latest anime mappings:
-
-```bash
-# Download and process anime-offline-database
-npm run db:init
-```
-
-This script will:
-- Download `anime-offline-database-minified.json` from manami-project
-- Extract MAL to AniDB mappings
-- Store mappings in your local MongoDB database
-- Show progress and statistics
-
-#### 2. Verify Database Status
-
-Navigate to the **Anime Mapping** page to check database status:
-- Last update timestamp
-- Total mappings available
-- Processing statistics
-- Error status (if any)
-
-### Using the Anime Mapping Interface
-
-#### 1. Access Anime Mapping Page
-
-1. **Log in** to your Paisen account
-2. **Navigate to** "Anime Mapping" in the sidebar
-3. **View** your anime list with mapping status
-
-#### 2. Understanding Mapping Status
-
-| Status | Description | Action Required |
-|--------|-------------|----------------|
-| ✅ **Mapped** | Anime has confirmed AniDB mapping | None |
-| ⚠️ **Unmapped** | No mapping found in offline database | Manual mapping required |
-| 🔍 **Suggested** | Automatic mapping found, needs confirmation | Review and confirm |
-
-#### 3. Mapping Workflow
-
-**For Automatic Mappings:**
-1. **Click "Map" button** next to unmapped anime
-2. **Review suggested mapping** from offline database
-3. **Confirm mapping** if correct, or **reject** if incorrect
-4. **Mapping saved** and marked as user-confirmed
-
-**For Manual Mappings:**
-1. **Click "Map" button** next to anime
-2. **No suggestion found** - manual input required
-3. **Enter AniDB ID** manually (find on [anidb.net](https://anidb.net/))
-4. **Save mapping** - marked as manual mapping
-
-#### 4. Search and Filter
-
-Use the filtering options to manage large anime lists:
-
-- **Search by title or genre**
-- **Filter by watch status** (watching, completed, etc.)
-- **Filter by mapping status** (mapped, unmapped)
-- **Sort** by title, status, episodes, or mapping status
-
-### Advanced Features
-
-#### 1. Periodic Updates
-
-Keep your mapping database current:
-
-```bash
-# Manual update via script
-npm run db:init
-
-# Or use the web interface
-# Navigate to Anime Mapping → Click "Update Database"
-```
-
-#### 2. Database Status Monitoring
-
-The interface shows important metrics:
-- **Last Updated:** When database was last refreshed
-- **Total Mappings:** Number of available mappings
-- **Confirmed Mappings:** User-confirmed and manual mappings
-- **Update Status:** Success/failure of last update
-
-#### 3. Mapping Sources
-
-Paisen tracks mapping sources for transparency:
-- **`offline_database`** - From manami-project database
-- **`user_confirmed`** - User confirmed suggested mapping
-- **`manual`** - User manually entered mapping
-
-### API Endpoints
-
-For developers and advanced users:
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/anime/mapping` | GET | Get mapping for MAL ID |
-| `/api/anime/mapping` | POST | Create manual mapping |
-| `/api/anime/mapping` | PUT | Confirm suggested mapping |
-| `/api/anime/db-status` | GET | Get database status |
-| `/api/anime/update-offline-db` | POST | Update offline database |
-
-### Troubleshooting
-
-**❌ Database Update Failed**
-```
-Error: Failed to download offline database
-```
-**✅ Solution:**
-1. Check internet connection
-2. Verify GitHub access (database hosted on GitHub)
-3. Check disk space for database storage
-4. Review logs for specific error details
-
-**❌ No Mappings Found**
-```
-Warning: No mappings available for anime
-```
-**✅ Solution:**
-1. Ensure offline database is initialized
-2. Check if anime exists in manami-project database
-3. Consider manual mapping for obscure/new anime
-4. Verify MAL ID is correct
-
-**❌ Mapping Interface Not Loading**
-```
-Error: Failed to load anime list
-```
-**✅ Solution:**
-1. Ensure user is logged in
-2. Check MyAnimeList data is synced
-3. Verify database connection
-4. Check browser console for errors
-
----
-
-## 🎬 Jellyfin Integration
-
-### Prerequisites
-- Jellyfin Server 10.8.0 or higher
-- Admin access to Jellyfin server
-- Network connectivity between Paisen and Jellyfin
-
-### Setup Steps
-
-#### 1. Generate Jellyfin API Key
-
-1. **Open Jellyfin Dashboard** → **Advanced** → **API Keys**
-2. **Click "+" to create new API key**
-3. **Enter App Name:** `Paisen`
-4. **Copy the generated API key**
-
-#### 2. Configure in Paisen
-
-1. **Navigate to Jellyfin page** in Paisen
-2. **Enter your server details:**
-   - **Server URL:** `http://your-jellyfin-server:8096`
-   - **API Key:** (paste from step 1)
-   - **User ID:** (select from dropdown after connection)
-3. **Test Connection** and **Save Configuration**
-
-#### 3. Optional: Webhook Setup
-
-For real-time sync when episodes are watched:
-
-1. **In Jellyfin Dashboard** → **Plugins** → **Catalog**
-2. **Install "Webhook" plugin** if not already installed
-3. **Configure webhook:**
-   - **Webhook URL:** `http://your-paisen-url:3000/api/jellyfin/webhook`
-   - **Events:** `Playback Stop`, `Item Added`
-4. **Save webhook configuration**
-
-### Features
-
-- **🔄 Automatic Sync** - Updates when episodes are watched
-- **📊 Progress Tracking** - Episode progress syncs to MyAnimeList
-- **🎯 Smart Matching** - Intelligent anime identification
-- **📈 Real-time Monitoring** - Server status and activity tracking
-
----
-
-## 🔌 API Documentation
+##  API Documentation
 
 Paisen provides a comprehensive REST API for integration with other applications.
 
@@ -513,12 +272,6 @@ To run tests in watch mode:
 
 ```bash
 npm test -- --watch
-```
-
-To initialize the database for testing:
-
-```bash
-npm run db:init
 ```
 
 ## 🔧 Troubleshooting
@@ -548,38 +301,6 @@ Error: Access token has expired
 1. Navigate to OAuth page in Paisen
 2. Re-authorize your MyAnimeList account
 3. Check token expiry in user settings
-
-#### Jellyfin Issues
-
-**❌ Connection Failed**
-```
-Error: Unable to connect to Jellyfin server
-```
-**✅ Solution:**
-1. Verify server URL format: `http://server:8096`
-2. Check API key is valid and has permissions
-3. Ensure network connectivity
-4. Test server accessibility from browser
-
-**❌ Sync Issues**
-```
-Error: Failed to sync anime data
-```
-**✅ Solution:**
-1. Check anime library permissions
-2. Verify metadata providers are configured
-3. Ensure anime has proper MAL and AniDB mapping
-4. Review sync logs for specific errors
-
-**❌ Webhook Not Working**
-```
-Warning: Webhook events not received
-```
-**✅ Solution:**
-1. Verify webhook URL is accessible: `http://paisen:3000/api/jellyfin/webhook`
-2. Check Jellyfin webhook plugin configuration
-3. Ensure correct events are selected
-4. Test webhook manually
 
 #### Database Issues
 
@@ -629,8 +350,6 @@ Error: Build failed with errors
 
 #### 1. Built-in Diagnostics
 
-- **Jellyfin Page** → Test Connection button
-- **Jellyfin Info Page** → Server Status and sync testing
 - **Browser Console** → Check for client-side errors
 - **Network Tab** → Monitor API requests and responses
 
@@ -735,7 +454,7 @@ git push origin feature/your-feature-name
 - Performance optimizations
 
 #### ✨ New Features
-- Additional anime databases integration
+- Additional anime data sources
 - Enhanced search capabilities
 - Mobile app development
 - Advanced analytics features
@@ -766,7 +485,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 feat: add new search functionality
 fix: resolve authentication token expiry issue
 docs: update installation guide
-test: add integration tests for Jellyfin sync
+test: add integration tests for MyAnimeList sync
 refactor: improve database query performance
 style: fix code formatting issues
 ```
@@ -806,8 +525,6 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ### 🔌 External Services
 - **[MyAnimeList](https://myanimelist.net/)** - Primary anime database and user lists
-- **[Jellyfin](https://jellyfin.org/)** - Open source media server integration
-- **[AniDB](https://anidb.net/)** - Anime database for cross-platform mapping
 
 ### 👥 Community
 - **Contributors** - Everyone who has contributed code, documentation, or feedback

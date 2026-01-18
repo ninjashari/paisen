@@ -22,12 +22,6 @@ const UserSchema = new mongoose.Schema({
   expiryTime: Number,
   refreshToken: String,
   tokenType: String,
-  jellyfinServerUrl: String,
-  jellyfinApiKey: String,
-  jellyfinUserId: String,
-  jellyfinUsername: String,
-  jellyfinSyncEnabled: { type: Boolean, default: false },
-  jellyfinLastSync: Date,
 })
 
 const User = mongoose.model('User', UserSchema)
