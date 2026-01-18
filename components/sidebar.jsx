@@ -8,11 +8,6 @@ const Sidebar = () => {
   const [homeClass, setHomeClass] = useState("nav-link collapsed")
   const [statisticsClass, setStatisticsClass] = useState("nav-link collapsed")
   const [searchClass, setSearchClass] = useState("nav-link collapsed")
-  const [jellyfinClass, setJellyfinClass] = useState("nav-link collapsed")
-  const [jellyfinInfoClass, setJellyfinInfoClass] = useState("nav-link collapsed")
-
-  const [animeLibraryClass, setAnimeLibraryClass] = useState("nav-link collapsed")
-  const [animeMappingClass, setAnimeMappingClass] = useState("nav-link collapsed")
 
   const [animeListClass, setAnimeListClass] = useState("nav-content collapse")
   const [animeListLinkClass, setAnimeListLinkClass] =
@@ -33,14 +28,6 @@ const Sidebar = () => {
       setStatisticsClass("nav-link")
     } else if ("/search" === currentPath) {
       setSearchClass("nav-link")
-    } else if ("/jellyfin" === currentPath) {
-      setJellyfinClass("nav-link")
-    } else if ("/jellyfin-info" === currentPath) {
-      setJellyfinInfoClass("nav-link")
-    } else if ("/anime-library" === currentPath) {
-      setAnimeLibraryClass("nav-link")
-    } else if ("/anime-mapping" === currentPath) {
-      setAnimeMappingClass("nav-link")
     } else if ("/animelist/current" === currentPath) {
       setAnimeListClass("nav-content")
       setAnimeListLinkClass("nav-link")
@@ -146,34 +133,6 @@ const Sidebar = () => {
           <Link className={searchClass} href="/search">
             <i className="bi bi-search"></i>
             <span>Search</span>
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link className={jellyfinClass} href="/jellyfin">
-            <i className="bi bi-server"></i>
-            <span>Jellyfin</span>
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link className={jellyfinInfoClass} href="/jellyfin-info">
-            <i className="bi bi-info-circle"></i>
-            <span>Jellyfin Info</span>
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link className={animeLibraryClass} href="/anime-library">
-            <i className="bi bi-collection"></i>
-            <span>Anime Library</span>
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link className={animeMappingClass} href="/anime-mapping">
-            <i className="bi bi-diagram-3"></i>
-            <span>Anime Mapping</span>
           </Link>
         </li>
 

@@ -22,12 +22,6 @@ const UserSchema = new mongoose.Schema({
   expiryTime: Number,
   refreshToken: String,
   tokenType: String,
-  jellyfinServerUrl: String,
-  jellyfinApiKey: String,
-  jellyfinUserId: String,
-  jellyfinUsername: String,
-  jellyfinSyncEnabled: { type: Boolean, default: false },
-  jellyfinLastSync: Date,
   syncMetadata: {
     lastAnimeSync: Date,
     lastSyncStats: {
@@ -86,15 +80,6 @@ async function checkTokens() {
       } else {
         console.log('No access token')
       }
-      
-      // Jellyfin config
-      console.log('\nJellyfin Configuration:')
-      console.log(`Server URL: ${user.jellyfinServerUrl || 'Not set'}`)
-      console.log(`API Key: ${user.jellyfinApiKey ? `${user.jellyfinApiKey.substring(0, 10)}...` : 'Not set'}`)
-      console.log(`User ID: ${user.jellyfinUserId || 'Not set'}`)
-      console.log(`Username: ${user.jellyfinUsername || 'Not set'}`)
-      console.log(`Sync Enabled: ${user.jellyfinSyncEnabled}`)
-      console.log(`Last Sync: ${user.jellyfinLastSync || 'Never'}`)
     }
     
   } catch (error) {

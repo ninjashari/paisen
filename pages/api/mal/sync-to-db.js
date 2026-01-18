@@ -2,13 +2,11 @@
  * MyAnimeList to Local Database Sync API Endpoint
  * 
  * This endpoint synchronizes the user's MyAnimeList anime list with the local
- * anime database. It enriches the local data with AniDB ID mappings from the
- * anime_mappings collection.
+ * anime database.
  * 
  * Features:
  * - Fetches anime list from MyAnimeList
  * - Matches anime with existing local data
- * - Enriches anime data with AniDB ID mappings
  * - Creates new anime entries if not found locally
  * - Updates user list status in local database
  */
@@ -18,9 +16,7 @@ import { authOptions } from '../auth/[...nextauth]'
 import dbConnect from '@/lib/dbConnect'
 import User from '@/models/User'
 import Anime from '@/models/Anime'
-import AnimeMapping from '@/models/AnimeMapping'
 import MalApi from '@/lib/malApi'
-import syncProgressTracker from '@/lib/syncProgress'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -58,8 +54,7 @@ export default async function handler(req, res) {
       })
     }
 
-    const sessionId = req.body.options?.sessionId || `mal_sync_${user._id}_${Date.now()}`
-    const syncResult = await performMalToDbSync(user, session.malAccessToken, { ...req.body.options, sessionId })
+    const syncResult = await performMalToDbSync(user, session.malAccessToken, req.body.options)
 
     await User.findByIdAndUpdate(user._id, {
       malLastSync: new Date()
@@ -68,8 +63,7 @@ export default async function handler(req, res) {
     res.status(200).json({
       success: true,
       message: `MyAnimeList sync to local database completed: ${syncResult.updated} anime updated, ${syncResult.created} anime created.`,
-      data: syncResult,
-      sessionId: sessionId
+      data: syncResult
     })
 
   } catch (error) {
@@ -84,8 +78,7 @@ export default async function handler(req, res) {
 
 async function performMalToDbSync(user, malAccessToken, options = {}) {
   const {
-    maxItems = 1000,
-    sessionId = null
+    maxItems = 1000
   } = options
 
   const malApi = new MalApi(malAccessToken)
@@ -97,13 +90,6 @@ async function performMalToDbSync(user, malAccessToken, options = {}) {
     errors: 0,
     matches: [],
     noMatches: []
-  }
-
-  if (sessionId) {
-    syncProgressTracker.startSession(sessionId, 0, 'mal_sync')
-    syncProgressTracker.updateProgress(sessionId, {
-      message: 'Fetching MyAnimeList anime library...'
-    })
   }
 
   const fields = {
@@ -119,28 +105,17 @@ async function performMalToDbSync(user, malAccessToken, options = {}) {
   const animeListResponse = await malApi.getAnimeList(fields, null)
   const animeList = animeListResponse.data.data
 
-  if (sessionId) {
-    syncProgressTracker.updateProgress(sessionId, {
-      totalItems: Math.min(animeList.length, maxItems),
-      message: `Processing ${Math.min(animeList.length, maxItems)} anime series...`
-    })
-  }
-
   for (const malAnime of animeList.slice(0, maxItems)) {
     syncResults.processed++
     try {
-      if (sessionId) {
-        syncProgressTracker.incrementProgress(sessionId, malAnime.node.title, 'processed')
-      }
 
       let localAnime = await Anime.findOne({ 'externalIds.malId': malAnime.node.id })
-      const mapping = await AnimeMapping.findOne({ malId: malAnime.node.id })
 
       const animeData = {
         title: malAnime.node.title,
         externalIds: {
           malId: malAnime.node.id,
-          anidbId: mapping?.anidbId || null
+          anidbId: null
         },
         genres: malAnime.node.genres,
         studios: malAnime.node.studios,
@@ -178,9 +153,6 @@ async function performMalToDbSync(user, malAccessToken, options = {}) {
 
         await localAnime.save()
         syncResults.updated++
-        if (sessionId) {
-          syncProgressTracker.incrementProgress(sessionId, malAnime.node.title, 'updated')
-        }
       } else {
         localAnime = new Anime(animeData)
         
@@ -205,9 +177,6 @@ async function performMalToDbSync(user, malAccessToken, options = {}) {
 
         await localAnime.save()
         syncResults.created++
-        if (sessionId) {
-          syncProgressTracker.incrementProgress(sessionId, malAnime.node.title, 'added')
-        }
       }
 
     } catch (error) {
@@ -218,10 +187,6 @@ async function performMalToDbSync(user, malAccessToken, options = {}) {
         error: error.message
       })
     }
-  }
-
-  if (sessionId) {
-    syncProgressTracker.completeSession(sessionId, true, `Sync completed. ${syncResults.updated} updated, ${syncResults.created} created.`)
   }
 
   return syncResults
