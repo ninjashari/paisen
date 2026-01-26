@@ -11,12 +11,31 @@ const Table = ({ animeList, malAccessToken }) => {
   const [animeDataList, setAnimeDataList] = useState([])
   const [loading, isLoading] = useState(true)
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "ascending" })
+  const [isClientSide, setIsClientSide] = useState(false)
 
+  // Load sort preference from localStorage and initialize data
   useEffect(() => {
+    setIsClientSide(true)
+    const savedSortConfig = localStorage.getItem('animeListSortConfig')
+    if (savedSortConfig) {
+      try {
+        setSortConfig(JSON.parse(savedSortConfig))
+      } catch (e) {
+        console.error('Failed to parse saved sort config:', e)
+      }
+    }
+    
     let dataList = getAnimeObj(animeList)
     setAnimeDataList(dataList)
     isLoading(false)
   }, [])
+
+  // Save sort config to localStorage whenever it changes
+  useEffect(() => {
+    if (isClientSide) {
+      localStorage.setItem('animeListSortConfig', JSON.stringify(sortConfig))
+    }
+  }, [sortConfig, isClientSide])
 
   const requestSort = (key) => {
     let direction = "ascending"
