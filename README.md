@@ -101,7 +101,7 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3001](http://localhost:3001).
 
 For production:
 
@@ -126,7 +126,7 @@ MONGODB_URI=mongodb://127.0.0.1:27017/paisen
 SECRET=your_secret_here
 
 # Your app's public URL (no trailing slash)
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3001
 
 # MyAnimeList Client ID from https://myanimelist.net/apiconfig
 MAL_CLIENT_ID=your_mal_client_id_here
@@ -137,7 +137,7 @@ MAL_CLIENT_ID=your_mal_client_id_here
 1. Go to [myanimelist.net/apiconfig](https://myanimelist.net/apiconfig) and click **Create ID**
 2. Fill in the form:
    - **App Type:** Web
-   - **App Redirect URL:** `http://localhost:3000/oauth` (or your production URL + `/oauth`)
+   - **App Redirect URL:** `http://localhost:3001/oauth` (or your production URL + `/oauth`)
 3. Copy the **Client ID** to `.env.local`
 
 ---

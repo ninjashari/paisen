@@ -9,7 +9,7 @@ const fs = require("fs")
 
 const CHROME =
   "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-const BASE = "http://localhost:3000"
+const BASE = "http://localhost:3001"
 const OUT = path.resolve(__dirname, "../screens")
 
 const PAGES = [
