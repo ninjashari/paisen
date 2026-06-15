@@ -23,10 +23,15 @@ function Statistics() {
     }
   }
   return (
-    <>
-      <Layout titleName="Authorise" />
-      {loading ? <Loader /> : <AuthoriseForm />}
-    </>
+    <Layout titleName="Authorise">
+      {loading ? (
+        <div className="bg-aurora flex min-h-screen items-center justify-center">
+          <Loader />
+        </div>
+      ) : (
+        <AuthoriseForm />
+      )}
+    </Layout>
   )
 }
 

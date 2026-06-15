@@ -1,9 +1,6 @@
 import SearchTable from "@/components/animelist-search-table"
-import Breadcrumb from "@/components/breadcrumb"
-import Header from "@/components/header"
-import Layout from "@/components/layout"
+import AppLayout from "@/components/app-layout"
 import Loader from "@/components/loader"
-import Sidebar from "@/components/sidebar"
 import { getUserAccessToken } from "@/utils/userService"
 import { getSession } from "next-auth/react"
 import { useRouter } from "next/router"
@@ -35,26 +32,25 @@ function Search() {
   }
 
   return (
-    <>
-      <Layout titleName="Search" />
-      <Header
-        isLoading={isLoading}
-        malAccessToken={malAccessToken}
-        setSearchData={setSearchData}
-      />
-      <Sidebar currentPage="search" />
-      <main id="main" className="main">
-        <Breadcrumb firstPage="Search" title="Search" />
-        {loading ? (
-          <Loader />
-        ) : (
-          <SearchTable
-            searchData={searchData}
-            malAccessToken={malAccessToken}
-          />
-        )}
-      </main>
-    </>
+    <AppLayout
+      title="Search"
+      breadcrumb={{ firstPage: "Search", title: "Search" }}
+      search={{ isLoading, malAccessToken, setSearchData }}
+    >
+      {loading ? (
+        <Loader />
+      ) : searchData.length > 0 ? (
+        <SearchTable
+          key={searchData.map((d) => d.id).join("_")}
+          searchData={searchData}
+          malAccessToken={malAccessToken}
+        />
+      ) : (
+        <p className="text-muted-foreground">
+          Use the search bar above to find anime and add them to your list.
+        </p>
+      )}
+    </AppLayout>
   )
 }
 

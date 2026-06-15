@@ -2,11 +2,14 @@ import MalApi from "@/lib/malApi"
 import { fields } from "@/utils/constants"
 import { createDataArray } from "@/utils/malService"
 import dynamic from "next/dynamic"
+import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false })
 
 const BarChart = ({ animeList, isLoading, malAccessToken }) => {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === "dark"
   const [series, setSeries] = useState([])
   const [scoreData, setScoreData] = useState([])
 
@@ -14,15 +17,23 @@ const BarChart = ({ animeList, isLoading, malAccessToken }) => {
     chart: {
       type: "bar",
       height: 350,
+      background: "transparent",
+      toolbar: { show: false },
+      fontFamily: "inherit",
     },
+    theme: { mode: isDark ? "dark" : "light" },
+    colors: ["#8b5cf6"],
     plotOptions: {
       bar: {
-        borderRadius: 4,
+        borderRadius: 6,
         horizontal: true,
       },
     },
     dataLabels: {
       enabled: false,
+    },
+    grid: {
+      borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
     },
     xaxis: {
       categories: ["10", "9", "8", "7", "6", "5", "4", "3", "2", "1"],
@@ -38,9 +49,7 @@ const BarChart = ({ animeList, isLoading, malAccessToken }) => {
         tempArr.push(anime.userScore)
       }
     })
-    // console.log(tempArr)
     setScoreData(createDataArray(tempArr))
-    // console.log(scoreData)
     setSeries([
       {
         name: "number",
@@ -60,14 +69,16 @@ const BarChart = ({ animeList, isLoading, malAccessToken }) => {
   }
 
   return (
-    <>
-      <div className="card-body">
-        <h5 className="card-title">Score</h5>
-        <div className="row">
-          <Chart options={data} series={series} type="bar" width="800" />
-        </div>
-      </div>
-    </>
+    <div>
+      <h5 className="font-display mb-2 font-semibold">Score</h5>
+      <Chart
+        options={data}
+        series={series}
+        type="bar"
+        width="100%"
+        height={350}
+      />
+    </div>
   )
 }
 

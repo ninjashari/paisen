@@ -1,13 +1,11 @@
 const Progressbar = ({ fillPercentage }) => {
   return (
-    <div className="progress" style={{ marginTop: "0.4rem" }}>
+    <div className="bg-primary/15 h-2 w-full overflow-hidden rounded-full">
       <div
-        className="progress-bar"
+        className="bg-primary h-full rounded-full transition-all"
         role="progressbar"
         style={{ width: fillPercentage }}
-        aria-valuemin="0"
-        aria-valuemax="100"
-      ></div>
+      />
     </div>
   )
 }

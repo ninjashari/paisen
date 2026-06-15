@@ -1,14 +1,23 @@
 import Link from "next/link"
 
-const Logo = () => {
+import { cn } from "@/lib/utils"
+
+const Logo = ({ className, onClick }) => {
   return (
-    <div className="d-flex align-items-center justify-content-between">
-      <Link href="/" className="logo d-flex align-items-center">
-        <img src="/img/logo.png" alt="" />
-        <span className="d-none d-lg-block">Paisen</span>
-      </Link>
-      <i className="bi bi-list toggle-sidebar-btn"></i>
-    </div>
+    <Link
+      href="/"
+      onClick={onClick}
+      className={cn("flex items-center gap-2.5", className)}
+    >
+      <img
+        src="/img/logo.png"
+        alt="Paisen"
+        className="size-8 rounded-md object-contain"
+      />
+      <span className="font-display text-lg font-bold tracking-tight text-gradient">
+        Paisen
+      </span>
+    </Link>
   )
 }
 

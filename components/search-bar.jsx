@@ -1,7 +1,10 @@
 import MalApi from "@/lib/malApi"
 import { fields } from "@/utils/constants"
+import { Search } from "lucide-react"
 import { useRouter } from "next/router"
 import { useState } from "react"
+
+import { Input } from "@/components/ui/input"
 
 const Searchbar = ({ isLoading, malAccessToken, setSearchData }) => {
   const router = useRouter()
@@ -39,24 +42,22 @@ const Searchbar = ({ isLoading, malAccessToken, setSearchData }) => {
   }
 
   return (
-    <div className="search-bar">
-      <form
-        className="search-form d-flex align-items-center"
-        onSubmit={handleSubmit}
-      >
-        <input
-          type="text"
-          name="query"
-          placeholder="Search"
-          title="Enter search keyword"
-          onChange={(e) => setInputSearchString(e.target.value)}
-          value={inputSearchString}
-        />
-        <button type="submit" title="Search">
-          <i className="bi bi-search"></i>
-        </button>
-      </form>
-    </div>
+    <form
+      className="relative w-full max-w-md"
+      onSubmit={handleSubmit}
+      role="search"
+    >
+      <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+      <Input
+        type="text"
+        name="query"
+        placeholder="Search anime…"
+        title="Enter search keyword"
+        onChange={(e) => setInputSearchString(e.target.value)}
+        value={inputSearchString}
+        className="pl-9"
+      />
+    </form>
   )
 }
 

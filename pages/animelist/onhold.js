@@ -1,9 +1,6 @@
 import Table from "@/components/animelist-table"
-import Breadcrumb from "@/components/breadcrumb"
-import Header from "@/components/header"
-import Layout from "@/components/layout"
+import AppLayout from "@/components/app-layout"
 import Loader from "@/components/loader"
-import Sidebar from "@/components/sidebar"
 import MalApi from "@/lib/malApi"
 import { fields, userListStatus } from "@/utils/constants"
 import { getURILastValue } from "@/utils/uriService"
@@ -59,30 +56,21 @@ export default function Animelist() {
       router.replace("/")
     }
   }
+
   return (
-    <>
-      <Layout titleName={pageTitle} />
-      <Header />
-      <Sidebar />
-      <main id="main" className="main">
-        <Breadcrumb
-          firstPage="Anime List"
-          title={pageTitle}
-          secondPage={pageTitle}
-        />
-        <section className="section">
-          <div className="row">
-            {loading ? (
-              <Loader />
-            ) : (
-              <Table
-                animeList={animeListData}
-                malAccessToken={malAccessToken}
-              />
-            )}
-          </div>
-        </section>
-      </main>
-    </>
+    <AppLayout
+      title={pageTitle}
+      breadcrumb={{
+        firstPage: "Anime List",
+        title: pageTitle,
+        secondPage: pageTitle,
+      }}
+    >
+      {loading ? (
+        <Loader />
+      ) : (
+        <Table animeList={animeListData} malAccessToken={malAccessToken} />
+      )}
+    </AppLayout>
   )
 }

@@ -1,12 +1,9 @@
-import Link from "next/link"
+import Logo from "./logo"
 
 const FormLogo = () => {
   return (
-    <div className="d-flex justify-content-center py-4">
-      <Link href="/" className="logo d-flex align-items-center w-auto">
-        <img src="/img/logo.png" alt="" />
-        <span className="d-none d-lg-block">Paisen</span>
-      </Link>
+    <div className="mb-6 flex justify-center">
+      <Logo className="text-xl [&_img]:size-10" />
     </div>
   )
 }

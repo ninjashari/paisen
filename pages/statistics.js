@@ -1,8 +1,5 @@
-import Breadcrumb from "@/components/breadcrumb"
-import Header from "@/components/header"
-import Layout from "@/components/layout"
+import AppLayout from "@/components/app-layout"
 import Loader from "@/components/loader"
-import Sidebar from "@/components/sidebar"
 import Stats from "@/components/stats"
 import MalApi from "@/lib/malApi"
 import { statisticsFields } from "@/utils/constants"
@@ -45,21 +42,16 @@ function Statistics() {
   }
 
   return (
-    <>
-      <Layout titleName="Statistics" />
-      <Header />
-      <Sidebar currentPage="statistics" />
-      <main id="main" className="main">
-        <Breadcrumb firstPage="Statistics" title="Statistics" />
-        <section className="section">
-          {loading ? (
-            <Loader />
-          ) : (
-            <Stats animeList={animeListData} isLoading={isLoading} />
-          )}
-        </section>
-      </main>
-    </>
+    <AppLayout
+      title="Statistics"
+      breadcrumb={{ firstPage: "Statistics", title: "Statistics" }}
+    >
+      {loading ? (
+        <Loader />
+      ) : (
+        <Stats animeList={animeListData} isLoading={isLoading} />
+      )}
+    </AppLayout>
   )
 }
 

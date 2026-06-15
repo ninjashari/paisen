@@ -1,8 +1,20 @@
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { useState } from "react"
-import FormLogo from "./form-logo"
-import { hashPassword } from "@/utils/hash"
+import { AlertTriangle } from "lucide-react"
+
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import FormShell from "./form-shell"
 
 const RegisterForm = ({ userForm }) => {
   const router = useRouter()
@@ -15,8 +27,6 @@ const RegisterForm = ({ userForm }) => {
   })
 
   const [confirmPassword, setConfirmPassword] = useState("")
-
-  const [formClass, setFormClass] = useState("row g-3 needs-validation")
 
   const [confirmPasswordErrorMsg, setConfirmPasswordErrorMsg] = useState(
     "Please enter confirm password"
@@ -60,8 +70,6 @@ const RegisterForm = ({ userForm }) => {
   // Handle form submit
   const handleSubmit = (e) => {
     e.preventDefault()
-    setFormClass("row g-3 was-validated")
-    // setShowAlert(true)
     if (
       e.target.name.validity.valid &&
       e.target.username.validity.valid &&
@@ -72,22 +80,17 @@ const RegisterForm = ({ userForm }) => {
     }
   }
 
-  const closeAlert = () => {
-    setShowAlert(false)
-  }
-
   // Call register API to save user data
   const postData = async (form) => {
     try {
-      const hashPass = await hashPassword(form.password)
-
+      // Send the raw password over the (TLS-encrypted) connection; the server
+      // hashes it. Hashing on the client is not a substitute for HTTPS.
       const addUser = {
         name: form.name,
         username: form.username,
-        password: hashPass,
+        password: form.password,
       }
 
-      // setConfirmPassword(form.password)
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
@@ -120,146 +123,102 @@ const RegisterForm = ({ userForm }) => {
   }
 
   return (
-    <main>
-      <div className="container">
-        <section className="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-          <div className="container">
-            <div className="row justify-content-center">
-              <div className="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-                <FormLogo />
+    <FormShell>
+      <Card className="glow-primary">
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl">Create an Account</CardTitle>
+          <CardDescription>
+            Enter your personal details to create account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {showAlert && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTriangle />
+              <AlertDescription>{alertMessage}</AlertDescription>
+            </Alert>
+          )}
 
-                {showAlert ? (
-                  <div
-                    className="alert alert-warning alert-dismissible fade show"
-                    role="alert"
-                  >
-                    <i className="bi bi-exclamation-triangle me-1"></i>
-                    {alertMessage}
-                    <button
-                      type="button"
-                      className="btn-close"
-                      data-bs-dismiss="alert"
-                      aria-label="Close"
-                      onClick={closeAlert}
-                    ></button>
-                  </div>
-                ) : (
-                  ""
-                )}
-
-                <div className="card mb-3">
-                  <div className="card-body">
-                    <div className="pt-4 pb-2">
-                      <h5 className="card-title text-center pb-0 fs-4">
-                        Create an Account
-                      </h5>
-                      <p className="text-center small">
-                        Enter your personal details to create account
-                      </p>
-                    </div>
-                    {/* needs-validation */}
-                    {/* was-validated */}
-                    <form
-                      className={formClass}
-                      noValidate
-                      onSubmit={handleSubmit}
-                    >
-                      <div className="col-12">
-                        <label className="form-label">Your Name</label>
-                        <input
-                          type="text"
-                          name="name"
-                          className="form-control"
-                          value={form.name}
-                          onChange={handleChange}
-                          pattern="^[A-Za-z][A-Za-z ]{0,48}[A-Za-z]$"
-                          required
-                        />
-                        <div className="invalid-feedback">Enter name</div>
-                      </div>
-
-                      <div className="col-12">
-                        <label className="form-label">Username</label>
-                        <div className="input-group has-validation">
-                          <span
-                            className="input-group-text"
-                            id="inputGroupPrepend"
-                          >
-                            @
-                          </span>
-                          <input
-                            type="text"
-                            name="username"
-                            className="form-control"
-                            value={form.username}
-                            onChange={handleChange}
-                            required
-                            pattern="^[A-Za-z][A-Za-z0-9_-]{7,31}$"
-                          />
-                          <div className="invalid-feedback">
-                            <ul>
-                              <li>Contain 8 to 32 characters</li>
-                              <li>Starts with an alphabet</li>
-                              <li>Username should be Alphanumeric</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="col-12">
-                        <label className="form-label">Password</label>
-                        <input
-                          type="password"
-                          name="password"
-                          className="form-control"
-                          value={form.password}
-                          onChange={handleChange}
-                          required
-                          pattern="^[A-Za-z0-9!@#$%^&*_=+-]{8,32}$"
-                        />
-                        <div className="invalid-feedback">
-                          <ul>
-                            <li>Minimum 8 characters required</li>
-                            <li>Maximum 32 characters required</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      <div className="col-12">
-                        <label className="form-label">Confirm Password</label>
-                        <input
-                          type="password"
-                          name="confirmPassword"
-                          className="form-control"
-                          value={confirmPassword}
-                          onChange={handleConfirmPasswordChange}
-                          required
-                        />
-                        <div className="invalid-feedback">
-                          {confirmPasswordErrorMsg}
-                        </div>
-                      </div>
-
-                      <div className="col-12">
-                        <button className="btn btn-primary w-100" type="submit">
-                          Register
-                        </button>
-                      </div>
-                      <div className="col-12">
-                        <p className="small mb-0">
-                          Already have an account?{" "}
-                          <Link href="/login">Log in</Link>
-                        </p>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <div className="grid gap-2">
+              <Label htmlFor="name">Your Name</Label>
+              <Input
+                id="name"
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                pattern="^[A-Za-z][A-Za-z ]{0,48}[A-Za-z]$"
+                required
+              />
             </div>
-          </div>
-        </section>
-      </div>
-    </main>
+
+            <div className="grid gap-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                name="username"
+                value={form.username}
+                onChange={handleChange}
+                required
+                pattern="^[A-Za-z][A-Za-z0-9_-]{7,31}$"
+              />
+              <p className="text-muted-foreground text-xs">
+                8–32 characters, starts with a letter, alphanumeric.
+              </p>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                required
+                pattern="^[A-Za-z0-9!@#$%^&*_=+-]{8,32}$"
+              />
+              <p className="text-muted-foreground text-xs">
+                Between 8 and 32 characters.
+              </p>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                name="confirmPassword"
+                value={confirmPassword}
+                onChange={handleConfirmPasswordChange}
+                required
+              />
+              {confirmPassword && confirmPassword !== form.password && (
+                <p className="text-destructive text-xs">
+                  {confirmPasswordErrorMsg}
+                </p>
+              )}
+            </div>
+
+            <Button type="submit" className="w-full">
+              Register
+            </Button>
+
+            <p className="text-muted-foreground text-sm">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="text-primary font-medium hover:underline"
+              >
+                Log in
+              </Link>
+            </p>
+          </form>
+        </CardContent>
+      </Card>
+    </FormShell>
   )
 }
 

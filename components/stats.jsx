@@ -7,45 +7,51 @@ import {
   getTotalDuration,
 } from "@/utils/malService"
 import dynamic from "next/dynamic"
+import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false })
 
 const Stats = ({ animeList, isLoading }) => {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === "dark"
+
   // Bar Chart Variables
   const [series, setSeries] = useState([])
-  // Bar chart
   const chartData = {
     chart: {
       type: "bar",
       height: 350,
+      background: "transparent",
+      toolbar: { show: false },
+      fontFamily: "inherit",
     },
+    theme: { mode: isDark ? "dark" : "light" },
+    colors: ["#8b5cf6"],
     plotOptions: {
       bar: {
-        borderRadius: 4,
+        borderRadius: 6,
         horizontal: true,
       },
     },
     dataLabels: {
       enabled: false,
     },
+    grid: {
+      borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+    },
     xaxis: {
       categories: ["10", "9", "8", "7", "6", "5", "4", "3", "2", "1"],
     },
   }
-  // End Bar Chart Variables
-
-  // Accordion UI class variables
-  const [animeListHeaderClass, setAnimeListHeaderClass] =
-    useState("accordion-button")
-  const [animeListContentClass, setAnimeListContentClass] = useState(
-    "accordion-collapse collapse show"
-  )
-  const [scoreDistributionHeaderClass, setScoreDistributionHeaderClass] =
-    useState("accordion-button collapsed")
-  const [scoreDistributionContentClass, setScoreDistributionContentClass] =
-    useState("accordion-collapse collapse")
-  // End Accordion UI class variables
 
   // Anime List Data Variables
   const [animeCount, setAnimeCount] = useState()
@@ -53,7 +59,7 @@ const Stats = ({ animeList, isLoading }) => {
   const [timeSpent, setTImeSpent] = useState()
   const [timeToSpend, setTimeToSpend] = useState()
   const [userMeanScore, setUserMeanScore] = useState()
-  // End Anime List Data Variables
+
   useEffect(() => {
     isLoading(true)
 
@@ -67,9 +73,7 @@ const Stats = ({ animeList, isLoading }) => {
         tempArr.push(anime.userScore)
       }
     })
-    // console.log(tempArr)
     let scoreData = createDataArray(tempArr)
-    // console.log(scoreData)
     setSeries([
       {
         name: "number",
@@ -103,128 +107,56 @@ const Stats = ({ animeList, isLoading }) => {
     isLoading(false)
   }, [])
 
-  // Accordion Functions
-  const handleAnimeListClick = (e) => {
-    e.preventDefault()
-
-    if (
-      "accordion-button" === animeListHeaderClass &&
-      "accordion-collapse collapse show" === animeListContentClass
-    ) {
-      setAnimeListHeaderClass("accordion-button collapsed")
-      setAnimeListContentClass("accordion-collapse collapse")
-    } else if (
-      "accordion-button collapsed" === animeListHeaderClass &&
-      "accordion-collapse collapse" === animeListContentClass
-    ) {
-      setAnimeListHeaderClass("accordion-button")
-      setAnimeListContentClass("accordion-collapse collapse show")
-      setScoreDistributionHeaderClass("accordion-button collapsed")
-      setScoreDistributionContentClass("accordion-collapse collapse")
-    }
-  }
-
-  const handleScoreDistributionClick = (e) => {
-    e.preventDefault()
-
-    if (
-      "accordion-button" === scoreDistributionHeaderClass &&
-      "accordion-collapse collapse show" === scoreDistributionContentClass
-    ) {
-      setScoreDistributionHeaderClass("accordion-button collapsed")
-      setScoreDistributionContentClass("accordion-collapse collapse")
-    } else if (
-      "accordion-button collapsed" === scoreDistributionHeaderClass &&
-      "accordion-collapse collapse" === scoreDistributionContentClass
-    ) {
-      setScoreDistributionHeaderClass("accordion-button")
-      setScoreDistributionContentClass("accordion-collapse collapse show")
-      setAnimeListHeaderClass("accordion-button collapsed")
-      setAnimeListContentClass("accordion-collapse collapse")
-    }
-  }
-  // End Accordion Functions
+  const summaryRows = [
+    { label: "Anime count", value: animeCount },
+    { label: "Episode count", value: episodeCount },
+    { label: "Time spent watching", value: timeSpent },
+    { label: "Time to complete", value: timeToSpend },
+    { label: "Mean score", value: userMeanScore },
+  ]
 
   return (
-    <div className="row">
-      <div className="col-10">
-        <div className="card">
-          <div className="card-body">
-            <h5 className="card-title">Watchlist Statistics</h5>
-
-            {/* Default Accordion */}
-            <div className="accordion">
-              <div className="accordion-item">
-                <h2 className="accordion-header">
-                  <button
-                    className={animeListHeaderClass}
-                    type="button"
-                    onClick={handleAnimeListClick}
+    <Card className="max-w-3xl">
+      <CardHeader>
+        <CardTitle>Watchlist Statistics</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Accordion type="single" collapsible defaultValue="anime-list">
+          <AccordionItem value="anime-list">
+            <AccordionTrigger>Anime List</AccordionTrigger>
+            <AccordionContent>
+              <dl className="divide-border divide-y">
+                {summaryRows.map((row) => (
+                  <div
+                    key={row.label}
+                    className="flex items-center justify-between py-2.5"
                   >
-                    Anime List
-                  </button>
-                </h2>
-                <div className={animeListContentClass}>
-                  <div className="accordion-body">
-                    <table className="table table-borderless">
-                      <tbody>
-                        <tr>
-                          <td>Anime count</td>
-                          <td>{animeCount}</td>
-                        </tr>
-                        <tr>
-                          <td>Episode count</td>
-                          <td>{episodeCount}</td>
-                        </tr>
-
-                        <tr>
-                          <td>Time spent watching</td>
-                          <td>{timeSpent}</td>
-                        </tr>
-                        <tr>
-                          <td>Time to complete</td>
-                          <td>{timeToSpend}</td>
-                        </tr>
-                        <tr>
-                          <td>Mean score</td>
-                          <td>{userMeanScore}</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    <dt className="text-muted-foreground text-sm">
+                      {row.label}
+                    </dt>
+                    <dd className="text-sm font-medium tabular-nums">
+                      {row.value}
+                    </dd>
                   </div>
-                </div>
-              </div>
-              <div className="accordion-item">
-                <h2 className="accordion-header">
-                  <button
-                    className={scoreDistributionHeaderClass}
-                    type="button"
-                    onClick={handleScoreDistributionClick}
-                  >
-                    Score Distribution
-                  </button>
-                </h2>
-                <div className={scoreDistributionContentClass}>
-                  <div className="accordion-body">
-                    <div className="card-body">
-                      <h5 className="card-title">Score</h5>
-                      <div className="row">
-                        <Chart
-                          options={chartData}
-                          series={series}
-                          type="bar"
-                          width="800"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+                ))}
+              </dl>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="score-distribution">
+            <AccordionTrigger>Score Distribution</AccordionTrigger>
+            <AccordionContent>
+              <Chart
+                options={chartData}
+                series={series}
+                type="bar"
+                width="100%"
+                height={350}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </CardContent>
+    </Card>
   )
 }
 

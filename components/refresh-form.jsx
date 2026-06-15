@@ -7,11 +7,20 @@ import {
 import { getSession } from "next-auth/react"
 import { useRouter } from "next/router"
 import { useState } from "react"
-import FormLogo from "./form-logo"
+import { CheckCircle2 } from "lucide-react"
+
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import FormShell from "./form-shell"
 
 const RefreshForm = () => {
   const router = useRouter()
-  const contentType = "application/json"
 
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState("")
@@ -26,10 +35,8 @@ const RefreshForm = () => {
         const clientID = await getClientId()
         if (clientID) {
           const malObj = new Mal(clientID)
-          // console.log(currentRefreshToken)
           const response = await malObj.refreshAccessToken(currentRefreshToken)
           if (response) {
-            // console.log(response)
             // Create user data to be updated
             const userUpdateData = {
               username: session.user.username,
@@ -38,8 +45,6 @@ const RefreshForm = () => {
               expiryTime: response.expires_in,
               accessToken: response.access_token,
             }
-
-            console.log(userUpdateData)
 
             const res = updateUserData(userUpdateData)
             setShowAlert(true)
@@ -67,63 +72,30 @@ const RefreshForm = () => {
     }
   }
 
-  const closeAlert = () => {
-    setShowAlert(false)
-  }
-
   return (
-    <main>
-      <div className="container">
-        <section className="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-          <div className="container">
-            <div className="row justify-content-center">
-              <div className="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-                <FormLogo />
-
-                {showAlert ? (
-                  <div
-                    className="alert alert-warning alert-dismissible fade show"
-                    role="alert"
-                  >
-                    <i className="bi bi-exclamation-triangle me-1"></i>
-                    {alertMessage}
-                    <button
-                      type="button"
-                      className="btn-close"
-                      data-bs-dismiss="alert"
-                      aria-label="Close"
-                      onClick={closeAlert}
-                    ></button>
-                  </div>
-                ) : (
-                  ""
-                )}
-
-                <div className="card mb-3">
-                  <div className="card-body">
-                    <div className="pt-4 pb-2">
-                      <h5 className="card-title text-center pb-0 fs-4">
-                        Refresh MAL token
-                      </h5>
-                    </div>
-                    <div className="col-12">
-                      <button
-                        className="btn btn-primary w-100"
-                        type="button"
-                        title="Click to refresh"
-                        onClick={handleTokenRefresh}
-                      >
-                        Refresh
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
+    <FormShell>
+      <Card className="glow-primary">
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl">Refresh MAL Token</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          {showAlert && (
+            <Alert>
+              <CheckCircle2 />
+              <AlertDescription>{alertMessage}</AlertDescription>
+            </Alert>
+          )}
+          <Button
+            type="button"
+            className="w-full"
+            title="Click to refresh"
+            onClick={handleTokenRefresh}
+          >
+            Refresh
+          </Button>
+        </CardContent>
+      </Card>
+    </FormShell>
   )
 }
 
