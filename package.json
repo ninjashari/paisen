@@ -78,6 +78,7 @@
     "jest": "^30.0.0",
     "jest-environment-jsdom": "^30.0.0",
     "postcss": "^8.5.15",
+    "puppeteer-core": "^25.1.0",
     "tailwindcss": "^4.3.1"
   }
 }
