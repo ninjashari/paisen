@@ -14,25 +14,39 @@ export const authOptions = {
       id: "credentials",
       name: "Credentials",
       async authorize(credentials) {
-        const user = await findUser(credentials.username)
+        try {
+          if (!credentials?.username || !credentials?.password) {
+            return null
+          }
 
-        // Check if user exists
-        if (!user) {
-          return undefined
-        }
+          const user = await findUser(credentials.username)
 
-        //Validate password
-        const isPasswordMatch = await isPasswordValid(
-          credentials.password,
-          user.password
-        )
+          // Check if user exists
+          if (!user) {
+            return null
+          }
 
-        if (!isPasswordMatch) {
-          return undefined
-        }
-        return {
-          name: user.name,
-          username: user.username,
+          //Validate password
+          const isPasswordMatch = await isPasswordValid(
+            credentials.password,
+            user.password
+          )
+
+          if (!isPasswordMatch) {
+            return null
+          }
+          return {
+            name: user.name,
+            username: user.username,
+          }
+        } catch (err) {
+          // A thrown error here (e.g. the database is unreachable) would
+          // otherwise be silently reported as "invalid credentials". Log the
+          // real cause and surface a distinct message to the client.
+          console.error("[next-auth] authorize() failed:", err)
+          throw new Error(
+            "Authentication service unavailable. Please try again later."
+          )
         }
       },
     }),

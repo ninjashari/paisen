@@ -2,7 +2,9 @@
  * Debug User Configuration API Endpoint
  * 
  * This endpoint provides detailed information about the current user's
- * configuration including MAL tokens and Jellyfin settings for debugging purposes.
+ * configuration including MAL tokens for debugging purposes.
+ *
+ * IMPORTANT: disabled in production — it exposes token metadata.
  */
 
 import { getServerSession } from 'next-auth/next'
@@ -11,6 +13,11 @@ import dbConnect from '@/lib/dbConnect'
 import User from '@/models/User'
 
 export default async function handler(req, res) {
+  // Only available in development.
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ message: 'Not found' })
+  }
+
   // Only accept GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({

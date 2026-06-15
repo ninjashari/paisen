@@ -1,23 +1,48 @@
 import { findUser, updateUser } from "@/lib/dbUtil"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "../auth/[...nextauth]"
+
+// Only these fields may be updated through this endpoint. This prevents mass
+// assignment (e.g. an attacker overwriting `password`, `name`, or `username`).
+const ALLOWED_FIELDS = [
+  "malUsername",
+  "codeChallenge",
+  "code",
+  "tokenType",
+  "refreshToken",
+  "expiryTime",
+  "accessToken",
+]
 
 export default async function handler(req, res) {
   switch (req.method) {
     case "PUT":
-      const updateUserData = req.body
+      // Require an authenticated session.
+      const session = await getServerSession(req, res, authOptions)
+      if (!session || !session.user) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Authentication required" })
+      }
 
-      // Set date for user
-      updateUserData.modifiedAt = new Date()
+      // Always target the authenticated user's own record — ignore any
+      // username supplied in the body (prevents updating other accounts).
+      const username = session.user.username
 
-      // Store new user
-      const storeUser = await updateUser(
-        updateUserData.username,
-        updateUserData
-      )
+      // Whitelist the updatable fields.
+      const updateUserData = { modifiedAt: new Date() }
+      for (const field of ALLOWED_FIELDS) {
+        if (req.body[field] !== undefined) {
+          updateUserData[field] = req.body[field]
+        }
+      }
+
+      const storeUser = await updateUser(username, updateUserData)
 
       if (storeUser.acknowledged) {
-        const userData = await findUser(updateUserData.username)
+        const userData = await findUser(username)
 
-        res.status(201).json({
+        res.status(200).json({
           success: true,
           data: {
             name: userData.name,
@@ -34,6 +59,8 @@ export default async function handler(req, res) {
       }
       break
     default:
+      res.setHeader("Allow", ["PUT"])
+      res.status(405).json({ success: false, message: "Method not allowed" })
       break
   }
 }

@@ -1,12 +1,23 @@
 import { createUser, findUser } from "@/lib/dbUtil"
+import { hashPassword } from "@/utils/hash"
 
 export default async function handler(req, res) {
   switch (req.method) {
     case "POST":
-      const addUser = req.body
+      // Whitelist accepted fields to prevent mass assignment (e.g. a client
+      // setting accessToken/refreshToken or other privileged fields directly).
+      const { name, username, password } = req.body
+
+      if (!name || !username || !password) {
+        res.status(400).json({
+          success: false,
+          message: "Name, username and password are required.",
+        })
+        return
+      }
 
       // Check if username exists
-      const userExists = await findUser(addUser.username)
+      const userExists = await findUser(username)
 
       if (userExists) {
         res.status(422).json({
@@ -17,9 +28,16 @@ export default async function handler(req, res) {
         return
       }
 
-      // Set date for user
-      addUser.createdAt = new Date()
-      addUser.modifiedAt = new Date()
+      // Hash the password server-side. The raw password must never be stored.
+      const hashedPassword = await hashPassword(password)
+
+      const addUser = {
+        name,
+        username,
+        password: hashedPassword,
+        createdAt: new Date(),
+        modifiedAt: new Date(),
+      }
 
       // Store new user
       const storeUser = await createUser(addUser)
@@ -36,7 +54,7 @@ export default async function handler(req, res) {
       }
       break
     default:
-      res.status(400).json({ success: false, message: "Invalid method" })
+      res.status(405).json({ success: false, message: "Invalid method" })
       break
   }
 }

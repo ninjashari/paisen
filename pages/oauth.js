@@ -81,7 +81,7 @@ export default function Home() {
   }
 
   return (
-    <main>
+    <main className="bg-aurora flex min-h-screen items-center justify-center">
       <Loader />
     </main>
   )

@@ -3,6 +3,20 @@ import MalApi from "@/lib/malApi"
 import { userStatusList, userStatusReverseMap } from "@/utils/constants"
 import { useEffect, useState } from "react"
 
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+
+const nativeSelect =
+  "border-input bg-background dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full min-w-36 rounded-md border px-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:ring-[3px]"
+
 const SearchTable = ({ searchData, malAccessToken }) => {
   const [currentSearchData, setCurrentSearchData] = useState([])
 
@@ -60,75 +74,71 @@ const SearchTable = ({ searchData, malAccessToken }) => {
   }
 
   return (
-    <>
-      <div className="card">
-        <div className="card-body">
-          <table className="table">
-            <thead style={{ textAlign: "center" }}>
-              <tr>
-                <th scope="col">Anime Title</th>
-                <th scope="col">Type</th>
-                <th scope="col">Episodes</th>
-                <th scope="col">Score</th>
-                <th scope="col">Season</th>
-                <th scope="col">Status</th>
-                <th scope="col">Change Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentSearchData?.map((searchItem) => (
-                <tr key={searchItem.id}>
-                  <td className="col">{searchItem.title}</td>
-                  <td className="col-1" style={{ textAlign: "center" }}>
-                    {searchItem.mediaType}
-                  </td>
-                  <td className="col-1" style={{ textAlign: "center" }}>
-                    {searchItem.totalEpisodes}
-                  </td>
-                  <td className="col-1" style={{ textAlign: "center" }}>
-                    {searchItem.meanScore}
-                  </td>
-                  <td className="col-2" style={{ textAlign: "center" }}>
-                    {searchItem.startSeason + " " + searchItem.startSeasonYear}
-                  </td>
-                  <td className="col-2" style={{ textAlign: "center" }}>
-                    {searchItem.userStatus
-                      ? searchItem.userStatus
-                      : "Not Added"}
-                  </td>
-                  <td className="col-2">
-                    <div className="row mb-3">
-                      <div className="col-sm-10">
-                        <select
-                          className="form-select"
-                          id={searchItem.id}
-                          value={
-                            userStatusReverseMap[searchItem.userStatus]
-                              ? userStatusReverseMap[searchItem.userStatus]
-                              : "not_added"
-                          }
-                          onChange={handleStatusChange}
-                        >
-                          <option value="not_added">Not Added</option>
-                          {userStatusList.map((userStatus) => (
-                            <option
-                              key={userStatus.apiValue}
-                              value={userStatus.apiValue}
-                            >
-                              {userStatus.pageTitle}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </>
+    <Card>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Anime Title</TableHead>
+              <TableHead className="text-center">Type</TableHead>
+              <TableHead className="text-center">Episodes</TableHead>
+              <TableHead className="text-center">Score</TableHead>
+              <TableHead className="text-center">Season</TableHead>
+              <TableHead className="text-center">Status</TableHead>
+              <TableHead>Change Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {currentSearchData?.map((searchItem) => (
+              <TableRow key={searchItem.id}>
+                <TableCell className="font-medium whitespace-normal">
+                  {searchItem.title}
+                </TableCell>
+                <TableCell className="text-center">
+                  {searchItem.mediaType}
+                </TableCell>
+                <TableCell className="text-center tabular-nums">
+                  {searchItem.totalEpisodes}
+                </TableCell>
+                <TableCell className="text-center tabular-nums">
+                  {searchItem.meanScore}
+                </TableCell>
+                <TableCell className="text-center whitespace-nowrap">
+                  {searchItem.startSeason + " " + searchItem.startSeasonYear}
+                </TableCell>
+                <TableCell className="text-center">
+                  <Badge variant={searchItem.userStatus ? "secondary" : "outline"}>
+                    {searchItem.userStatus ? searchItem.userStatus : "Not Added"}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <select
+                    className={nativeSelect}
+                    id={searchItem.id}
+                    value={
+                      userStatusReverseMap[searchItem.userStatus]
+                        ? userStatusReverseMap[searchItem.userStatus]
+                        : "not_added"
+                    }
+                    onChange={handleStatusChange}
+                  >
+                    <option value="not_added">Not Added</option>
+                    {userStatusList.map((userStatus) => (
+                      <option
+                        key={userStatus.apiValue}
+                        value={userStatus.apiValue}
+                      >
+                        {userStatus.pageTitle}
+                      </option>
+                    ))}
+                  </select>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   )
 }
 

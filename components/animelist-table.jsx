@@ -1,16 +1,35 @@
 import MalApi from "@/lib/malApi"
 import { userStatusList, userStatusReverseMap } from "@/utils/constants"
 import { getAnimeObj, getWatchedPercentage } from "@/utils/malService"
+import { ArrowDown, ArrowUp, Minus, Plus } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
+
+import { Card, CardContent } from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import Loader from "./loader"
 import Progressbar from "./progress-bar"
 import ScoreSelect from "./score-select"
 import SquareIcon from "./square-icon"
 
-const Table = ({ animeList, malAccessToken }) => {
+const nativeSelect =
+  "border-input bg-background dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full min-w-36 rounded-md border px-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:ring-[3px]"
+
+const Table_ = ({ animeList, malAccessToken }) => {
   const [animeDataList, setAnimeDataList] = useState([])
   const [loading, isLoading] = useState(true)
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "ascending" })
+  const [sortConfig, setSortConfig] = useState({
+    key: null,
+    direction: "ascending",
+  })
 
   useEffect(() => {
     let dataList = getAnimeObj(animeList)
@@ -39,9 +58,11 @@ const Table = ({ animeList, malAccessToken }) => {
           const aSeason = a.startSeason?.toLowerCase()
           const bSeason = b.startSeason?.toLowerCase()
           aValue =
-            (a.startSeasonYear || 0) * 10 + (seasonMap[aSeason] !== undefined ? seasonMap[aSeason] : -1)
+            (a.startSeasonYear || 0) * 10 +
+            (seasonMap[aSeason] !== undefined ? seasonMap[aSeason] : -1)
           bValue =
-            (b.startSeasonYear || 0) * 10 + (seasonMap[bSeason] !== undefined ? seasonMap[bSeason] : -1)
+            (b.startSeasonYear || 0) * 10 +
+            (seasonMap[bSeason] !== undefined ? seasonMap[bSeason] : -1)
         } else if (sortConfig.key === "score") {
           aValue = a.userScore
           bValue = b.userScore
@@ -61,22 +82,16 @@ const Table = ({ animeList, malAccessToken }) => {
     return sortableItems
   }, [animeDataList, sortConfig])
 
-  const handleWatchIncrement = async (e) => {
-    e.preventDefault()
-
-    // Get anime id
-    const animeId = e.target.id
-
+  const handleWatchIncrement = async (animeId) => {
     // Increment watched episodes by one on click of plus
     let newList = []
     let prevWatchedEpisodes = 0
     let watchedEpisodes = 0
     let totalEpisodes = 0
     let currentStatus = undefined
-    
+
     animeDataList.forEach((dataObj) => {
       if (parseInt(dataObj.id) === parseInt(animeId)) {
-        // console.log(dataObj)
         prevWatchedEpisodes = dataObj.episodesWatched
         dataObj.incrementWatchedEpisodes()
         watchedEpisodes = dataObj.episodesWatched
@@ -94,8 +109,6 @@ const Table = ({ animeList, malAccessToken }) => {
     if (malAccessToken) {
       const malApi = new MalApi(malAccessToken)
       const res = await malApi.updateList(animeId, fieldsToUpdate)
-
-      // console.log(currentStatus)
 
       if (200 === res.status) {
         if (
@@ -118,12 +131,7 @@ const Table = ({ animeList, malAccessToken }) => {
     }
   }
 
-  const handleWatchDecrement = async (e) => {
-    e.preventDefault()
-
-    // Get anime id
-    const animeId = e.target.id
-
+  const handleWatchDecrement = async (animeId) => {
     // Decrement watched episodes by one on click of minus
     let newList = []
     let watchedEpisodes = 0
@@ -192,204 +200,150 @@ const Table = ({ animeList, malAccessToken }) => {
       alert("Couldn't fetch local user data")
     }
   }
+
+  const SortIcon = ({ column }) => {
+    if (sortConfig.key !== column) return null
+    return sortConfig.direction === "ascending" ? (
+      <ArrowUp className="ml-1 inline size-3.5" />
+    ) : (
+      <ArrowDown className="ml-1 inline size-3.5" />
+    )
+  }
+
+  const canEditProgress = (anime) =>
+    userStatusReverseMap[anime.userStatus] === "watching" ||
+    userStatusReverseMap[anime.userStatus] === "on_hold" ||
+    userStatusReverseMap[anime.userStatus] === "plan_to_watch"
+
+  if (loading) {
+    return <Loader />
+  }
+
   return (
-    <>
-      {loading ? (
-        <Loader />
-      ) : (
-        <div className="card">
-          <div className="card-body">
-            <table className="table">
-              <thead style={{ textAlign: "center" }}>
-                <tr>
-                  <th scope="col"></th>
-                  <th scope="col">Anime Title</th>
-                  <th scope="col">Progress</th>
-                  <th
-                    scope="col"
-                    onClick={() => requestSort("score")}
-                    style={{ cursor: "pointer" }}
-                  >
-                    Score{" "}
-                    {sortConfig.key === "score"
-                      ? sortConfig.direction === "ascending"
-                        ? "▲"
-                        : "▼"
-                      : ""}
-                  </th>
-                  <th scope="col">Type</th>
-                  <th
-                    scope="col"
-                    onClick={() => requestSort("season")}
-                    style={{
-                      cursor: "pointer",
-                      textAlign: "center",
-                      paddingLeft: "0px",
-                      paddingRight: "0px",
-                    }}
-                  >
-                    Season{" "}
-                    {sortConfig.key === "season"
-                      ? sortConfig.direction === "ascending"
-                        ? "▲"
-                        : "▼"
-                      : ""}
-                  </th>
-                  <th scope="col">Change Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedAnimeDataList?.map((anime) => (
-                  <tr key={anime.id} className="col">
-                    <th>
-                      {" "}
-                      <SquareIcon
-                        squareColor={anime.status.color}
-                        title={anime.status.value}
-                      />
-                    </th>
-                    <td
-                      className="col-3"
-                      style={{ paddingLeft: "0px", paddingRight: "0px" }}
-                    >
-                      {anime.title}
-                    </td>
-                    <td
-                      className="col-3"
-                      style={{ paddingLeft: "0px", paddingRight: "0px" }}
-                    >
-                      <div
-                        className="row"
-                        style={{ paddingLeft: "0px", paddingRight: "0px" }}
-                      >
-                        {/* Decrement watched episodes */}
-                        <div className="col-1">
-                          {anime.episodesWatched > 0 &&
+    <Card>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-6" />
+              <TableHead>Anime Title</TableHead>
+              <TableHead className="min-w-56">Progress</TableHead>
+              <TableHead
+                className="hand-on-hover cursor-pointer select-none"
+                onClick={() => requestSort("score")}
+              >
+                Score
+                <SortIcon column="score" />
+              </TableHead>
+              <TableHead className="text-center">Type</TableHead>
+              <TableHead
+                className="hand-on-hover cursor-pointer text-center select-none"
+                onClick={() => requestSort("season")}
+              >
+                Season
+                <SortIcon column="season" />
+              </TableHead>
+              <TableHead>Change Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedAnimeDataList?.map((anime) => (
+              <TableRow key={anime.id}>
+                <TableCell>
+                  <SquareIcon
+                    squareColor={anime.status.color}
+                    title={anime.status.value}
+                  />
+                </TableCell>
+                <TableCell className="font-medium whitespace-normal">
+                  {anime.title}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 shrink-0"
+                      disabled={
+                        !(
+                          anime.episodesWatched > 0 &&
                           anime.episodesWatched <= anime.totalEpisodes &&
-                          (userStatusReverseMap[anime.userStatus] ===
-                            "watching" ||
-                            userStatusReverseMap[anime.userStatus] ===
-                              "on_hold" ||
-                            userStatusReverseMap[anime.userStatus] ===
-                              "plan_to_watch") ? (
-                            <button
-                              type="button"
-                              className="btn btn-sm"
-                              onClick={handleWatchDecrement}
-                            >
-                              <i className="bi bi-dash" id={anime.id}></i>
-                            </button>
-                          ) : (
-                            ""
-                          )}
-                        </div>
-                        {/* End Decrement watched episodes */}
-
-                        {/* Progress Bar */}
-                        <div className="col-5" style={{ paddingRight: "0px" }}>
-                          <Progressbar
-                            fillPercentage={getWatchedPercentage(
-                              anime.episodesWatched,
-                              anime.totalEpisodes
-                            )}
-                          />
-                        </div>
-                        {/* End Progress Bar */}
-
-                        {/* Increment watched episodes */}
-                        <div
-                          className="col-1"
-                          style={{ paddingLeft: "0px", paddingRight: "0px" }}
-                        >
-                          {anime.episodesWatched >= 0 &&
-                          anime.episodesWatched < anime.totalEpisodes &&
-                          (userStatusReverseMap[anime.userStatus] ===
-                            "watching" ||
-                            userStatusReverseMap[anime.userStatus] ===
-                              "on_hold" ||
-                            userStatusReverseMap[anime.userStatus] ===
-                              "plan_to_watch") ? (
-                            <button
-                              type="button"
-                              className="btn btn-sm"
-                              style={{ padding: "0px" }}
-                              onClick={handleWatchIncrement}
-                            >
-                              <i className="bi bi-plus" id={anime.id}></i>
-                            </button>
-                          ) : (
-                            ""
-                          )}
-                        </div>
-                        {/* End Increment watched episodes */}
-
-                        {/* Value of watched/total episodes */}
-                        <div
-                          className="col-4"
-                          style={{ paddingLeft: "0px", paddingRight: "0px" }}
-                        >
-                          {anime.episodesWatched + "/" + anime.totalEpisodes}
-                        </div>
-                        {/* End Value of watched/total episodes */}
-                      </div>
-                    </td>
-                    <td
-                      className="col-2"
-                      style={{ paddingLeft: "0px", paddingRight: "0px" }}
+                          canEditProgress(anime)
+                        )
+                      }
+                      onClick={() => handleWatchDecrement(anime.id)}
+                      aria-label="Decrease watched episodes"
                     >
-                      <ScoreSelect
-                        selectedVal={anime.userScore}
-                        animeID={anime.id}
-                        malAccessToken={malAccessToken}
-                        isLoading={isLoading}
+                      <Minus className="size-4" />
+                    </Button>
+
+                    <div className="min-w-20 flex-1">
+                      <Progressbar
+                        fillPercentage={getWatchedPercentage(
+                          anime.episodesWatched,
+                          anime.totalEpisodes
+                        )}
                       />
-                    </td>
-                    <td
-                      className="col-1"
-                      style={{
-                        textAlign: "center",
-                        paddingLeft: "0px",
-                        paddingRight: "0px",
-                      }}
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 shrink-0"
+                      disabled={
+                        !(
+                          anime.episodesWatched >= 0 &&
+                          anime.episodesWatched < anime.totalEpisodes &&
+                          canEditProgress(anime)
+                        )
+                      }
+                      onClick={() => handleWatchIncrement(anime.id)}
+                      aria-label="Increase watched episodes"
                     >
-                      {anime.mediaType}
-                    </td>
-                    <td
-                      className="col-1"
-                      style={{
-                        textAlign: "center",
-                        paddingLeft: "0px",
-                        paddingRight: "0px",
-                      }}
-                    >
-                      {anime.startSeason + " " + anime.startSeasonYear}
-                    </td>
-                    <td className="col-2" style={{ paddingRight: "0px" }}>
-                      <select
-                        className="form-select"
-                        id={anime.id}
-                        value={userStatusReverseMap[anime.userStatus]}
-                        onChange={handleStatusChange}
+                      <Plus className="size-4" />
+                    </Button>
+
+                    <span className="text-muted-foreground w-12 shrink-0 text-right text-xs tabular-nums">
+                      {anime.episodesWatched + "/" + anime.totalEpisodes}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <ScoreSelect
+                    selectedVal={anime.userScore}
+                    animeID={anime.id}
+                    malAccessToken={malAccessToken}
+                    isLoading={isLoading}
+                  />
+                </TableCell>
+                <TableCell className="text-center">{anime.mediaType}</TableCell>
+                <TableCell className="text-center whitespace-nowrap">
+                  {anime.startSeason + " " + anime.startSeasonYear}
+                </TableCell>
+                <TableCell>
+                  <select
+                    className={nativeSelect}
+                    id={anime.id}
+                    value={userStatusReverseMap[anime.userStatus]}
+                    onChange={handleStatusChange}
+                  >
+                    {userStatusList.map((userStatus) => (
+                      <option
+                        key={userStatus.apiValue}
+                        value={userStatus.apiValue}
                       >
-                        {userStatusList.map((userStatus) => (
-                          <option
-                            key={userStatus.apiValue}
-                            value={userStatus.apiValue}
-                          >
-                            {userStatus.pageTitle}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-    </>
+                        {userStatus.pageTitle}
+                      </option>
+                    ))}
+                  </select>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   )
 }
 
-export default Table
+export default Table_
