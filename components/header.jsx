@@ -6,7 +6,7 @@ import Profilenav from "./profile-nav"
 import Searchbar from "./search-bar"
 import ThemeToggle from "./theme-toggle"
 
-const Header = ({ onMenuClick, isLoading, malAccessToken, setSearchData }) => {
+const Header = ({ onMenuClick, isLoading, setSearchData, onError }) => {
   const showSearch = typeof setSearchData === "function"
 
   return (
@@ -29,8 +29,8 @@ const Header = ({ onMenuClick, isLoading, malAccessToken, setSearchData }) => {
         <div className="flex-1">
           <Searchbar
             isLoading={isLoading}
-            malAccessToken={malAccessToken}
             setSearchData={setSearchData}
+            onError={onError}
           />
         </div>
       ) : (

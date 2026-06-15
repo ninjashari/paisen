@@ -1,547 +1,200 @@
-# 🎌 Paisen
+# Paisen
 
-> **Self-hosted MyAnimeList Manager**
+> **Self-hosted MyAnimeList tracker**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-13-black.svg)](https://nextjs.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-6.0%2B-green.svg)](https://www.mongodb.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas%20%2F%20local-green.svg)](https://www.mongodb.com/)
 
-**Paisen** is a powerful, self-hosted anime management application that integrates with MyAnimeList to provide a comprehensive anime tracking experience. With its lightning-fast local database, Paisen transforms how you discover, track, and manage your anime collection.
-
----
-
-## 📋 Table of Contents
-
-- [✨ Features](#-features)
-- [📸 Screenshots](#-screenshots)
-- [🚀 Quick Start](#-quick-start)
-- [📋 Prerequisites](#-prerequisites)
-- [⚙️ Installation](#️-installation)
-- [🔧 Configuration](#-configuration)
-- [ API Documentation](#-api-documentation)
-- [🧪 Testing](#-testing)
-- [🔧 Troubleshooting](#-troubleshooting)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
-- [🙏 Acknowledgments](#-acknowledgments)
+**Paisen** is a fast, self-hosted dashboard for tracking, searching, and analyzing your MyAnimeList — synced straight to MAL.
 
 ---
 
-## ✨ Features
+## Screenshots
 
-### 🎯 Core Functionality
-- **🔐 MyAnimeList Integration** - Full OAuth2 authentication with secure token management
-- **📚 Anime List Management** - View, update, and organize your complete collection
-- **🔍 Universal Search** - Lightning-fast search across multiple databases
-- **📊 Rich Analytics** - Comprehensive statistics and watching pattern insights
-- **👥 Multi-user Support** - Isolated accounts with personal data protection
+| Home | Login | Register |
+|:---:|:---:|:---:|
+| ![Home](screens/home.jpg) | ![Login](screens/login.jpg) | ![Register](screens/register.jpg) |
+| *Landing page with feature overview* | *Credential login with hashed password* | *Account creation with validation* |
 
-### 🗄️ Database & Performance
-- **🚀 Lightning Speed** - 90% faster than direct API calls
-- **🔍 Full-text Search** - Advanced indexing across all metadata
-- **📱 Offline Support** - Complete functionality without internet
-- **🆔 Universal IDs** - Cross-platform mapping (MAL, AniDB)
-- **📊 Analytics Engine** - Detailed statistics and performance metrics
-- **🔄 Smart Caching** - Intelligent data synchronization and updates
-
-### 🗺️ Anime Mapping System
-- **🔗 Offline Database** - Uses [manami-project/anime-offline-database](https://github.com/manami-project/anime-offline-database) for cross-platform mappings
-- **🤖 Auto-Mapping** - Automatic MAL to AniDB ID mapping suggestions
-- **✅ User Confirmation** - Review and confirm suggested mappings
-- **✏️ Manual Override** - Enter custom AniDB IDs when auto-mapping fails
-- **📊 Mapping Statistics** - Track confirmed vs suggested mappings
-- **🔄 Periodic Updates** - Regular offline database updates for latest mappings
+> App screenshots (anime list, search, statistics) require a linked MyAnimeList account. See [Features](#features) for what each page provides.
 
 ---
 
-## 📸 Screenshots
+## Features
 
-### 🏠 Dashboard & Authentication
+### Authentication & accounts
+- Multi-user support — each account has its own isolated data
+- Passwords hashed client-side (SHA-256) before transit, then bcrypt-stored server-side
+- Session management via NextAuth.js (JWT strategy, 30-day tokens)
+- MyAnimeList OAuth2 (PKCE) integration — link your MAL account per user
 
-<div align="center">
+### Anime list management
+- View your list split by status: **Currently Watching**, **Completed**, **On Hold**, **Dropped**, **Plan to Watch**
+- Inline status update (change watching → completed, etc.) without leaving the page
+- Inline score update (0–10) per entry
+- Inline episode count update
 
-| Home Dashboard | User Registration |
-|:---:|:---:|
-| ![Home](screens/home.jpg) | ![Register](screens/register.jpg) |
-| *Main dashboard with activity overview and quick access* | *Secure user registration with validation* |
+### Search & discovery
+- Search any anime by title via the MAL API
+- See your current watch status and score inline with results
+- Add or update entries directly from search
 
-| User Login | OAuth Authorization |
-|:---:|:---:|
-| ![Login](screens/login.jpg) | ![Authorize](screens/authorise.jpg) |
-| *Clean login interface with authentication* | *MyAnimeList OAuth integration* |
+### Statistics
+- Mean score across your list
+- Total episodes watched and total time spent
+- Score distribution chart
+- Breakdown by watch status
 
-</div>
-
-### 📚 Anime Management
-
-<div align="center">
-
-| Original Anime List |
-|:---:|
-| ![Anime List](screens/anime-list.jpg) |
-| *Original list view with status tracking* |
-
-</div>
-
-### 📊 Analytics & Statistics
-
-<div align="center">
-
-| Statistics Overview | Score Distribution |
-|:---:|:---:|
-| ![Statistics](screens/statistics-list.jpg) | ![Score Distribution](screens/statistics-score-distribution.jpg) |
-| *Detailed analytics and watching patterns* | *Score distribution and rating insights* |
-
-</div>
+### Technical
+- All MAL API calls are **server-side proxied** — no access token ever reaches the browser
+- Token refresh flow via `/api/mal/refresh`
+- Light / dark theme toggle (system default, persisted)
+- Error states with retry on all data-loading pages — no infinite spinners
+- Toast notifications for mutations (score, status, episode updates)
 
 ---
 
-## 🚀 Quick Start
+## Pages
+
+| Route | Description |
+|---|---|
+| `/` | Landing page (login / sign-up CTAs) |
+| `/login` | Credential login |
+| `/register` | New account creation |
+| `/authorise` | Link your MyAnimeList account (OAuth PKCE) |
+| `/oauth` | MAL OAuth callback handler |
+| `/animelist/current` | Currently watching |
+| `/animelist/completed` | Completed |
+| `/animelist/onhold` | On hold |
+| `/animelist/dropped` | Dropped |
+| `/animelist/plantowatch` | Plan to watch |
+| `/search` | Anime search |
+| `/statistics` | Watch statistics and charts |
+
+---
+
+## Prerequisites
+
+- **Node.js** 18+
+- **MongoDB** — local instance or [MongoDB Atlas](https://www.mongodb.com/atlas) (free tier works)
+- **MyAnimeList API application** — [create one here](https://myanimelist.net/apiconfig)
+
+---
+
+## Installation
 
 ```bash
-# Clone the repository
+# 1. Clone
 git clone https://github.com/ninjashari/paisen.git
 cd paisen
 
-# Install dependencies
+# 2. Install dependencies
 npm install
 
-# Set up environment variables
+# 3. Configure environment
 cp .env.local.example .env.local
-# Edit .env.local with your configuration
+# Edit .env.local — see Configuration below
 
-# Start development server
+# 4. Start dev server
 npm run dev
 ```
 
-🎉 **Open [http://localhost:3000](http://localhost:3000) to view Paisen**
+Open [http://localhost:3000](http://localhost:3000).
 
----
-
-## 📋 Prerequisites
-
-Before installing Paisen, ensure you have the following:
-
-### Required Software
-- **Node.js** 18.0+ ([Download](https://nodejs.org/))
-- **MongoDB** 6.0+ ([Installation Guide](https://www.mongodb.com/docs/manual/installation/))
-- **Git** ([Download](https://git-scm.com/))
-
-### Required Accounts
-- **MyAnimeList Account** ([Create Account](https://myanimelist.net/register.php))
-- **MyAnimeList API Application** ([Create App](https://myanimelist.net/blog.php?eid=835707))
-
----
-
-## ⚙️ Installation
-
-### 1. Clone Repository
+For production:
 
 ```bash
-git clone https://github.com/ninjashari/paisen.git
-cd paisen
-```
-
-### 2. Install Dependencies
-
-```bash
-npm install
-```
-
-### 3. Environment Configuration
-
-Create your environment file:
-
-```bash
-cp .env.local.example .env.local
-```
-
-Edit `.env.local` with your configuration:
-
-```env
-# MyAnimeList API Configuration
-MAL_CLIENT_ID=your_mal_client_id_here
-
-# Security Keys (Generate secure random strings)
-SECRET=your_32_character_secret_key_here
-SYNC_KEY=your_secure_sync_key_here
-
-# Database Configuration
-MONGODB_URI=mongodb://localhost:27017/paisen
-
-# Application URL
-NEXTAUTH_URL=http://localhost:3000
-```
-
-### 4. Database Setup
-
-Start MongoDB service:
-
-```bash
-# On macOS (with Homebrew)
-brew services start mongodb-community
-
-# On Ubuntu/Debian
-sudo systemctl start mongod
-
-# On Windows
-net start MongoDB
-```
-
-### 5. Start Development Server
-
-```bash
-npm run dev
-```
-
-🎉 **Your Paisen instance is now running at [http://localhost:3000](http://localhost:3000)**
-
-### 6. Production Build
-
-For production deployment:
-
-```bash
-# Ubuntu/Debian
-sudo systemctl start mongod
-
-# macOS with Homebrew
-brew services start mongodb-community
-
-# Windows
-net start MongoDB
-```
-
-### 5. Build and Start
-
-```bash
-# Development mode
-npm run dev
-
-# Production mode
 npm run build
 npm start
 ```
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
-### MyAnimeList API Setup
-
-1. **Visit [MyAnimeList API](https://myanimelist.net/blog.php?eid=835707)**
-2. **Click "Create ID"** to create a new application
-3. **Fill in application details:**
-   - **App Type:** `Web`
-   - **App Name:** `Paisen` (or your preferred name)
-   - **App Description:** `Self-hosted anime management`
-   - **App Redirect URL:** `http://localhost:3000/oauth`
-   - **Homepage URL:** `http://localhost:3000/`
-   - **Commercial/Non-Commercial:** `Non-Commercial`
-4. **Copy the Client ID** to your `.env.local` file
-
-### Security Configuration
-
-Generate secure keys for your installation:
-
-```bash
-# Generate SECRET (32 characters)
-openssl rand -hex 16
-
-# Generate SYNC_KEY (any secure string)
-openssl rand -base64 32
-```
-
----
-
-##  API Documentation
-
-Paisen provides a comprehensive REST API for integration with other applications.
-
-**API documentation coming soon.**
-
-## 🧪 Testing
-
-Run the full test suite:
-
-```bash
-npm test
-```
-
-To run tests in watch mode:
-
-```bash
-npm test -- --watch
-```
-
-## 🔧 Troubleshooting
-
-**"Error: Could not connect to MongoDB"**
-- Ensure your MongoDB server is running.
-- Verify that `MONGODB_URI` in `.env.local` is correct.
-
-### Common Issues and Solutions
-
-#### MyAnimeList Issues
-
-**❌ Authentication Failed**
-```
-Error: Invalid client credentials
-```
-**✅ Solution:**
-1. Verify `MAL_CLIENT_ID` in `.env.local`
-2. Check redirect URL in MAL app settings: `http://localhost:3000/oauth`
-3. Ensure app is approved and active
-
-**❌ Token Expired**
-```
-Error: Access token has expired
-```
-**✅ Solution:**
-1. Navigate to OAuth page in Paisen
-2. Re-authorize your MyAnimeList account
-3. Check token expiry in user settings
-
-#### Database Issues
-
-**❌ Connection Error**
-```
-Error: MongoNetworkError: connect ECONNREFUSED
-```
-**✅ Solution:**
-1. Start MongoDB service: `sudo systemctl start mongod`
-2. Check connection string in `.env.local`
-3. Verify MongoDB is listening on correct port
-4. Check disk space and permissions
-
-**❌ Performance Issues**
-```
-Warning: Slow database queries
-```
-**✅ Solution:**
-1. Check available disk space
-2. Monitor MongoDB performance
-3. Consider adding database indexes
-4. Review query patterns in logs
-
-#### General Issues
-
-**❌ Application Won't Start**
-```
-Error: Cannot find module 'next'
-```
-**✅ Solution:**
-1. Run `npm install` to install dependencies
-2. Check Node.js version (requires 18+)
-3. Clear node_modules and reinstall: `rm -rf node_modules && npm install`
-4. Check for conflicting global packages
-
-**❌ Build Errors**
-```
-Error: Build failed with errors
-```
-**✅ Solution:**
-1. Check syntax errors in code
-2. Verify all environment variables are set
-3. Run `npm run build` to see detailed errors
-4. Check for missing dependencies
-
-### Getting Help
-
-#### 1. Built-in Diagnostics
-
-- **Browser Console** → Check for client-side errors
-- **Network Tab** → Monitor API requests and responses
-
-#### 2. Log Analysis
-
-```bash
-# Check application logs
-npm run dev  # Development logs in console
-
-# Check MongoDB logs
-sudo tail -f /var/log/mongodb/mongod.log
-
-# Check system logs
-sudo journalctl -u mongod -f
-```
-
-#### 3. Debug Mode
-
-Enable debug logging in `.env.local`:
+Create `.env.local` in the project root:
 
 ```env
-NODE_ENV=development
-DEBUG=paisen:*
+# MongoDB connection string — include the database name
+MONGODB_URI=mongodb://127.0.0.1:27017/paisen
+# or Atlas:
+# MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/paisen?retryWrites=true&w=majority
+
+# NextAuth — generate with: openssl rand -hex 32
+SECRET=your_secret_here
+
+# Your app's public URL (no trailing slash)
+NEXTAUTH_URL=http://localhost:3000
+
+# MyAnimeList Client ID from https://myanimelist.net/apiconfig
+MAL_CLIENT_ID=your_mal_client_id_here
 ```
 
-#### 4. Community Support
+### MyAnimeList API setup
 
-- **GitHub Issues:** [Report bugs and request features](https://github.com/ninjashari/paisen/issues)
-- **Discussions:** [Ask questions and share ideas](https://github.com/ninjashari/paisen/discussions)
-- **Wiki:** [Detailed documentation and guides](https://github.com/ninjashari/paisen/wiki)
-
-When reporting issues, please include:
-- Operating system and version
-- Node.js and npm versions
-- Error messages and logs
-- Steps to reproduce the issue
-- Screenshots if applicable
+1. Go to [myanimelist.net/apiconfig](https://myanimelist.net/apiconfig) and click **Create ID**
+2. Fill in the form:
+   - **App Type:** Web
+   - **App Redirect URL:** `http://localhost:3000/oauth` (or your production URL + `/oauth`)
+3. Copy the **Client ID** to `.env.local`
 
 ---
 
-## 🤝 Contributing
+## First-time setup
 
-We welcome contributions from the community! Whether you're fixing bugs, adding features, improving documentation, or helping with testing, your contributions make Paisen better for everyone.
-
-### 🚀 Quick Start for Contributors
-
-```bash
-# Fork the repository on GitHub
-# Clone your fork
-git clone https://github.com/YOUR_USERNAME/paisen.git
-cd paisen
-
-# Add upstream remote
-git remote add upstream https://github.com/ninjashari/paisen.git
-
-# Create a feature branch
-git checkout -b feature/your-feature-name
-
-# Make your changes and commit
-git add .
-git commit -m "feat: add your feature description"
-
-# Push to your fork and create a pull request
-git push origin feature/your-feature-name
-```
-
-### 📋 Contribution Guidelines
-
-#### Code Style
-- Follow existing code style and conventions
-- Use meaningful variable and function names
-- Add comments for complex logic
-- Include JSDoc comments for functions
-- Run `npm run lint` before committing
-
-#### Testing
-- Write tests for new features
-- Ensure all existing tests pass
-- Aim for high test coverage
-- Include both unit and integration tests
-
-#### Documentation
-- Update README.md for new features
-- Add inline code comments
-- Update API documentation
-- Include screenshots for UI changes
-
-#### Pull Request Process
-1. **Create an issue** first to discuss major changes
-2. **Keep PRs focused** on a single feature or bug fix
-3. **Write clear commit messages** following conventional commits
-4. **Include tests** for new functionality
-5. **Update documentation** as needed
-6. **Request review** from maintainers
-
-### 🎯 Areas for Contribution
-
-#### 🐛 Bug Fixes
-- Fix reported issues
-- Improve error handling
-- Enhance stability
-- Performance optimizations
-
-#### ✨ New Features
-- Additional anime data sources
-- Enhanced search capabilities
-- Mobile app development
-- Advanced analytics features
-
-#### 📚 Documentation
-- Improve setup guides
-- Add troubleshooting sections
-- Create video tutorials
-- Translate documentation
-
-#### 🧪 Testing
-- Increase test coverage
-- Add integration tests
-- Performance benchmarking
-- Cross-platform testing
-
-#### 🎨 UI/UX Improvements
-- Design enhancements
-- Accessibility improvements
-- Mobile responsiveness
-- User experience optimization
-
-### 🏷️ Commit Convention
-
-We use [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-feat: add new search functionality
-fix: resolve authentication token expiry issue
-docs: update installation guide
-test: add integration tests for MyAnimeList sync
-refactor: improve database query performance
-style: fix code formatting issues
-```
-
-### 📝 Issue Templates
-
-When creating issues, please use our templates:
-
-- **🐛 Bug Report:** For reporting bugs
-- **✨ Feature Request:** For suggesting new features
-- **📚 Documentation:** For documentation improvements
-- **❓ Question:** For asking questions
+1. Start the app and go to `/register` — create a Paisen account
+2. Log in at `/login`
+3. Go to `/authorise` — enter your MyAnimeList username and click **Authorize**
+4. You'll be redirected to MAL to approve access, then back to your anime list
 
 ---
 
-## 📄 License
+## Tech stack
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-### What this means:
-- ✅ **Commercial use** - You can use this software commercially
-- ✅ **Modification** - You can modify the source code
-- ✅ **Distribution** - You can distribute the software
-- ✅ **Private use** - You can use this software privately
-- ❌ **Liability** - The authors are not liable for any damages
-- ❌ **Warranty** - No warranty is provided with this software
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (Pages Router) |
+| UI | React 19, Tailwind CSS v4, shadcn/ui (Radix UI) |
+| Auth | NextAuth.js v4 (CredentialsProvider, JWT) |
+| Database | MongoDB + Mongoose 9 |
+| Charts | ApexCharts + react-apexcharts |
+| Icons | Lucide React |
+| Toasts | Sonner |
+| Theme | next-themes (light / dark / system) |
 
 ---
 
-## 🙏 Acknowledgments
+## Troubleshooting
 
-### 🌟 Core Technologies
-- **[Next.js](https://nextjs.org/)** - React framework for production
-- **[MongoDB](https://www.mongodb.com/)** - Document database for data storage
-- **[NextAuth.js](https://next-auth.js.org/)** - Authentication for Next.js
-- **[Bootstrap](https://getbootstrap.com/)** - CSS framework for responsive design
+**Login fails with correct credentials**
+- Ensure your `MONGODB_URI` includes the database name: `.../paisen?retryWrites=true`
+- Check MongoDB Atlas → Network Access → your IP is allowlisted (or set `0.0.0.0/0` for testing)
 
-### 🔌 External Services
-- **[MyAnimeList](https://myanimelist.net/)** - Primary anime database and user lists
+**MAL returns 405 or CORS error**
+- All MAL calls go through `/api/mal/*` server routes — if you see direct calls to `api.myanimelist.net` in the Network tab, the proxy routes are not being used correctly
 
-### 👥 Community
-- **Contributors** - Everyone who has contributed code, documentation, or feedback
-- **Beta Testers** - Users who helped test and improve the application
-- **Community Members** - Active participants in discussions and support
+**"Authorize your MyAnimeList account" error after login**
+- Go to `/authorise` and complete the OAuth flow — the MAL access token is not yet stored
 
-### 🎨 Design Resources
-- **[Bootstrap Icons](https://icons.getbootstrap.com/)** - Icon library
-- **[Unsplash](https://unsplash.com/)** - Stock photos for documentation
-- **Community Screenshots** - User-contributed interface examples
+**Token expired**
+- Use the refresh button (sync icon) in the app header to exchange your refresh token for a new access token
+
+**Build fails (`Cannot find module`)**
+- Run `npm install` then `npm run build` again
+- Ensure `NEXTAUTH_URL`, `SECRET`, `MONGODB_URI`, and `MAL_CLIENT_ID` are all set
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE) for details.
 
 ---
 
 <div align="center">
 
-### 🎌 Made with ❤️ for the Anime Community
+Made for the anime community · [Report Issues](https://github.com/ninjashari/paisen/issues) · [Discussions](https://github.com/ninjashari/paisen/discussions)
 
-**[⭐ Star this project](https://github.com/ninjashari/paisen)** • **[🐛 Report Issues](https://github.com/ninjashari/paisen/issues)** • **[💬 Join Discussions](https://github.com/ninjashari/paisen/discussions)**
-
-</div> 
+</div>

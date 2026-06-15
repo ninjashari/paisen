@@ -2,6 +2,7 @@ import Link from "next/link"
 import { useRouter } from "next/router"
 import { useState } from "react"
 import { AlertTriangle } from "lucide-react"
+import { hashClientPassword } from "@/utils/clientCrypto"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -83,12 +84,12 @@ const RegisterForm = ({ userForm }) => {
   // Call register API to save user data
   const postData = async (form) => {
     try {
-      // Send the raw password over the (TLS-encrypted) connection; the server
-      // hashes it. Hashing on the client is not a substitute for HTTPS.
+      // Hash the password in the browser so the raw value never appears in the
+      // request payload. The server still bcrypts the received value.
       const addUser = {
         name: form.name,
         username: form.username,
-        password: form.password,
+        password: await hashClientPassword(form.password),
       }
 
       const res = await fetch("/api/auth/register", {

@@ -50,7 +50,7 @@ const Profilenav = () => {
       <DropdownMenuContent align="end" className="w-52">
         <DropdownMenuLabel className="truncate">{name}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut()}>
+        <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
           <LogOut />
           Sign out
         </DropdownMenuItem>

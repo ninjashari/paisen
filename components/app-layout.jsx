@@ -19,7 +19,7 @@ import Sidebar, { SidebarNav } from "./sidebar"
  * Props:
  * - title: page <title>
  * - breadcrumb: { title, firstPage?, secondPage? }
- * - search: { isLoading, malAccessToken, setSearchData } to show header search
+ * - search: { isLoading, setSearchData, onError } to show header search
  */
 const AppLayout = ({ title, breadcrumb, search = {}, children }) => {
   const [mobileOpen, setMobileOpen] = useState(false)

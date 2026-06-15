@@ -1,7 +1,8 @@
-import MalApi from "@/lib/malApi"
+import { updateAnime } from "@/utils/malClient"
 import { userStatusList, userStatusReverseMap } from "@/utils/constants"
 import { getAnimeObj, getWatchedPercentage } from "@/utils/malService"
 import { ArrowDown, ArrowUp, Minus, Plus } from "lucide-react"
+import { toast } from "sonner"
 import { useEffect, useMemo, useState } from "react"
 
 import { Card, CardContent } from "@/components/ui/card"
@@ -21,9 +22,9 @@ import ScoreSelect from "./score-select"
 import SquareIcon from "./square-icon"
 
 const nativeSelect =
-  "border-input bg-background dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full min-w-36 rounded-md border px-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:ring-[3px]"
+  "border-input bg-background dark:bg-input/30 dark:[color-scheme:dark] focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full min-w-36 rounded-md border px-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:ring-[3px]"
 
-const Table_ = ({ animeList, malAccessToken }) => {
+const Table_ = ({ animeList }) => {
   const [animeDataList, setAnimeDataList] = useState([])
   const [loading, isLoading] = useState(true)
   const [sortConfig, setSortConfig] = useState({
@@ -106,28 +107,20 @@ const Table_ = ({ animeList, malAccessToken }) => {
     const fieldsToUpdate = {
       num_watched_episodes: watchedEpisodes,
     }
-    if (malAccessToken) {
-      const malApi = new MalApi(malAccessToken)
-      const res = await malApi.updateList(animeId, fieldsToUpdate)
+    try {
+      await updateAnime(animeId, fieldsToUpdate)
 
-      if (200 === res.status) {
-        if (
-          watchedEpisodes === totalEpisodes &&
-          currentStatus !== "completed"
-        ) {
-          await changeCurrentUserStatus(animeId, "completed")
-        } else if (
-          parseInt(prevWatchedEpisodes) === 0 &&
-          currentStatus !== "watching"
-        ) {
-          await changeCurrentUserStatus(animeId, "watching")
-        }
-        isLoading(false)
-      } else {
-        alert("Couldn't update animelist")
+      if (watchedEpisodes === totalEpisodes && currentStatus !== "completed") {
+        await changeCurrentUserStatus(animeId, "completed")
+      } else if (
+        parseInt(prevWatchedEpisodes) === 0 &&
+        currentStatus !== "watching"
+      ) {
+        await changeCurrentUserStatus(animeId, "watching")
       }
-    } else {
-      alert("Couldn't fetch local user data")
+    } catch (err) {
+      console.error("Failed to update episodes:", err)
+      toast.error(err.message || "Couldn't update anime list")
     }
   }
 
@@ -149,17 +142,11 @@ const Table_ = ({ animeList, malAccessToken }) => {
     const fieldsToUpdate = {
       num_watched_episodes: watchedEpisodes,
     }
-    if (malAccessToken) {
-      const malApi = new MalApi(malAccessToken)
-      const res = await malApi.updateList(animeId, fieldsToUpdate)
-
-      if (200 === res.status) {
-        isLoading(false)
-      } else {
-        alert("Couldn't update animelist")
-      }
-    } else {
-      alert("Couldn't fetch access token from parent")
+    try {
+      await updateAnime(animeId, fieldsToUpdate)
+    } catch (err) {
+      console.error("Failed to update episodes:", err)
+      toast.error(err.message || "Couldn't update anime list")
     }
   }
 
@@ -187,17 +174,11 @@ const Table_ = ({ animeList, malAccessToken }) => {
     const fieldsToUpdate = {
       status: targetStatus,
     }
-    if (malAccessToken) {
-      const malApi = new MalApi(malAccessToken)
-      const res = await malApi.updateList(animeId, fieldsToUpdate)
-
-      if (200 === res.status) {
-        isLoading(false)
-      } else {
-        alert("Couldn't update animelist")
-      }
-    } else {
-      alert("Couldn't fetch local user data")
+    try {
+      await updateAnime(animeId, fieldsToUpdate)
+    } catch (err) {
+      console.error("Failed to update status:", err)
+      toast.error(err.message || "Couldn't update anime list")
     }
   }
 
@@ -312,8 +293,6 @@ const Table_ = ({ animeList, malAccessToken }) => {
                   <ScoreSelect
                     selectedVal={anime.userScore}
                     animeID={anime.id}
-                    malAccessToken={malAccessToken}
-                    isLoading={isLoading}
                   />
                 </TableCell>
                 <TableCell className="text-center">{anime.mediaType}</TableCell>

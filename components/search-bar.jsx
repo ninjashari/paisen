@@ -1,43 +1,33 @@
-import MalApi from "@/lib/malApi"
-import { fields } from "@/utils/constants"
+import { searchAnime } from "@/utils/malClient"
 import { Search } from "lucide-react"
-import { useRouter } from "next/router"
 import { useState } from "react"
+import { toast } from "sonner"
 
 import { Input } from "@/components/ui/input"
 
-const Searchbar = ({ isLoading, malAccessToken, setSearchData }) => {
-  const router = useRouter()
+const Searchbar = ({ isLoading, setSearchData, onError }) => {
   const [inputSearchString, setInputSearchString] = useState("")
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const query = e.target.query.value
+
+    if (!query) {
+      return
+    }
+
     isLoading(true)
-    setInputSearchString(e.target.query.value)
+    if (onError) onError(null)
 
-    if (inputSearchString) {
-      if (malAccessToken) {
-        const malApi = new MalApi(malAccessToken)
-
-        const resp = await malApi.getSearchAnimeList(inputSearchString, fields)
-        if (200 === resp.status) {
-          let dataList = resp.data.data
-          let nameList = []
-
-          dataList.forEach((dataItem) => {
-            nameList.push(dataItem.node)
-          })
-          setSearchData(nameList)
-          isLoading(false)
-        } else {
-          alert("Couldn't fetch user anime list")
-        }
-      } else {
-        alert("Couldn't get acces token. Please authorise!!")
-        router.replace("/")
-      }
-    } else {
-      router.replace("/")
+    try {
+      const data = await searchAnime(query)
+      setSearchData(data)
+    } catch (err) {
+      console.error("Search failed:", err)
+      if (onError) onError(err.message)
+      toast.error(err.message || "Couldn't search MyAnimeList")
+    } finally {
+      isLoading(false)
     }
   }
 

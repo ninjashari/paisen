@@ -1,11 +1,10 @@
 import Table from "@/components/animelist-table"
 import AppLayout from "@/components/app-layout"
+import ErrorState from "@/components/error-state"
 import Loader from "@/components/loader"
-import MalApi from "@/lib/malApi"
-import { fields, userListStatus } from "@/utils/constants"
+import { userListStatus } from "@/utils/constants"
+import { fetchAnimeList } from "@/utils/malClient"
 import { getURILastValue } from "@/utils/uriService"
-import { getUserAccessToken } from "@/utils/userService"
-import { getSession } from "next-auth/react"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
@@ -13,49 +12,41 @@ export default function Animelist() {
   const router = useRouter()
 
   const [animeListData, setAnimeListData] = useState([])
-  const [loading, isLoading] = useState(true)
-  const [malAccessToken, setMalAccessToken] = useState()
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [pageTitle, setPageTitle] = useState()
-  const [currentPageValue, setCurrentPageValue] = useState()
 
-  useEffect(() => {
-    isLoading(true)
+  const load = async () => {
     const pageValue = getURILastValue(router.asPath)
-    if (pageValue) {
-      const pageTitleValue = userListStatus[pageValue].pageTitle
-      const pageValueCurrent = userListStatus[pageValue].apiValue
+    if (!pageValue || !userListStatus[pageValue]) return
 
-      setPageTitle(pageTitleValue)
-      setCurrentPageValue(pageValueCurrent)
+    setPageTitle(userListStatus[pageValue].pageTitle)
+    setLoading(true)
+    setError(null)
 
-      getAnimeList()
-    }
-  }, [pageTitle, currentPageValue])
-
-  const getAnimeList = async () => {
-    const session = await getSession()
-    if (session) {
-      const accessToken = await getUserAccessToken(session)
-      if (accessToken) {
-        setMalAccessToken(accessToken)
-
-        const malApi = new MalApi(accessToken)
-
-        if (currentPageValue) {
-          const resp = await malApi.getAnimeList(fields, currentPageValue)
-          if (200 === resp.status) {
-            const malData = resp.data
-            setAnimeListData(malData.data)
-            isLoading(false)
-          }
-        }
-      } else {
-        alert("Couldn't retrieve access token from user. Authorise MAL user")
+    try {
+      const data = await fetchAnimeList(userListStatus[pageValue].apiValue)
+      setAnimeListData(data)
+    } catch (err) {
+      console.error("Failed to load anime list:", err)
+      if (err.message === "Authentication required") {
+        router.replace("/")
+        return
       }
-    } else {
-      router.replace("/")
+      if (err.message.startsWith("Authorize")) {
+        router.replace("/authorise")
+        return
+      }
+      setError(err.message)
+    } finally {
+      setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (router.isReady) load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, router.asPath])
 
   return (
     <AppLayout
@@ -68,8 +59,10 @@ export default function Animelist() {
     >
       {loading ? (
         <Loader />
+      ) : error ? (
+        <ErrorState message={error} onRetry={load} />
       ) : (
-        <Table animeList={animeListData} malAccessToken={malAccessToken} />
+        <Table animeList={animeListData} />
       )}
     </AppLayout>
   )

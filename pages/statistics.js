@@ -1,45 +1,32 @@
 import AppLayout from "@/components/app-layout"
+import ErrorState from "@/components/error-state"
 import Loader from "@/components/loader"
 import Stats from "@/components/stats"
-import MalApi from "@/lib/malApi"
-import { statisticsFields } from "@/utils/constants"
-import { getUserAccessToken } from "@/utils/userService"
-import { getSession } from "next-auth/react"
-import { useRouter } from "next/router"
+import { fetchAnimeList } from "@/utils/malClient"
 import { useEffect, useState } from "react"
 
 function Statistics() {
-  const router = useRouter()
   const [animeListData, setAnimeListData] = useState([])
-  const [loading, isLoading] = useState(true)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  useEffect(() => {
-    isLoading(true)
-    getAnimeList()
-  }, [])
-
-  const getAnimeList = async () => {
-    const session = await getSession()
-    if (session) {
-      const accessToken = await getUserAccessToken(session)
-      if (accessToken) {
-        const malApi = new MalApi(accessToken)
-
-        const resp = await malApi.getAnimeList(statisticsFields)
-        if (200 === resp.status) {
-          const malData = resp.data
-          setAnimeListData(malData.data)
-          isLoading(false)
-        } else {
-          alert("Couldn't fetch user anime list")
-        }
-      } else {
-        alert("Couldn't retrieve access token from user. Authorise MAL user")
-      }
-    } else {
-      router.replace("/")
+  const load = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await fetchAnimeList(undefined, "statistics")
+      setAnimeListData(data)
+    } catch (err) {
+      console.error("Failed to load statistics:", err)
+      setError(err.message)
+    } finally {
+      setLoading(false)
     }
   }
+
+  useEffect(() => {
+    load()
+  }, [])
 
   return (
     <AppLayout
@@ -48,8 +35,10 @@ function Statistics() {
     >
       {loading ? (
         <Loader />
+      ) : error ? (
+        <ErrorState message={error} onRetry={load} />
       ) : (
-        <Stats animeList={animeListData} isLoading={isLoading} />
+        <Stats animeList={animeListData} isLoading={() => {}} />
       )}
     </AppLayout>
   )

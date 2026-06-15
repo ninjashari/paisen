@@ -1,82 +1,38 @@
 import Loader from "@/components/loader"
-import Mal from "@/lib/mal"
+import { exchangeMalToken } from "@/utils/malClient"
 import { getQueryParams } from "@/utils/malService"
-import { getSession } from "next-auth/react"
 import { useRouter } from "next/router"
 import { useEffect } from "react"
+import { toast } from "sonner"
 
-export default function Home() {
+export default function OAuthCallback() {
   const router = useRouter()
-  const contentType = "application/json"
 
   useEffect(() => {
-    // Store code to DB
-    updateUserCodeAndToken()
-  }, [])
+    if (!router.isReady) return
+    handleCallback()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady])
 
-  const updateUserCodeAndToken = async () => {
+  const handleCallback = async () => {
     try {
-      // Get MAL client ID
-      const res = await fetch("/api/mal/clientid")
-      if (res.ok) {
-        const resp = await res.json()
-        if (resp && resp.data && resp.data.clientId) {
-          const clientID = resp.data.clientId
+      const queryParams = getQueryParams(router.asPath.toString())
+      const code = queryParams.code
 
-          // Fetch user data
-          const session = await getSession()
-
-          const userResponse = await fetch("/api/user/" + session.user.username)
-
-          const userRes = await userResponse.json()
-          const currentUserData = userRes.userData
-          const queryParams = getQueryParams(router.asPath.toString())
-          const queryCode = queryParams.code
-
-          // Create MAL service object
-          const mal = new Mal(clientID)
-          if (queryCode && currentUserData) {
-            const response = await mal.generateAccessToken(
-              queryCode,
-              currentUserData.codeChallenge
-            )
-
-            if (response) {
-              // Create user data to be updated
-              const updateUserData = {
-                username: session.user.username,
-                code: queryCode,
-                tokenType: response.token_type,
-                refreshToken: response.refresh_token,
-                expiryTime: response.expires_in,
-                accessToken: response.access_token,
-              }
-
-              // Update user data
-              const updateResponse = await fetch("/api/user/update", {
-                method: "PUT",
-                headers: {
-                  Accept: contentType,
-                  "Content-Type": contentType,
-                },
-                body: JSON.stringify(updateUserData),
-              })
-
-              if (updateResponse.ok) {
-                router.replace("/")
-              } else {
-                alert("Couldn't update user data with token info")
-              }
-            } else {
-              alert("Couldn't generate access token")
-            }
-          } else {
-            alert("Couldn't get queryCode")
-          }
-        }
+      if (!code) {
+        toast.error("Missing authorization code from MyAnimeList.")
+        router.replace("/")
+        return
       }
+
+      await exchangeMalToken(code)
+      toast.success("MyAnimeList account authorized.")
+      // Hard redirect so the session cookie is re-fetched and picks up the new malAccessToken.
+      window.location.href = "/animelist/current"
     } catch (err) {
-      alert(err)
+      console.error("OAuth token exchange failed:", err)
+      toast.error(err.message || "Authorization failed. Please try again.")
+      router.replace("/")
     }
   }
 

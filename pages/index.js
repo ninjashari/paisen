@@ -4,12 +4,13 @@ import ThemeToggle from "@/components/theme-toggle"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { useSession } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react"
 import Link from "next/link"
 import {
   ArrowRight,
   BarChart3,
   ListVideo,
+  LogOut,
   RefreshCw,
   Search,
   ShieldCheck,
@@ -55,9 +56,16 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             {session ? (
-              <Button asChild>
-                <Link href="/animelist/current">Open app</Link>
-              </Button>
+              <>
+                <Button asChild>
+                  <Link href={session.malAccessToken ? "/animelist/current" : "/authorise"}>
+                    {session.malAccessToken ? "Open app" : "Link MAL account"}
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="icon" aria-label="Sign out" onClick={() => signOut({ callbackUrl: "/" })}>
+                  <LogOut className="size-4" />
+                </Button>
+              </>
             ) : (
               <>
                 <Button variant="ghost" asChild>
@@ -89,8 +97,8 @@ export default function Home() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             {session ? (
               <Button asChild size="lg" className="glow-primary">
-                <Link href="/animelist/current">
-                  Go to your list
+                <Link href={session.malAccessToken ? "/animelist/current" : "/authorise"}>
+                  {session.malAccessToken ? "Go to your list" : "Link MAL account"}
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
