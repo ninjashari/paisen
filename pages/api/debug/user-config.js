@@ -50,13 +50,6 @@ export default async function handler(req, res) {
     const tokenExpiresIn = user.expiryTime ? Math.max(0, user.expiryTime - currentTime) : null
     const tokenExpiresInHours = tokenExpiresIn ? Math.floor(tokenExpiresIn / (1000 * 60 * 60)) : null
 
-    // Check Jellyfin configuration
-    const jellyfinConfigured = !!(
-      user.jellyfinServerUrl && 
-      user.jellyfinApiKey && 
-      user.jellyfinUserId
-    )
-
     res.status(200).json({
       success: true,
       data: {
@@ -77,19 +70,6 @@ export default async function handler(req, res) {
           expiresInMs: tokenExpiresIn,
           expiresInHours: tokenExpiresInHours,
           accessTokenPreview: user.accessToken ? `${user.accessToken.substring(0, 10)}...` : null
-        },
-        jellyfin: {
-          isConfigured: jellyfinConfigured,
-          hasServerUrl: !!user.jellyfinServerUrl,
-          hasApiKey: !!user.jellyfinApiKey,
-          hasUserId: !!user.jellyfinUserId,
-          hasUsername: !!user.jellyfinUsername,
-          syncEnabled: user.jellyfinSyncEnabled,
-          lastSync: user.jellyfinLastSync,
-          serverUrlPreview: user.jellyfinServerUrl ? `${user.jellyfinServerUrl.substring(0, 20)}...` : null,
-          apiKeyPreview: user.jellyfinApiKey ? `${user.jellyfinApiKey.substring(0, 10)}...` : null,
-          userId: user.jellyfinUserId,
-          username: user.jellyfinUsername
         },
         syncMetadata: {
           lastAnimeSync: user.syncMetadata?.lastAnimeSync,
