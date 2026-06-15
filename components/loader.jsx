@@ -1,19 +1,9 @@
-import React from "react"
+import { Loader2 } from "lucide-react"
 
 const Loader = () => {
   return (
-    <div className="container">
-      <section className="section register d-flex flex-column align-items-center justify-content-center mt-10r">
-        <div className="container">
-          <div className="row justify-content-center">
-            <div className="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+    <div className="flex w-full items-center justify-center py-24">
+      <Loader2 className="text-primary size-8 animate-spin" />
     </div>
   )
 }

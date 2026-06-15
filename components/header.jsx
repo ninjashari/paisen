@@ -1,34 +1,43 @@
-import { useRouter } from "next/router"
+import { Menu } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
 import Logo from "./logo"
 import Profilenav from "./profile-nav"
 import Searchbar from "./search-bar"
-import { useEffect, useState } from "react"
+import ThemeToggle from "./theme-toggle"
 
-const Header = ({ isLoading, malAccessToken, setSearchData }) => {
-  const router = useRouter()
-  const [showSearch, setShowSearch] = useState(false)
-
-  useEffect(() => {
-    if (router.asPath === "/search") {
-      setShowSearch(true)
-    } else {
-      setShowSearch(false)
-    }
-  }, [router.asPath])
+const Header = ({ onMenuClick, isLoading, malAccessToken, setSearchData }) => {
+  const showSearch = typeof setSearchData === "function"
 
   return (
-    <header id="header" className="header fixed-top d-flex align-items-center">
-      <Logo />
+    <header className="bg-background/80 sticky top-0 z-30 flex h-16 items-center gap-3 border-b px-4 backdrop-blur md:px-6">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="lg:hidden"
+        onClick={onMenuClick}
+        aria-label="Open menu"
+      >
+        <Menu className="size-5" />
+      </Button>
+
+      <div className="lg:hidden">
+        <Logo />
+      </div>
+
       {showSearch ? (
-        <Searchbar
-          isLoading={isLoading}
-          malAccessToken={malAccessToken}
-          setSearchData={setSearchData}
-        />
+        <div className="flex-1">
+          <Searchbar
+            isLoading={isLoading}
+            malAccessToken={malAccessToken}
+            setSearchData={setSearchData}
+          />
+        </div>
       ) : (
-        ""
+        <div className="flex-1" />
       )}
 
+      <ThemeToggle />
       <Profilenav />
     </header>
   )

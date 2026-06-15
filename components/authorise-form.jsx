@@ -4,25 +4,36 @@ import { getSession } from "next-auth/react"
 import Link from "next/link"
 import pkceChallenge from "pkce-challenge"
 import { useState } from "react"
-import FormLogo from "./form-logo"
 import { useRouter } from "next/router"
+import { AlertTriangle } from "lucide-react"
+
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import FormShell from "./form-shell"
 
 const AuthoriseForm = () => {
   const router = useRouter()
 
   const [username, setUsername] = useState("")
-  const [formClass, setFormClass] = useState("row g-3 needs-validation")
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState("")
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setFormClass("row g-3 was-validated")
 
     const session = await getSession()
     if (session) {
       if (e.target.username.validity.valid) {
-        const pkce = pkceChallenge()
+        const pkce = await pkceChallenge()
         const userUpdateData = {
           username: session.user.username,
           malUsername: username,
@@ -30,14 +41,12 @@ const AuthoriseForm = () => {
         }
 
         const response = await updateUserData(userUpdateData)
-        // console.log(response)
         if (response) {
           const clientID = await getClientId()
           if (clientID) {
             const mal = new Mal(clientID)
 
             const url = mal.generateAuthorizeUrl(userUpdateData.codeChallenge)
-            // console.log(url)
 
             window.location.href = url
           } else {
@@ -57,101 +66,63 @@ const AuthoriseForm = () => {
     }
   }
 
-  const closeAlert = () => {
-    setShowAlert(false)
-  }
-
   return (
-    <main>
-      <div className="container">
-        <section className="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-          <div className="container">
-            <div className="row justify-content-center">
-              <div className="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-                <FormLogo />
+    <FormShell>
+      <Card className="glow-primary">
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl">Authorize MyAnimeList</CardTitle>
+          <CardDescription>
+            Enter your MyAnimeList username to authorize
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {showAlert && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTriangle />
+              <AlertDescription>{alertMessage}</AlertDescription>
+            </Alert>
+          )}
 
-                {showAlert ? (
-                  <div
-                    className="alert alert-warning alert-dismissible fade show"
-                    role="alert"
-                  >
-                    <i className="bi bi-exclamation-triangle me-1"></i>
-                    {alertMessage}
-                    <button
-                      type="button"
-                      className="btn-close"
-                      data-bs-dismiss="alert"
-                      aria-label="Close"
-                      onClick={closeAlert}
-                    ></button>
-                  </div>
-                ) : (
-                  ""
-                )}
-
-                <div className="card mb-3">
-                  <div className="card-body">
-                    <div className="pt-4 pb-2">
-                      <h5 className="card-title text-center pb-0 fs-4">
-                        Authorize myanimelist
-                      </h5>
-                      <p className="text-center small">
-                        Enter your myanimelist username to authorize
-                      </p>
-                    </div>
-
-                    <form
-                      className={formClass}
-                      noValidate
-                      onSubmit={handleSubmit}
-                    >
-                      <div className="col-12">
-                        <label className="form-label">Username</label>
-                        <div className="input-group has-validation">
-                          <span
-                            className="input-group-text"
-                            id="inputGroupPrepend"
-                          >
-                            @
-                          </span>
-                          <input
-                            type="text"
-                            name="username"
-                            className="form-control"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            pattern="^[A-Za-z][A-Za-z0-9_-]{1,15}$"
-                            required
-                          />
-                          <div className="invalid-feedback">
-                            Please enter your myanimelist username (not the
-                            email id).
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="col-12">
-                        <button className="btn btn-primary w-100" type="submit">
-                          Authorize
-                        </button>
-                      </div>
-                      <div className="col-12">
-                        <p className="small mb-0">
-                          Don't have MAL account?{" "}
-                          <Link href="https://myanimelist.net/register.php">
-                            Create MAL account
-                          </Link>
-                        </p>
-                      </div>
-                    </form>
-                  </div>
-                </div>
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <div className="grid gap-2">
+              <Label htmlFor="username">Username</Label>
+              <div className="flex items-stretch">
+                <span className="border-input bg-muted text-muted-foreground inline-flex items-center rounded-l-md border border-r-0 px-3 text-sm">
+                  @
+                </span>
+                <Input
+                  id="username"
+                  type="text"
+                  name="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  pattern="^[A-Za-z][A-Za-z0-9_-]{1,15}$"
+                  required
+                  className="rounded-l-none"
+                />
               </div>
+              <p className="text-muted-foreground text-xs">
+                Enter your MyAnimeList username (not the email id).
+              </p>
             </div>
-          </div>
-        </section>
-      </div>
-    </main>
+
+            <Button type="submit" className="w-full">
+              Authorize
+            </Button>
+
+            <p className="text-muted-foreground text-sm">
+              Don&apos;t have MAL account?{" "}
+              <Link
+                href="https://myanimelist.net/register.php"
+                className="text-primary font-medium hover:underline"
+              >
+                Create MAL account
+              </Link>
+            </p>
+          </form>
+        </CardContent>
+      </Card>
+    </FormShell>
   )
 }
 

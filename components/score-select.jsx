@@ -2,6 +2,8 @@ import MalApi from "@/lib/malApi"
 import { scoreList } from "@/utils/constants"
 import { useEffect, useState } from "react"
 
+import { cn } from "@/lib/utils"
+
 const ScoreSelect = ({ selectedVal, animeID, malAccessToken }) => {
   const [selectedScore, setSelectedScore] = useState()
 
@@ -35,10 +37,12 @@ const ScoreSelect = ({ selectedVal, animeID, malAccessToken }) => {
 
   return (
     <select
-      className="form-select"
-      aria-label="Default select example"
+      aria-label="Score"
       value={selectedScore}
       onChange={handleSelectedChange}
+      className={cn(
+        "border-input bg-background dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full min-w-16 rounded-md border px-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:ring-[3px]"
+      )}
     >
       {scoreList.map((score) => (
         <option key={score.score} value={score.score}>
