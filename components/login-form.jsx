@@ -3,6 +3,7 @@ import { useRouter } from "next/router"
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { AlertTriangle } from "lucide-react"
+import { hashClientPassword } from "@/utils/clientCrypto"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -29,10 +30,12 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    const hashedPassword = await hashClientPassword(password)
+
     await signIn("credentials", {
       redirect: false,
       username,
-      password,
+      password: hashedPassword,
     })
       .then((res) => {
         if (!res.ok) {

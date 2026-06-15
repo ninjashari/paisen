@@ -1,10 +1,11 @@
-import MalApi from "@/lib/malApi"
+import { updateAnime } from "@/utils/malClient"
 import { scoreList } from "@/utils/constants"
+import { toast } from "sonner"
 import { useEffect, useState } from "react"
 
 import { cn } from "@/lib/utils"
 
-const ScoreSelect = ({ selectedVal, animeID, malAccessToken }) => {
+const ScoreSelect = ({ selectedVal, animeID }) => {
   const [selectedScore, setSelectedScore] = useState()
 
   useEffect(() => {
@@ -19,19 +20,11 @@ const ScoreSelect = ({ selectedVal, animeID, malAccessToken }) => {
     setSelectedScore(scoreVal)
 
     // Call MAL api to update
-    const fieldsToUpdate = {
-      score: scoreVal,
-    }
-    if (malAccessToken) {
-      const malApi = new MalApi(malAccessToken)
-
-      const res = await malApi.updateList(animeID, fieldsToUpdate)
-
-      if (200 !== res.status) {
-        alert("Couldn't update animelist with score")
-      }
-    } else {
-      alert("Couldn't fetch access token from parent")
+    try {
+      await updateAnime(animeID, { score: scoreVal })
+    } catch (err) {
+      console.error("Failed to update score:", err)
+      toast.error(err.message || "Couldn't update score")
     }
   }
 
@@ -41,7 +34,7 @@ const ScoreSelect = ({ selectedVal, animeID, malAccessToken }) => {
       value={selectedScore}
       onChange={handleSelectedChange}
       className={cn(
-        "border-input bg-background dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full min-w-16 rounded-md border px-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:ring-[3px]"
+        "border-input bg-background dark:bg-input/30 dark:[color-scheme:dark] focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full min-w-16 rounded-md border px-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:ring-[3px]"
       )}
     >
       {scoreList.map((score) => (

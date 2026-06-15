@@ -2,6 +2,7 @@ import "@/css/globals.css"
 import { SessionProvider } from "next-auth/react"
 import { ThemeProvider } from "next-themes"
 import { Inter, Sora } from "next/font/google"
+import Toaster from "@/components/toaster"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function App({
           className={`${inter.variable} ${display.variable} font-sans min-h-screen bg-background text-foreground antialiased`}
         >
           <Component {...pageProps} />
+          <Toaster />
         </div>
       </ThemeProvider>
     </SessionProvider>

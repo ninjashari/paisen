@@ -1,35 +1,5 @@
 const contentType = "application/json"
 
-export const getUserAccessToken = async (session) => {
-  if (session) {
-    const userResponse = await fetch("/api/user/" + session?.user?.username)
-    const userRes = await userResponse.json()
-    const currentUserData = userRes.userData
-    return currentUserData.accessToken
-  }
-  return undefined
-}
-
-export const getUserRefreshToken = async (session) => {
-  if (session) {
-    const userResponse = await fetch("/api/user/" + session?.user?.username)
-    const userRes = await userResponse.json()
-    const currentUserData = userRes.userData
-    return currentUserData.refreshToken
-  }
-  return undefined
-}
-
-export const getUserData = async (session) => {
-  if (session) {
-    const userResponse = await fetch("/api/user/" + session?.user?.username)
-    const userRes = await userResponse.json()
-    const currentUserData = userRes.userData
-    return currentUserData
-  }
-  return undefined
-}
-
 export const getClientId = async () => {
   const res = await fetch("/api/mal/clientid")
   if (res.ok) {

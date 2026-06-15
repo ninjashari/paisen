@@ -1,54 +1,49 @@
 import SearchTable from "@/components/animelist-search-table"
 import AppLayout from "@/components/app-layout"
+import ErrorState from "@/components/error-state"
 import Loader from "@/components/loader"
-import { getUserAccessToken } from "@/utils/userService"
-import { getSession } from "next-auth/react"
-import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { Search as SearchIcon } from "lucide-react"
+import { useState } from "react"
 
 function Search() {
-  const router = useRouter()
-  const [loading, isLoading] = useState(true)
-  const [malAccessToken, setMalAccessToken] = useState()
+  const [loading, setLoading] = useState(false)
   const [searchData, setSearchData] = useState([])
+  const [error, setError] = useState(null)
+  const [hasSearched, setHasSearched] = useState(false)
 
-  useEffect(() => {
-    getAccessToken()
-  }, [])
-
-  const getAccessToken = async () => {
-    const session = await getSession()
-    if (session) {
-      const accessToken = await getUserAccessToken(session)
-      if (accessToken) {
-        setMalAccessToken(accessToken)
-        isLoading(false)
-      } else {
-        alert("Couldn't retrieve access token from user. Authorise MAL user")
-      }
-    } else {
-      router.replace("/")
-    }
+  const handleLoading = (value) => {
+    setLoading(value)
+    if (value) setHasSearched(true)
   }
 
   return (
     <AppLayout
       title="Search"
       breadcrumb={{ firstPage: "Search", title: "Search" }}
-      search={{ isLoading, malAccessToken, setSearchData }}
+      search={{
+        isLoading: handleLoading,
+        setSearchData,
+        onError: setError,
+      }}
     >
       {loading ? (
         <Loader />
+      ) : error ? (
+        <ErrorState message={error} onRetry={() => setError(null)} />
       ) : searchData.length > 0 ? (
         <SearchTable
           key={searchData.map((d) => d.id).join("_")}
           searchData={searchData}
-          malAccessToken={malAccessToken}
         />
       ) : (
-        <p className="text-muted-foreground">
-          Use the search bar above to find anime and add them to your list.
-        </p>
+        <div className="text-muted-foreground flex flex-col items-center gap-3 py-20 text-center">
+          <SearchIcon className="size-8 opacity-60" />
+          <p>
+            {hasSearched
+              ? "No results found. Try a different search."
+              : "Use the search bar above to find anime and add them to your list."}
+          </p>
+        </div>
       )}
     </AppLayout>
   )
