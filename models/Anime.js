@@ -93,7 +93,7 @@ const UserListStatusSchema = new mongoose.Schema({
 
 // Minimal Anime schema - storing only essential fields for our website functionality
 const AnimeSchema = new mongoose.Schema({
-  // MAL ID (primary identifier, optional for Jellyfin-only entries)
+  // MAL ID (primary identifier)
   malId: {
     type: Number,
     required: false,

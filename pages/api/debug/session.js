@@ -46,8 +46,7 @@ export default async function handler(req, res) {
       userFound: !!user,
       userDetails: user ? {
         username: user.username,
-        name: user.name,
-        hasJellyfinConfig: !!(user.jellyfinServerUrl && user.jellyfinApiKey)
+        name: user.name
       } : null,
       allUsers: allUsers.map(u => ({
         username: u.username,

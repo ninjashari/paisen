@@ -16,9 +16,9 @@ const Layout = ({ titleName, children }) => {
   return (
     <>
       <Head>
-        <title>{titleName || "Paisen - MyAnimeList & Jellyfin Integration"}</title>
+        <title>{titleName || "Paisen - MyAnimeList Tracker"}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="Sync your MyAnimeList with Jellyfin media server" />
+        <meta name="description" content="Track and manage your MyAnimeList" />
       </Head>
       {children}
     </>
