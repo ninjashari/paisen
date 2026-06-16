@@ -1,42 +1,35 @@
-import Table from "@/components/animelist-table"
-import AppLayout from "@/components/app-layout"
+import AnimeListSkeleton from "@/components/anime-list-skeleton"
+import AnimeListView from "@/components/anime-list-view"
+import AppShell from "@/components/app-shell"
 import ErrorState from "@/components/error-state"
-import Loader from "@/components/loader"
 import { userListStatus } from "@/utils/constants"
 import { fetchAnimeList } from "@/utils/malClient"
 import { getURILastValue } from "@/utils/uriService"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
-export default function Animelist() {
+export default function AnimeListPage() {
   const router = useRouter()
 
-  const [animeListData, setAnimeListData] = useState([])
+  const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [pageTitle, setPageTitle] = useState()
+  const [meta, setMeta] = useState({ pageTitle: "", apiValue: "" })
 
   const load = async () => {
     const pageValue = getURILastValue(router.asPath)
     if (!pageValue || !userListStatus[pageValue]) return
-
-    setPageTitle(userListStatus[pageValue].pageTitle)
+    const m = userListStatus[pageValue]
+    setMeta(m)
     setLoading(true)
     setError(null)
-
     try {
-      const data = await fetchAnimeList(userListStatus[pageValue].apiValue)
-      setAnimeListData(data)
+      const list = await fetchAnimeList(m.apiValue)
+      setData(list)
     } catch (err) {
       console.error("Failed to load anime list:", err)
-      if (err.message === "Authentication required") {
-        router.replace("/")
-        return
-      }
-      if (err.message.startsWith("Authorize")) {
-        router.replace("/authorise")
-        return
-      }
+      if (err.message === "Authentication required") return router.replace("/")
+      if (err.message.startsWith("Authorize")) return router.replace("/authorise")
       setError(err.message)
     } finally {
       setLoading(false)
@@ -49,21 +42,14 @@ export default function Animelist() {
   }, [router.isReady, router.asPath])
 
   return (
-    <AppLayout
-      title={pageTitle}
-      breadcrumb={{
-        firstPage: "Anime List",
-        title: pageTitle,
-        secondPage: pageTitle,
-      }}
-    >
+    <AppShell title={meta.pageTitle} subtitle="Your MyAnimeList, synced.">
       {loading ? (
-        <Loader />
+        <AnimeListSkeleton />
       ) : error ? (
         <ErrorState message={error} onRetry={load} />
       ) : (
-        <Table animeList={animeListData} />
+        <AnimeListView animeList={data} />
       )}
-    </AppLayout>
+    </AppShell>
   )
 }
