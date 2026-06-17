@@ -6,10 +6,16 @@ import { userListStatus } from "@/utils/constants"
 import { fetchAnimeList } from "@/utils/malClient"
 import { getURILastValue } from "@/utils/uriService"
 import { useRouter } from "next/router"
+import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 
 export default function AnimeListPage() {
   const router = useRouter()
+  const { setTheme } = useTheme()
+
+  useEffect(() => {
+    setTheme("dark")
+  }, [setTheme])
 
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)

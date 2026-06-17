@@ -17,7 +17,7 @@ const AppShell = ({ title, subtitle, actions, children }) => {
         {/* ambient backdrop */}
         <div className="bg-mesh pointer-events-none fixed inset-0 -z-10 opacity-60" />
         <TopNav />
-        <main className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6">
+        <main className="mx-auto w-full max-w-[100rem] px-4 py-8 md:px-6">
           {(title || actions) && (
             <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
               <div>

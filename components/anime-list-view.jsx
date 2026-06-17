@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/router"
 import { toast } from "sonner"
 import { ArrowDown, ArrowUp, LayoutGrid, Rows3, Tv } from "lucide-react"
 
@@ -41,8 +42,9 @@ const airingDot = {
  * Props: animeList (raw MAL list with { node }).
  */
 const AnimeListView = ({ animeList }) => {
+  const router = useRouter()
   const [items, setItems] = useState([])
-  const [view, setView] = useState("grid")
+  const [view, setView] = useState("table")
   const [sort, setSort] = useState({ key: null, dir: "asc" })
 
   useEffect(() => {
@@ -50,9 +52,15 @@ const AnimeListView = ({ animeList }) => {
   }, [animeList])
 
   useEffect(() => {
+    // an explicit ?view= in the URL wins over the saved preference
+    const queryView = router.query.view
+    if (queryView === "grid" || queryView === "table") {
+      setView(queryView)
+      return
+    }
     const saved = typeof window !== "undefined" && localStorage.getItem(VIEW_KEY)
     if (saved === "grid" || saved === "table") setView(saved)
-  }, [])
+  }, [router.query.view])
 
   const setViewMode = (v) => {
     setView(v)
@@ -206,21 +214,21 @@ const AnimeListView = ({ animeList }) => {
       ) : (
         <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <Table>
+            <Table className="w-full table-fixed">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12" />
                   <TableHead className="cursor-pointer select-none" onClick={() => requestSort("title")}>
                     Title <SortIcon col="title" />
                   </TableHead>
-                  <TableHead className="min-w-56">Progress</TableHead>
-                  <TableHead className="cursor-pointer select-none" onClick={() => requestSort("score")}>
+                  <TableHead className="w-72">Progress</TableHead>
+                  <TableHead className="w-44 cursor-pointer select-none" onClick={() => requestSort("score")}>
                     Score <SortIcon col="score" />
                   </TableHead>
-                  <TableHead className="cursor-pointer select-none text-center" onClick={() => requestSort("season")}>
+                  <TableHead className="w-28 cursor-pointer select-none text-center" onClick={() => requestSort("season")}>
                     Season <SortIcon col="season" />
                   </TableHead>
-                  <TableHead className="min-w-40">Status</TableHead>
+                  <TableHead className="w-56">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -233,7 +241,7 @@ const AnimeListView = ({ animeList }) => {
                         className="aspect-[2/3] w-10 rounded-md"
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-normal">
                       <div className="font-medium">{anime.title}</div>
                       <div className="text-muted-foreground mt-0.5 flex items-center gap-1.5 text-xs">
                         <span className={cn("size-1.5 rounded-full", airingDot[anime.status?.color] || "bg-muted-foreground")} />

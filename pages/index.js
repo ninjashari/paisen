@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { signOut, useSession } from "next-auth/react"
+import { useTheme } from "next-themes"
+import { useEffect } from "react"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -23,29 +25,38 @@ const features = [
     title: "Track your progress",
     description:
       "Update episodes watched, scores, and status in a couple of clicks.",
+    href: "/animelist/current?view=grid",
   },
   {
     icon: Search,
     title: "Search & add instantly",
     description:
       "Find any anime and add it to your list without leaving the dashboard.",
+    href: "/search",
   },
   {
     icon: BarChart3,
     title: "Insightful statistics",
     description:
       "See time watched, episode counts, mean score, and score distribution.",
+    href: "/statistics",
   },
   {
     icon: RefreshCw,
     title: "Synced with MyAnimeList",
     description:
       "Securely authorize your MAL account — changes sync straight to MAL.",
+    href: "/animelist/current",
   },
 ]
 
 export default function Home() {
   const { data: session } = useSession()
+  const { setTheme } = useTheme()
+
+  useEffect(() => {
+    setTheme("light")
+  }, [setTheme])
   const appHref = session?.malAccessToken ? "/animelist/current" : "/authorise"
   const appLabel = session?.malAccessToken ? "Open app" : "Link MAL account"
 
@@ -144,27 +155,30 @@ export default function Home() {
         </section>
 
         {/* Features */}
-        <section className="mx-auto w-full max-w-6xl px-4 pb-24 md:px-8">
+        <section className="mx-auto w-full max-w-6xl px-4 pb-24 pt-8 md:px-8">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => {
               const Icon = feature.icon
               return (
-                <Card
+                <Link
                   key={feature.title}
-                  className="hover:glow-sm h-full rounded-2xl transition-shadow"
+                  href={feature.href}
+                  className="rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <CardContent className="flex flex-col gap-3">
-                    <div className="bg-brand glow-sm flex size-11 items-center justify-center rounded-xl text-white">
-                      <Icon className="size-5" />
-                    </div>
-                    <h3 className="font-display font-semibold">
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
+                  <Card className="hover:glow-sm h-full rounded-2xl transition-shadow">
+                    <CardContent className="flex flex-col gap-3">
+                      <div className="bg-brand glow-sm flex size-11 items-center justify-center rounded-xl text-white">
+                        <Icon className="size-5" />
+                      </div>
+                      <h3 className="font-display font-semibold">
+                        {feature.title}
+                      </h3>
+                      <p className="text-muted-foreground text-sm">
+                        {feature.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
               )
             })}
           </div>
