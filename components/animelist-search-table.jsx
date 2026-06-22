@@ -1,138 +1,99 @@
 import Anime from "@/lib/anime"
 import { updateAnime } from "@/utils/malClient"
-import { userStatusList, userStatusReverseMap } from "@/utils/constants"
+import { userStatusReverseMap } from "@/utils/constants"
 import { toast } from "sonner"
 import { useEffect, useState } from "react"
+import { Star } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Card } from "@/components/ui/card"
+import AnimePoster from "@/components/anime-poster"
+import StatusSelect from "@/components/status-select"
 
-const nativeSelect =
-  "border-input bg-background dark:bg-input/30 dark:[color-scheme:dark] focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full min-w-36 rounded-md border px-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:ring-[3px]"
-
-const SearchTable = ({ searchData }) => {
-  const [currentSearchData, setCurrentSearchData] = useState([])
+/**
+ * Redesigned search results — a responsive poster grid. Each card lets the user
+ * set/change the watch status, persisting to MAL.
+ * Props: searchData (raw MAL nodes).
+ */
+const SearchResults = ({ searchData }) => {
+  const [items, setItems] = useState([])
+  // Tracks the current api-value status per anime id (incl. "not_added").
+  const [statuses, setStatuses] = useState({})
 
   useEffect(() => {
-    getAnimeSearchData()
+    const objs = searchData.map((node) => new Anime(node))
+    setItems(objs)
+    const initial = {}
+    objs.forEach((a) => {
+      initial[a.id] = userStatusReverseMap[a.userStatus] || "not_added"
+    })
+    setStatuses(initial)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const getAnimeSearchData = () => {
-    let tempData = []
-    searchData.forEach((searchItem) => {
-      const animeObj = new Anime(searchItem)
-      tempData.push(animeObj)
-    })
-    setCurrentSearchData(tempData)
-  }
-
-  const handleStatusChange = async (e) => {
-    e.preventDefault()
-
-    // Get target status
-    const targetStatus = e.target.value
-    // Get anime id
-    const animeId = e.target.id
-
-    await changeCurrentUserStatus(animeId, targetStatus)
-  }
-
-  const changeCurrentUserStatus = async (animeId, targetStatus) => {
-    // Change status of anime in local list
-    let newList = []
-    currentSearchData.forEach((dataObj) => {
-      if (parseInt(dataObj.id) === parseInt(animeId)) {
-        dataObj.setUserStatus(targetStatus)
-      }
-      newList.push(dataObj)
-    })
-    setCurrentSearchData(newList)
-
-    // Update in MAL DB using API call
+  const onStatus = async (animeId, status) => {
+    const prev = statuses[animeId]
+    setStatuses((s) => ({ ...s, [animeId]: status }))
     try {
-      await updateAnime(animeId, { status: targetStatus })
-      toast.success("Anime list updated")
+      await updateAnime(animeId, { status })
+      toast.success("Added to your list")
     } catch (err) {
       console.error("Failed to update status:", err)
       toast.error(err.message || "Couldn't update anime list")
+      setStatuses((s) => ({ ...s, [animeId]: prev }))
     }
   }
 
   return (
-    <Card>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Anime Title</TableHead>
-              <TableHead className="text-center">Type</TableHead>
-              <TableHead className="text-center">Episodes</TableHead>
-              <TableHead className="text-center">Score</TableHead>
-              <TableHead className="text-center">Season</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead>Change Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {currentSearchData?.map((searchItem) => (
-              <TableRow key={searchItem.id}>
-                <TableCell className="font-medium whitespace-normal">
-                  {searchItem.title}
-                </TableCell>
-                <TableCell className="text-center">
-                  {searchItem.mediaType}
-                </TableCell>
-                <TableCell className="text-center tabular-nums">
-                  {searchItem.totalEpisodes}
-                </TableCell>
-                <TableCell className="text-center tabular-nums">
-                  {searchItem.meanScore}
-                </TableCell>
-                <TableCell className="text-center whitespace-nowrap">
-                  {searchItem.startSeason + " " + searchItem.startSeasonYear}
-                </TableCell>
-                <TableCell className="text-center">
-                  <Badge variant={searchItem.userStatus ? "secondary" : "outline"}>
-                    {searchItem.userStatus ? searchItem.userStatus : "Not Added"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <select
-                    className={nativeSelect}
-                    id={searchItem.id}
-                    value={
-                      userStatusReverseMap[searchItem.userStatus]
-                        ? userStatusReverseMap[searchItem.userStatus]
-                        : "not_added"
-                    }
-                    onChange={handleStatusChange}
-                  >
-                    <option value="not_added">Not Added</option>
-                    {userStatusList.map((userStatus) => (
-                      <option
-                        key={userStatus.apiValue}
-                        value={userStatus.apiValue}
-                      >
-                        {userStatus.pageTitle}
-                      </option>
-                    ))}
-                  </select>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4">
+      {items.map((anime) => (
+        <Card
+          key={anime.id}
+          className="group hover:ring-primary/40 gap-0 overflow-hidden p-0 py-0 transition-all hover:-translate-y-1 hover:shadow-lg hover:ring-1"
+        >
+          <div className="relative aspect-[2/3] w-full overflow-hidden">
+            <AnimePoster
+              src={anime.imageUrl}
+              alt={anime.title}
+              className="size-full transition-transform duration-300 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+
+            <div className="absolute inset-x-0 top-0 flex items-center justify-between p-2">
+              <Badge className="bg-black/55 border-0 text-[10px] text-white backdrop-blur">
+                {anime.mediaType}
+              </Badge>
+            </div>
+
+            <div className="absolute inset-x-0 bottom-0 p-3">
+              <h3 className="line-clamp-2 text-sm font-semibold text-white">
+                {anime.title}
+              </h3>
+              <div className="mt-1 flex items-center gap-2 text-[11px] text-white/80">
+                <span>
+                  {anime.startSeason} {anime.startSeasonYear}
+                </span>
+                {anime.meanScore ? (
+                  <span className="flex items-center gap-0.5">
+                    <Star className="text-warning size-3" />
+                    {anime.meanScore}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          <div className="p-3">
+            <StatusSelect
+              value={statuses[anime.id] || "not_added"}
+              onValueChange={(s) => onStatus(anime.id, s)}
+              includeNotAdded
+            />
+          </div>
+        </Card>
+      ))}
+    </div>
   )
 }
 
-export default SearchTable
+export default SearchResults

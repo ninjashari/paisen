@@ -8,24 +8,57 @@ import {
 } from "@/utils/malService"
 import dynamic from "next/dynamic"
 import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+import { useMemo } from "react"
+import { Clock, Film, Hourglass, Star, Tv } from "lucide-react"
 
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false })
 
-const Stats = ({ animeList, isLoading }) => {
+const Stats = ({ animeList }) => {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === "dark"
 
-  // Bar Chart Variables
-  const [series, setSeries] = useState([])
+  const { metrics, series } = useMemo(() => {
+    // Convert animeList to node list
+    const dataList = getStatsAnimeObj(animeList)
+
+    // Score distribution
+    const tempArr = []
+    dataList.forEach((anime) => {
+      if (anime.userScore > 0 && anime.userScore <= 10) {
+        tempArr.push(anime.userScore)
+      }
+    })
+    const scoreData = createDataArray(tempArr)
+
+    // Episode count
+    let episodeCount = 0
+    dataList.forEach((data) => {
+      episodeCount += data.totalEpisodes
+    })
+
+    // Durations
+    const timeSpent = convertToDaysHrsMins(getTotalDuration(dataList))
+    const timeToSpend = convertToDaysHrsMins(getRemainingDuration(dataList))
+
+    return {
+      series: [{ name: "number", data: scoreData }],
+      metrics: {
+        animeCount: dataList.length,
+        episodeCount,
+        timeSpent,
+        timeToSpend,
+        userMeanScore: calculateMeanScore(dataList),
+      },
+    }
+  }, [animeList])
+
   const chartData = {
     chart: {
       type: "bar",
@@ -53,110 +86,49 @@ const Stats = ({ animeList, isLoading }) => {
     },
   }
 
-  // Anime List Data Variables
-  const [animeCount, setAnimeCount] = useState()
-  const [episodeCount, setEpisodeCount] = useState()
-  const [timeSpent, setTImeSpent] = useState()
-  const [timeToSpend, setTimeToSpend] = useState()
-  const [userMeanScore, setUserMeanScore] = useState()
-
-  useEffect(() => {
-    isLoading(true)
-
-    // Convert animeList to node list
-    let dataList = getStatsAnimeObj(animeList)
-
-    // Bar chart
-    let tempArr = []
-    dataList.forEach((anime) => {
-      if (anime.userScore > 0 && anime.userScore <= 10) {
-        tempArr.push(anime.userScore)
-      }
-    })
-    let scoreData = createDataArray(tempArr)
-    setSeries([
-      {
-        name: "number",
-        data: scoreData,
-      },
-    ])
-
-    // Set anime count
-    setAnimeCount(dataList.length)
-
-    // Set episode count
-    let count = 0
-    dataList.forEach((data) => {
-      count += data.totalEpisodes
-    })
-    setEpisodeCount(count)
-
-    // Set watched episodes duration
-    let totalDuration = getTotalDuration(dataList)
-    let formattedTotalDuration = convertToDaysHrsMins(totalDuration)
-    setTImeSpent(formattedTotalDuration)
-
-    // Set Time to watch remaining episodes
-    let remainingDuration = getRemainingDuration(dataList)
-    let formattedRemDuration = convertToDaysHrsMins(remainingDuration)
-    setTimeToSpend(formattedRemDuration)
-
-    // Set Mean Score
-    setUserMeanScore(calculateMeanScore(dataList))
-
-    isLoading(false)
-  }, [])
-
-  const summaryRows = [
-    { label: "Anime count", value: animeCount },
-    { label: "Episode count", value: episodeCount },
-    { label: "Time spent watching", value: timeSpent },
-    { label: "Time to complete", value: timeToSpend },
-    { label: "Mean score", value: userMeanScore },
+  const statCards = [
+    { label: "Anime count", value: metrics.animeCount, icon: Film },
+    { label: "Episode count", value: metrics.episodeCount, icon: Tv },
+    { label: "Time spent watching", value: metrics.timeSpent, icon: Clock },
+    { label: "Time to complete", value: metrics.timeToSpend, icon: Hourglass },
+    { label: "Mean score", value: metrics.userMeanScore, icon: Star },
   ]
 
   return (
-    <Card className="max-w-3xl">
-      <CardHeader>
-        <CardTitle>Watchlist Statistics</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Accordion type="single" collapsible defaultValue="anime-list">
-          <AccordionItem value="anime-list">
-            <AccordionTrigger>Anime List</AccordionTrigger>
-            <AccordionContent>
-              <dl className="divide-border divide-y">
-                {summaryRows.map((row) => (
-                  <div
-                    key={row.label}
-                    className="flex items-center justify-between py-2.5"
-                  >
-                    <dt className="text-muted-foreground text-sm">
-                      {row.label}
-                    </dt>
-                    <dd className="text-sm font-medium tabular-nums">
-                      {row.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="score-distribution">
-            <AccordionTrigger>Score Distribution</AccordionTrigger>
-            <AccordionContent>
-              <Chart
-                options={chartData}
-                series={series}
-                type="bar"
-                width="100%"
-                height={350}
-              />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </CardContent>
-    </Card>
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        {statCards.map(({ label, value, icon: Icon }) => (
+          <Card key={label} className="transition-all hover:-translate-y-0.5 hover:shadow-lg">
+            <CardContent className="flex items-center gap-4">
+              <div className="bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-xl">
+                <Icon className="size-6" />
+              </div>
+              <div className="min-w-0">
+                <div className="font-display text-2xl font-bold tabular-nums">
+                  {value}
+                </div>
+                <div className="text-muted-foreground text-sm">{label}</div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-display">Score Distribution</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Chart
+            options={chartData}
+            series={series}
+            type="bar"
+            width="100%"
+            height={350}
+          />
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 

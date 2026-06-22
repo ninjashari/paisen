@@ -3,6 +3,8 @@ export const fields = {
   animeList: [
     "id",
     "title",
+    "main_picture",
+    "mean",
     "genres",
     "media_type",
     "status",

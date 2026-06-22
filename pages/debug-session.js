@@ -9,7 +9,7 @@
 import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
 import axios from "axios"
-import AppLayout from "@/components/app-layout"
+import AppShell from "@/components/app-shell"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 /**
@@ -53,10 +53,7 @@ function DebugSession() {
     "bg-muted text-muted-foreground overflow-x-auto rounded-md p-4 text-xs"
 
   return (
-    <AppLayout
-      title="Debug Session"
-      breadcrumb={{ title: "Debug Session" }}
-    >
+    <AppShell title="Debug Session">
       <div className="flex flex-col gap-4">
         <p className="text-muted-foreground text-sm">Status: {status}</p>
 
@@ -92,7 +89,7 @@ function DebugSession() {
           </Card>
         )}
       </div>
-    </AppLayout>
+    </AppShell>
   )
 }
 

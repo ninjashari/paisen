@@ -5,7 +5,7 @@ import Link from "next/link"
 import pkceChallenge from "pkce-challenge"
 import { useState } from "react"
 import { useRouter } from "next/router"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle, ExternalLink, ShieldCheck } from "lucide-react"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -68,11 +68,13 @@ const AuthoriseForm = () => {
 
   return (
     <FormShell>
-      <Card className="glow-primary">
+      <Card className="glow-primary glass border-border/60 rounded-2xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Authorize MyAnimeList</CardTitle>
+          <CardTitle className="font-display text-2xl">
+            Link MyAnimeList
+          </CardTitle>
           <CardDescription>
-            Enter your MyAnimeList username to authorize
+            Authorize your MAL account so changes sync both ways
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -85,9 +87,9 @@ const AuthoriseForm = () => {
 
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="grid gap-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">MyAnimeList username</Label>
               <div className="flex items-stretch">
-                <span className="border-input bg-muted text-muted-foreground inline-flex items-center rounded-l-md border border-r-0 px-3 text-sm">
+                <span className="border-input bg-muted text-muted-foreground inline-flex items-center rounded-l-xl border border-r-0 px-3 text-sm font-medium">
                   @
                 </span>
                 <Input
@@ -96,6 +98,7 @@ const AuthoriseForm = () => {
                   name="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  placeholder="yourname"
                   pattern="^[A-Za-z][A-Za-z0-9_-]{1,15}$"
                   required
                   className="rounded-l-none"
@@ -106,17 +109,19 @@ const AuthoriseForm = () => {
               </p>
             </div>
 
-            <Button type="submit" className="w-full">
+            <Button type="submit" variant="brand" className="glow-sm w-full">
+              <ShieldCheck className="size-4" />
               Authorize
             </Button>
 
-            <p className="text-muted-foreground text-sm">
-              Don&apos;t have MAL account?{" "}
+            <p className="text-muted-foreground text-center text-sm">
+              Don&apos;t have a MAL account?{" "}
               <Link
                 href="https://myanimelist.net/register.php"
-                className="text-primary font-medium hover:underline"
+                className="text-primary inline-flex items-center gap-1 font-medium hover:underline"
               >
-                Create MAL account
+                Create one
+                <ExternalLink className="size-3.5" />
               </Link>
             </p>
           </form>

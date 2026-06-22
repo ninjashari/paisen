@@ -1,13 +1,10 @@
-import AppLayout from "@/components/app-layout"
+import AppShell from "@/components/app-shell"
 import { Card, CardContent } from "@/components/ui/card"
 import { CalendarRange } from "lucide-react"
 
 function Seasons() {
   return (
-    <AppLayout
-      title="Seasons"
-      breadcrumb={{ firstPage: "Seasons", title: "Seasons" }}
-    >
+    <AppShell title="Seasons" subtitle="Browse anime by season.">
       <Card>
         <CardContent className="flex flex-col items-center justify-center gap-3 py-16 text-center">
           <div className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full">
@@ -19,7 +16,7 @@ function Seasons() {
           </p>
         </CardContent>
       </Card>
-    </AppLayout>
+    </AppShell>
   )
 }
 

@@ -2,7 +2,7 @@ import Link from "next/link"
 import { useRouter } from "next/router"
 import { useState } from "react"
 import { signIn } from "next-auth/react"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle, Lock, LogIn, User } from "lucide-react"
 import { hashClientPassword } from "@/utils/clientCrypto"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -59,11 +59,13 @@ const LoginForm = () => {
 
   return (
     <FormShell>
-      <Card className="glow-primary">
+      <Card className="glow-primary glass border-border/60 rounded-2xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Login to Your Account</CardTitle>
+          <CardTitle className="font-display text-2xl">
+            Welcome back
+          </CardTitle>
           <CardDescription>
-            Enter your username &amp; password to login
+            Sign in to pick up where you left off
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -77,39 +79,50 @@ const LoginForm = () => {
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="grid gap-2">
               <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                name="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <User className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                <Input
+                  id="username"
+                  type="text"
+                  name="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="yourname"
+                  className="pl-9"
+                  required
+                />
+              </div>
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                name="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Lock className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                <Input
+                  id="password"
+                  type="password"
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="pl-9"
+                  required
+                />
+              </div>
             </div>
 
-            <Button type="submit" className="w-full">
-              Login
+            <Button type="submit" variant="brand" className="glow-sm w-full">
+              <LogIn className="size-4" />
+              Sign in
             </Button>
 
-            <p className="text-muted-foreground text-sm">
-              Don&apos;t have account?{" "}
+            <p className="text-muted-foreground text-center text-sm">
+              Don&apos;t have an account?{" "}
               <Link
                 href="/register"
                 className="text-primary font-medium hover:underline"
               >
-                Create an account
+                Create one
               </Link>
             </p>
           </form>

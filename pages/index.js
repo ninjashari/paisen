@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { signOut, useSession } from "next-auth/react"
+import { useTheme } from "next-themes"
+import { useEffect } from "react"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -23,29 +25,40 @@ const features = [
     title: "Track your progress",
     description:
       "Update episodes watched, scores, and status in a couple of clicks.",
+    href: "/animelist/current?view=grid",
   },
   {
     icon: Search,
     title: "Search & add instantly",
     description:
       "Find any anime and add it to your list without leaving the dashboard.",
+    href: "/search",
   },
   {
     icon: BarChart3,
     title: "Insightful statistics",
     description:
       "See time watched, episode counts, mean score, and score distribution.",
+    href: "/statistics",
   },
   {
     icon: RefreshCw,
     title: "Synced with MyAnimeList",
     description:
       "Securely authorize your MAL account — changes sync straight to MAL.",
+    href: "/animelist/current",
   },
 ]
 
 export default function Home() {
   const { data: session } = useSession()
+  const { setTheme } = useTheme()
+
+  useEffect(() => {
+    setTheme("light")
+  }, [setTheme])
+  const appHref = session?.malAccessToken ? "/animelist/current" : "/authorise"
+  const appLabel = session?.malAccessToken ? "Open app" : "Link MAL account"
 
   return (
     <Layout titleName="Paisen — MyAnimeList Tracker">
@@ -57,12 +70,15 @@ export default function Home() {
             <ThemeToggle />
             {session ? (
               <>
-                <Button asChild>
-                  <Link href={session.malAccessToken ? "/animelist/current" : "/authorise"}>
-                    {session.malAccessToken ? "Open app" : "Link MAL account"}
-                  </Link>
+                <Button asChild variant="brand">
+                  <Link href={appHref}>{appLabel}</Link>
                 </Button>
-                <Button variant="ghost" size="icon" aria-label="Sign out" onClick={() => signOut({ callbackUrl: "/" })}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Sign out"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                >
                   <LogOut className="size-4" />
                 </Button>
               </>
@@ -71,7 +87,7 @@ export default function Home() {
                 <Button variant="ghost" asChild>
                   <Link href="/login">Log in</Link>
                 </Button>
-                <Button asChild>
+                <Button asChild variant="brand">
                   <Link href="/register">Sign up</Link>
                 </Button>
               </>
@@ -80,8 +96,19 @@ export default function Home() {
         </header>
 
         {/* Hero */}
-        <section className="bg-aurora flex flex-1 flex-col items-center justify-center px-4 py-20 text-center">
-          <Badge variant="secondary" className="mb-5 gap-1.5">
+        <section className="bg-mesh relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 py-24 text-center">
+          {/* Floating accent orbs */}
+          <div
+            aria-hidden="true"
+            className="bg-brand animate-float pointer-events-none absolute left-[8%] top-24 size-40 rounded-full opacity-20 blur-3xl"
+          />
+          <div
+            aria-hidden="true"
+            className="bg-brand animate-float pointer-events-none absolute bottom-16 right-[10%] size-56 rounded-full opacity-15 blur-3xl"
+            style={{ animationDelay: "-3s" }}
+          />
+
+          <Badge variant="secondary" className="glass mb-6 gap-1.5">
             <Sparkles className="size-3.5" />
             Your self-hosted MyAnimeList companion
           </Badge>
@@ -89,22 +116,31 @@ export default function Home() {
             Your anime list,{" "}
             <span className="text-gradient">beautifully organized</span>
           </h1>
-          <p className="text-muted-foreground mt-5 max-w-xl text-base md:text-lg">
+          <p className="text-muted-foreground mt-6 max-w-xl text-base md:text-lg">
             Paisen is a fast, modern dashboard for tracking, searching, and
             analyzing your MyAnimeList — with everything synced back to MAL.
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             {session ? (
-              <Button asChild size="lg" className="glow-primary">
-                <Link href={session.malAccessToken ? "/animelist/current" : "/authorise"}>
-                  {session.malAccessToken ? "Go to your list" : "Link MAL account"}
+              <Button
+                asChild
+                size="lg"
+                variant="brand"
+                className="glow-primary"
+              >
+                <Link href={appHref}>
+                  {session.malAccessToken ? "Go to your list" : appLabel}
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
             ) : (
               <>
-                <Button asChild size="lg" className="glow-primary">
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-brand glow-primary text-white"
+                >
                   <Link href="/register">
                     Get started
                     <ArrowRight className="size-4" />
@@ -119,24 +155,30 @@ export default function Home() {
         </section>
 
         {/* Features */}
-        <section className="mx-auto w-full max-w-6xl px-4 pb-20 md:px-8">
+        <section className="mx-auto w-full max-w-6xl px-4 pb-24 pt-8 md:px-8">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => {
               const Icon = feature.icon
               return (
-                <Card key={feature.title} className="h-full">
-                  <CardContent className="flex flex-col gap-3">
-                    <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-lg">
-                      <Icon className="size-5" />
-                    </div>
-                    <h3 className="font-display font-semibold">
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
+                <Link
+                  key={feature.title}
+                  href={feature.href}
+                  className="rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Card className="hover:glow-sm h-full rounded-2xl transition-shadow">
+                    <CardContent className="flex flex-col gap-3">
+                      <div className="bg-brand glow-sm flex size-11 items-center justify-center rounded-xl text-white">
+                        <Icon className="size-5" />
+                      </div>
+                      <h3 className="font-display font-semibold">
+                        {feature.title}
+                      </h3>
+                      <p className="text-muted-foreground text-sm">
+                        {feature.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
               )
             })}
           </div>
