@@ -5,7 +5,7 @@ import { ArrowDown, ArrowUp, LayoutGrid, Rows3, Tv } from "lucide-react"
 
 import { updateAnime } from "@/utils/malClient"
 import { getAnimeObj } from "@/utils/malService"
-import { userStatusReverseMap } from "@/utils/constants"
+import { MAL_ANIME_URL, userStatusReverseMap } from "@/utils/constants"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -24,6 +24,7 @@ import ScoreControl from "./score-control"
 import StatusSelect from "./status-select"
 
 const VIEW_KEY = "paisen.listView"
+const SORT_KEY = "paisen.listSort"
 
 const canEditProgress = (anime) =>
   ["watching", "on_hold", "plan_to_watch"].includes(
@@ -61,6 +62,19 @@ const AnimeListView = ({ animeList }) => {
     const saved = typeof window !== "undefined" && localStorage.getItem(VIEW_KEY)
     if (saved === "grid" || saved === "table") setView(saved)
   }, [router.query.view])
+
+  useEffect(() => {
+    const saved = typeof window !== "undefined" && localStorage.getItem(SORT_KEY)
+    if (!saved) return
+    try {
+      const parsed = JSON.parse(saved)
+      if (parsed && (parsed.dir === "asc" || parsed.dir === "desc")) {
+        setSort(parsed)
+      }
+    } catch {
+      // ignore malformed saved sort
+    }
+  }, [])
 
   const setViewMode = (v) => {
     setView(v)
@@ -122,10 +136,16 @@ const AnimeListView = ({ animeList }) => {
   }
 
   const requestSort = (key) => {
-    setSort((s) => ({
-      key,
-      dir: s.key === key && s.dir === "asc" ? "desc" : "asc",
-    }))
+    setSort((s) => {
+      const next = {
+        key,
+        dir: s.key === key && s.dir === "asc" ? "desc" : "asc",
+      }
+      if (typeof window !== "undefined") {
+        localStorage.setItem(SORT_KEY, JSON.stringify(next))
+      }
+      return next
+    })
   }
 
   const sorted = useMemo(() => {
@@ -242,7 +262,14 @@ const AnimeListView = ({ animeList }) => {
                       />
                     </TableCell>
                     <TableCell className="whitespace-normal">
-                      <div className="font-medium">{anime.title}</div>
+                      <a
+                        href={`${MAL_ANIME_URL}/${anime.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium hover:underline"
+                      >
+                        {anime.title}
+                      </a>
                       <div className="text-muted-foreground mt-0.5 flex items-center gap-1.5 text-xs">
                         <span className={cn("size-1.5 rounded-full", airingDot[anime.status?.color] || "bg-muted-foreground")} />
                         {anime.status?.value || anime.status} · {anime.mediaType}

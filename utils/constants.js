@@ -1,3 +1,5 @@
+export const MAL_ANIME_URL = "https://myanimelist.net/anime"
+
 // Essential fields for anime list API calls (minimal set)
 export const fields = {
   animeList: [

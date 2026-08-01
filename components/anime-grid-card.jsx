@@ -3,6 +3,7 @@ import { Star } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { MAL_ANIME_URL } from "@/utils/constants"
 import AnimePoster from "./anime-poster"
 import EpisodeStepper from "./episode-stepper"
 import ScoreControl from "./score-control"
@@ -55,9 +56,15 @@ const AnimeGridCard = ({
 
         {/* title + meta over gradient */}
         <div className="absolute inset-x-0 bottom-0 p-3">
-          <h3 className="line-clamp-2 text-sm font-semibold text-white">
+          <a
+            href={`${MAL_ANIME_URL}/${anime.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="line-clamp-2 text-sm font-semibold text-white hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
             {anime.title}
-          </h3>
+          </a>
           <div className="mt-1 flex items-center gap-2 text-[11px] text-white/80">
             <span>
               {anime.startSeason} {anime.startSeasonYear}
